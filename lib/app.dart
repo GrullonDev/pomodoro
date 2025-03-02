@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
               size: const Size(screenWidth, screenHeight),
               devicePixelRatio: mediaQueryData.devicePixelRatio,
             ),
-            child: SizedBox(
+            child: const SizedBox(
               width: screenWidth,
               height: screenHeight,
               child: LandingPage(),

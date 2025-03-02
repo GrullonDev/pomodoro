@@ -1,11 +1,10 @@
 // Home screen that displays the logo and a button to start the session
 
 import 'package:flutter/material.dart';
+
 import 'package:pomodoro/home_page.dart';
 
 class LandingPage extends StatelessWidget {
-  static const _textStyle = TextStyle(fontFamily: 'Arial');
-
   const LandingPage({super.key});
 
   @override
@@ -24,7 +23,7 @@ class LandingPage extends StatelessWidget {
                     duration: Duration(milliseconds: 500),
                     opacity: 1,
                     child: Text(
-                      'Welcome to Session',
+                      'Bienvenido a Pomodoro',
                       style: TextStyle(
                           fontSize: 32,
                           color: Colors.white,
@@ -50,7 +49,7 @@ class LandingPage extends StatelessWidget {
                         ),
                       ),
                       child: const Text(
-                        'start',
+                        'Iniciar',
                         style: TextStyle(color: Colors.greenAccent),
                       ),
                     ),
@@ -64,7 +63,7 @@ class LandingPage extends StatelessWidget {
             height: 90,
             alignment: Alignment.center,
             child: const Text(
-              'Built in YYC by Jash Dubal',
+              'Construido por @GrullonDev',
               style: TextStyle(
                   fontSize: 12, color: Colors.white24, fontFamily: 'Arial'),
             ),

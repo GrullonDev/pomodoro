@@ -1,18 +1,21 @@
-import 'package:flutter/material.dart';
 import 'dart:async';
+
+import 'package:flutter/material.dart';
+
 import 'package:animated_snack_bar/animated_snack_bar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MyTimer extends StatefulWidget {
+  const MyTimer({
+    super.key,
+    required this.breakTime,
+    required this.workTime,
+    required this.workSessions,
+  });
+
   final String breakTime;
   final String workTime;
   final String workSessions;
-
-  const MyTimer(
-      {super.key,
-      required this.breakTime,
-      required this.workTime,
-      required this.workSessions});
 
   @override
   _TimerState createState() => _TimerState();
@@ -34,8 +37,10 @@ class _TimerState extends State<MyTimer> {
   void initState() {
     super.initState();
     try {
-      if (widget.breakTime == '0') {
-        throw Exception('Break time cannot be 0');
+      if (int.parse(widget.breakTime) <= 0 ||
+          int.parse(widget.workTime) <= 0 ||
+          int.parse(widget.workSessions) <= 0) {
+        throw Exception('Values must be greater than 0');
       }
       _timeInt = int.parse(widget.workTime);
       _time = Duration(minutes: _timeInt);
@@ -80,7 +85,7 @@ class _TimerState extends State<MyTimer> {
                         width:
                             50), // Add some horizontal spacing to align the text with the first message
                     Text(
-                      "Please enter valid numbers to start.",
+                      "Please enter valid numbers greater than 0 to start.",
                       style: TextStyle(
                         color: Colors.black,
                         fontSize: 14,
@@ -111,10 +116,6 @@ class _TimerState extends State<MyTimer> {
     String formattedDate = "${date.day}-${date.month}-${date.year}";
     await _prefs!.setString(
         'time', '$curr / ${_sessionCount * _timeInt} $formattedDate');
-  }
-
-  Future<void> _resetTime() async {
-    await _prefs!.setString('time', '');
   }
 
   @override

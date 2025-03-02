@@ -28,10 +28,6 @@ class _DataState extends State<Data> {
     _getPrefs();
   }
 
-  Future<void> _resetTime() async {
-    await _prefs!.setString('time', '');
-  }
-
   void _getPrefs() async {
     _prefs = await SharedPreferences.getInstance();
     setState(() {
