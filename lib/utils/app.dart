@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:pomodoro/landing.dart';
+import 'package:pomodoro/utils/landing.dart';
 
 // Import the package required to fix window size window management
 

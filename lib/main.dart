@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:pomodoro/app.dart';
+import 'package:pomodoro/utils/app.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();

@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 
-import 'package:pomodoro/home_page.dart';
+import 'package:pomodoro/utils/home_page.dart';
 
 class LandingPage extends StatelessWidget {
   const LandingPage({super.key});
