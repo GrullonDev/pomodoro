@@ -22,7 +22,7 @@ class Habit extends StatelessWidget {
             backgroundColor: Colors.black,
             title: const Text.rich(
               TextSpan(
-                text: 'Start session', // text for title
+                text: 'Iniciar Pomodoro',
                 style: TextStyle(
                   fontSize: 24,
                   color: Colors.greenAccent,
@@ -39,16 +39,14 @@ class Habit extends StatelessWidget {
             child: Column(
               children: [
                 const Text(
-                  "Work duration",
+                  "Duración de trabajo",
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 18,
                     color: Colors.white70,
                     fontFamily: 'Arial',
                   ),
                 ),
-                const SizedBox(
-                    height:
-                        10), // add a space between the text and the input field
+                const SizedBox(height: 10),
                 TextField(
                   controller: workController,
                   textAlign: TextAlign.center,
@@ -65,7 +63,7 @@ class Habit extends StatelessWidget {
                   decoration: const InputDecoration(
                     // filled: true,
                     fillColor: Colors.black12,
-                    labelText: '(in minutes)',
+                    labelText: '(En minutos)',
                     labelStyle: TextStyle(color: Colors.white70),
                     enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.all(Radius.circular(4.0)),
@@ -77,9 +75,9 @@ class Habit extends StatelessWidget {
                 ),
                 const SizedBox(height: 25),
                 const Text(
-                  "Break duration",
+                  "Duración de descanso",
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 18,
                     color: Colors.white70,
                     fontFamily: 'Arial',
                   ),
@@ -101,7 +99,7 @@ class Habit extends StatelessWidget {
                   decoration: const InputDecoration(
                     filled: true,
                     fillColor: Colors.black12,
-                    labelText: '(in minutes)',
+                    labelText: '(En minutos)',
                     labelStyle: TextStyle(color: Colors.white70),
                     enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.all(Radius.circular(4.0)),
@@ -115,9 +113,9 @@ class Habit extends StatelessWidget {
                     height:
                         25), // add a space between the text and the input field
                 const Text(
-                  "Sessions",
+                  "Sesiones",
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 18,
                     color: Colors.white70,
                     fontFamily: 'Arial',
                   ),
@@ -139,7 +137,7 @@ class Habit extends StatelessWidget {
                   decoration: const InputDecoration(
                     // filled: true,
                     fillColor: Colors.black12,
-                    labelText: '(number of work sessions)',
+                    labelText: '(Número de sesiones)',
                     labelStyle: TextStyle(
                       color: Colors.white70,
                     ),
@@ -151,9 +149,7 @@ class Habit extends StatelessWidget {
                         borderSide: BorderSide(color: Colors.white10)),
                   ),
                 ),
-                const SizedBox(
-                    height:
-                        80), // add a space between the text and the input field
+                const SizedBox(height: 80),
                 TextButton(
                   onPressed: () => Navigator.push(
                     context,
@@ -182,7 +178,7 @@ class Habit extends StatelessWidget {
                             const BorderSide(color: Colors.black12, width: 2.0),
                       )),
                   child: const Text(
-                    "Start",
+                    "Iniciar",
                     style: TextStyle(
                       fontSize: 20,
                       color: Colors.black,
