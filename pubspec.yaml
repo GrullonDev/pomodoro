@@ -18,6 +18,8 @@ dependencies:
   badges: ^3.1.2
   animated_snack_bar: ^0.4.0
   curved_navigation_bar: ^1.0.6
+  flutter_local_notifications: ^18.0.1
+  flutter_background_service: ^5.1.0
 
 dev_dependencies:
   flutter_test:
