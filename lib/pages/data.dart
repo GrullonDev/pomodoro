@@ -63,7 +63,7 @@ class _DataState extends State<Data> {
           backgroundColor: Colors.black,
           title: const Text.rich(
             TextSpan(
-              text: 'Data', // text for title
+              text: 'Almacén',
               style: TextStyle(
                 fontSize: 24,
                 color: Colors.greenAccent,
@@ -110,10 +110,10 @@ class _DataState extends State<Data> {
                                   fontSize: 24,
                                   fontWeight: FontWeight.bold,
                                   fontFamily: 'Arial')),
-                          const Text('total minutes',
+                          const Text('Total de tiempo',
                               style: TextStyle(
                                   color: Colors.greenAccent,
-                                  fontSize: 12,
+                                  fontSize: 16,
                                   fontFamily: 'Arial',
                                   fontStyle: FontStyle.italic)),
                         ],
@@ -143,10 +143,10 @@ class _DataState extends State<Data> {
                                   fontSize: 24,
                                   fontWeight: FontWeight.bold,
                                   fontFamily: 'Arial')),
-                          const Text('longest session',
+                          const Text('sesión más larga',
                               style: TextStyle(
                                   color: Colors.greenAccent,
-                                  fontSize: 12,
+                                  fontSize: 16,
                                   fontFamily: 'Arial',
                                   fontStyle: FontStyle.italic)),
                         ],
@@ -176,10 +176,10 @@ class _DataState extends State<Data> {
                                   fontSize: 24,
                                   fontWeight: FontWeight.bold,
                                   fontFamily: 'Arial')),
-                          const Text('number of sessions',
+                          const Text('numero de sesiones',
                               style: TextStyle(
                                   color: Colors.greenAccent,
-                                  fontSize: 12,
+                                  fontSize: 16,
                                   fontFamily: 'Arial',
                                   fontStyle: FontStyle.italic)),
                         ],
@@ -211,10 +211,10 @@ class _DataState extends State<Data> {
                                   fontSize: 24,
                                   fontWeight: FontWeight.bold,
                                   fontFamily: 'Arial')),
-                          const Text('avg session time',
+                          const Text('total de tiempo promedio',
                               style: TextStyle(
                                   color: Colors.greenAccent,
-                                  fontSize: 12,
+                                  fontSize: 16,
                                   fontFamily: 'Arial',
                                   fontStyle: FontStyle.italic)),
                         ],

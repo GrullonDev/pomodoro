@@ -18,24 +18,26 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      bottomNavigationBar: CurvedNavigationBar(
-        height: 75,
-        animationCurve: Curves.easeInOut,
-        backgroundColor: Colors.black,
-        buttonBackgroundColor: Colors.greenAccent,
-        color: Colors.greenAccent,
-        animationDuration: const Duration(milliseconds: 350),
-        onTap: (selectedIndex) {
-          setState(() {
-            index = selectedIndex;
-          });
-        },
-        index: 1,
-        items: const [
-          Icon(Icons.timelapse_rounded, size: 20, color: Colors.black),
-          Icon(Icons.fitbit_rounded, size: 20, color: Colors.black),
-          Icon(Icons.history_rounded, size: 20, color: Colors.black),
-        ],
+      bottomNavigationBar: SafeArea(
+        child: CurvedNavigationBar(
+          height: 50,
+          animationCurve: Curves.easeInOut,
+          backgroundColor: Colors.black,
+          buttonBackgroundColor: Colors.greenAccent,
+          color: Colors.greenAccent,
+          animationDuration: const Duration(milliseconds: 350),
+          onTap: (selectedIndex) {
+            setState(() {
+              index = selectedIndex;
+            });
+          },
+          index: 1,
+          items: const [
+            Icon(Icons.timelapse_rounded, size: 20, color: Colors.black),
+            Icon(Icons.fitbit_rounded, size: 20, color: Colors.black),
+            Icon(Icons.history_rounded, size: 20, color: Colors.black),
+          ],
+        ),
       ),
       body: Container(
         child: getSelectedWidget(index: index),

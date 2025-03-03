@@ -101,7 +101,7 @@ class _SettingsState extends State<Settings> {
         backgroundColor: Colors.black,
         title: const Text.rich(
           TextSpan(
-            text: 'History',
+            text: 'Historial',
             style: TextStyle(
                 fontSize: 24, color: Colors.greenAccent, fontFamily: 'Arial'),
           ),
@@ -124,8 +124,14 @@ class _SettingsState extends State<Settings> {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(
-                child: Text('No Data Available',
-                    style: TextStyle(color: Colors.greenAccent)));
+              child: Text(
+                'No hay datos',
+                style: TextStyle(
+                  color: Colors.greenAccent,
+                  fontSize: 24,
+                ),
+              ),
+            );
           } else {
             final sessionEntries = snapshot.data!;
             return ListView.builder(
