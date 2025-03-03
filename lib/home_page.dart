@@ -1,8 +1,10 @@
-import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:pomodoro/pages/data.dart';
-import 'package:pomodoro/pages/habit.dart';
-import 'package:pomodoro/pages/settings.dart';
+
+import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+
+import 'package:pomodoro/features/data/data.dart';
+import 'package:pomodoro/features/habit/habit.dart';
+import 'package:pomodoro/features/settings/settings.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

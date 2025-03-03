@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Importar para usar FilteringTextInputFormatter
-import 'package:pomodoro/pages/timer.dart';
+import 'package:pomodoro/utils/timer.dart';
 
 class Habit extends StatelessWidget {
   const Habit({super.key});
