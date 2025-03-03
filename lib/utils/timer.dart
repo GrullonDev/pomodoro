@@ -69,7 +69,7 @@ class _TimerState extends State<MyTimer> {
                     ),
                     SizedBox(width: 20),
                     Text(
-                      'Invalid input!',
+                      'Entrada no valida',
                       style: TextStyle(
                         color: Colors.black,
                         fontWeight: FontWeight.bold,
@@ -81,11 +81,9 @@ class _TimerState extends State<MyTimer> {
                 ),
                 Row(
                   children: [
-                    SizedBox(
-                        width:
-                            50), // Add some horizontal spacing to align the text with the first message
+                    SizedBox(width: 50),
                     Text(
-                      "Please enter valid numbers greater than 0 to start.",
+                      "Por favor, introduzca números válidos mayores que 0 para empezar.",
                       style: TextStyle(
                         color: Colors.black,
                         fontSize: 14,
@@ -156,7 +154,7 @@ class _TimerState extends State<MyTimer> {
                           ),
                           SizedBox(width: 20),
                           Text(
-                            'Session Completed!',
+                            'Sesión Completada',
                             style: TextStyle(
                               color: Colors.black,
                               fontWeight: FontWeight.bold,
@@ -168,11 +166,9 @@ class _TimerState extends State<MyTimer> {
                       ),
                       Row(
                         children: [
-                          const SizedBox(
-                              width:
-                                  50), // Add some horizontal spacing to align the text with the first message
+                          const SizedBox(width: 50),
                           Text(
-                            'You logged ${_sessionCount * _timeInt} minutes.',
+                            'Te registraste ${_sessionCount * _timeInt} minutos.',
                             style: const TextStyle(
                               color: Colors.black,
                               fontSize: 14,
@@ -232,7 +228,7 @@ class _TimerState extends State<MyTimer> {
         backgroundColor: Colors.black,
         title: const Text.rich(
           TextSpan(
-            text: 'Session', // text for title
+            text: 'Sesión',
             style: TextStyle(
               fontSize: 24,
               color: Colors.greenAccent,
@@ -240,8 +236,6 @@ class _TimerState extends State<MyTimer> {
             ),
           ),
         ),
-
-        // Create a button to pause/resume the timer
         actions: [
           IconButton(
             padding: const EdgeInsets.only(right: 20.0),
@@ -255,52 +249,58 @@ class _TimerState extends State<MyTimer> {
           ),
         ],
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Stack(
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          double size = constraints.maxWidth * 0.6;
+          if (constraints.maxWidth < 600) {
+            size = constraints.maxWidth * 0.8;
+          }
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                SizedBox(
-                  width: 300,
-                  height: 300,
-                  child: CircularProgressIndicator(
-                    color: Colors.greenAccent,
-                    backgroundColor: Colors.black,
-                    value: _time.inSeconds /
-                        (_currMax *
-                            60), // calculates the progress as a value between 0 and 1
-                    strokeWidth: 2,
-                  ),
-                ),
-                Positioned(
-                  top: 100,
-                  left: 70,
-                  child: Text(
-                    '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}',
-                    style: const TextStyle(
-                      fontSize: 60,
-                      color: Colors.greenAccent,
-                      fontFamily: 'Arial',
+                Stack(
+                  children: [
+                    SizedBox(
+                      width: size,
+                      height: size,
+                      child: CircularProgressIndicator(
+                        color: Colors.greenAccent,
+                        backgroundColor: Colors.black,
+                        value: _time.inSeconds / (_currMax * 60),
+                        strokeWidth: 2,
+                      ),
                     ),
-                  ),
-                ),
-                Positioned(
-                  bottom: 100,
-                  left: 130,
-                  child: Text(
-                    timerState,
-                    style: const TextStyle(
-                      fontSize: 20,
-                      color: Colors.greenAccent,
-                      fontFamily: 'Arial',
+                    Positioned(
+                      top: size * 0.33,
+                      left: size * 0.23,
+                      child: Text(
+                        '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}',
+                        style: TextStyle(
+                          fontSize: size * 0.2,
+                          color: Colors.greenAccent,
+                          fontFamily: 'Arial',
+                        ),
+                      ),
                     ),
-                  ),
+                    Positioned(
+                      bottom: size * 0.33,
+                      left: size * 0.43,
+                      child: Text(
+                        timerState,
+                        style: TextStyle(
+                          fontSize: size * 0.07,
+                          color: Colors.greenAccent,
+                          fontFamily: 'Arial',
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
-          ],
-        ),
+          );
+        },
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
