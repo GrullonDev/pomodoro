@@ -64,3 +64,21 @@ local.properties
 
 # Linux
 *~
+
+# Ignorar archivos modificados
+.dart_tool/package_config_subset
+.dart_tool/flutter_build/
+.dart_tool/flutter_build/2aaa42e593d3a95cfd57a0c311bfbe0b/kernel_snapshot_program.stamp
+.dart_tool/flutter_build/2aaa42e593d3a95cfd57a0c311bfbe0b/kernel_snapshot_program.d
+.dart_tool/flutter_build/2aaa42e593d3a95cfd57a0c311bfbe0b/kernel_snapshot_native_assets.stamp
+.dart_tool/flutter_build/2aaa42e593d3a95cfd57a0c311bfbe0b/gen_dart_plugin_registrant.stamp
+.dart_tool/flutter_build/2aaa42e593d3a95cfd57a0c311bfbe0b/flutter_assets.d
+.dart_tool/flutter_build/2aaa42e593d3a95cfd57a0c311bfbe0b/debug_android_application.stamp
+.dart_tool/flutter_build/2aaa42e593d3a95cfd57a0c311bfbe0b/.filecache
+.dart_tool/flutter_build/9891b55fec2091e7680167b90e78e1d5/.filecache
+.dart_tool/flutter_build/2aaa42e593d3a95cfd57a0c311bfbe0b/outputs.json
+.dart_tool/flutter_build/2aaa42e593d3a95cfd57a0c311bfbe0b/native_assets.yaml
+.dart_tool/flutter_build/9891b55fec2091e7680167b90e78e1d5/kernel_snapshot_program.stamp
+.dart_tool/flutter_build/9891b55fec2091e7680167b90e78e1d5/kernel_snapshot_program.d
+.dart_tool/flutter_build/9891b55fec2091e7680167b90e78e1d5/flutter_assets.d
+.dart_tool/flutter_build/9891b55fec2091e7680167b90e78e1d5/debug_ios_bundle_flutter_assets.stamp
