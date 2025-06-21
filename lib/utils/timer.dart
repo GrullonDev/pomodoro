@@ -18,10 +18,10 @@ class MyTimer extends StatefulWidget {
   final String workSessions;
 
   @override
-  _TimerState createState() => _TimerState();
+  TimerState createState() => TimerState();
 }
 
-class _TimerState extends State<MyTimer> {
+class TimerState extends State<MyTimer> {
   bool _isRunning = false;
   Duration _time = const Duration(minutes: 60);
   Duration _break = const Duration(minutes: 10);
