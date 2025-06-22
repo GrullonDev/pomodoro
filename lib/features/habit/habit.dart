@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Importar para usar FilteringTextInputFormatter
 import 'package:pomodoro/utils/responsive/responsive.dart';
+
 import 'package:pomodoro/utils/timer.dart';
 
 class Habit extends StatelessWidget {
@@ -178,15 +179,6 @@ class Habit extends StatelessWidget {
                       },
                     ),
                   ),
-                  child: Text(
-                    "Iniciar",
-                    style: TextStyle(
-                      fontSize: buttonFontSize,
-                      color: Colors.black,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'Arial',
-                    ),
-                  ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.greenAccent,
                     padding: EdgeInsets.zero,
@@ -199,13 +191,16 @@ class Habit extends StatelessWidget {
                       side: const BorderSide(color: Colors.black12),
                     ),
                   ),
+                  child: Text(
+                    "Iniciar",
+                    style: TextStyle(
+                      fontSize: buttonFontSize,
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Arial',
+                    ),
+                  ),
                 ),
-                /* TextButton(
-                  onPressed: 
-                  style: TextButton.styleFrom(
-                      
-                  child: 
-                ), */
               ],
             ),
           ),
