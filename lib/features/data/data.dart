@@ -5,10 +5,7 @@ class Data extends StatefulWidget {
   const Data({super.key});
 
   @override
-  State<StatefulWidget> createState() {
-    // TODO: implement createState
-    return _DataState();
-  }
+  State<Data> createState() => _DataState();
 }
 
 class _DataState extends State<Data> {
