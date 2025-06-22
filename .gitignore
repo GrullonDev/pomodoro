@@ -28,6 +28,9 @@ ios/Runner.xcworkspace/contents.xcworkspacedata
 ios/Runner.xcworkspace/xcshareddata/
 ios/Runner.xcworkspace/xcshareddata/xcschemes/
 ios/Runner.xcworkspace/xcshareddata/xcschemes/Runner.xcscheme
+ios/Podfile.lock
+ios/Pods/Manifest.lock
+ios/.gitignore
 
 # Android
 *.iml
@@ -85,3 +88,9 @@ local.properties
 
 # FVM Version Cache
 .fvm/
+
+# GIT
+.dart_tool/
+.vscode/
+.fvmrc
+.metadata
