@@ -25,12 +25,13 @@ if (flutterVersionName == null) {
 
 android {
     namespace = "com.example.pomodoro"
-    compileSdk = 34
+    compileSdk = 35
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+        coreLibraryDesugaringEnabled true
     }
 
         kotlinOptions {
@@ -39,11 +40,11 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.pomodoro"
+        applicationId = "com.grullondev.pomodoro"
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
-        minSdk = localProperties.get("flutter.minSdkVersion")?.toInteger() ?: 23
-        targetSdk = flutter.targetSdkVersion
+        minSdk = localProperties.get("flutter.minSdkVersion")?.toInteger() ?: 21
+        targetSdk = 35
         versionCode = flutterVersionCode.toInteger()
         versionName = flutterVersionName
     }
@@ -60,3 +61,8 @@ android {
 flutter {
     source = "../.."
 }
+
+dependencies {
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.0.4'
+}
+
