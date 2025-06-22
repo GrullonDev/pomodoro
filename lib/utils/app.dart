@@ -3,13 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:pomodoro/utils/landing.dart';
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({super.key, required this.navigatorKey});
+
+  final GlobalKey<NavigatorState> navigatorKey;
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
+      navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
-      home: LandingPage(),
+      home: const LandingPage(),
     );
   }
 }
