@@ -3,12 +3,15 @@
 import 'package:flutter/material.dart';
 
 import 'package:pomodoro/utils/home_page.dart';
+import 'package:pomodoro/utils/responsive/responsive.dart';
 
 class LandingPage extends StatelessWidget {
   const LandingPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = context.isMobile;
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: Column(
@@ -19,38 +22,45 @@ class LandingPage extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const AnimatedOpacity(
-                    duration: Duration(milliseconds: 500),
+                  AnimatedOpacity(
+                    duration: const Duration(milliseconds: 500),
                     opacity: 1,
                     child: Text(
                       'Bienvenido a Pomodoro',
                       style: TextStyle(
-                          fontSize: 32,
-                          color: Colors.white,
-                          fontFamily: 'Arial'),
+                        fontSize: isMobile ? 28 : 40,
+                        color: Colors.white,
+                        fontFamily: 'Arial',
+                      ),
                     ),
                   ),
                   const SizedBox(height: 16),
                   AnimatedOpacity(
                     duration: const Duration(milliseconds: 500),
                     opacity: 1,
-                    child: TextButton(
-                      onPressed: () => Navigator.push(
-                        context,
-                        PageRouteBuilder(
-                          transitionDuration: const Duration(seconds: 1),
-                          pageBuilder:
-                              (context, animation, secondaryAnimation) {
-                            return FadeTransition(
-                              opacity: animation,
-                              child: const HomePage(),
-                            );
-                          },
+                    child: SizedBox(
+                      width: isMobile ? 120 : 200,
+                      child: TextButton(
+                        onPressed: () => Navigator.push(
+                          context,
+                          PageRouteBuilder(
+                            transitionDuration: const Duration(seconds: 1),
+                            pageBuilder:
+                                (context, animation, secondaryAnimation) {
+                              return FadeTransition(
+                                opacity: animation,
+                                child: const HomePage(),
+                              );
+                            },
+                          ),
                         ),
-                      ),
-                      child: const Text(
-                        'Iniciar',
-                        style: TextStyle(color: Colors.greenAccent),
+                        child: Text(
+                          'Iniciar',
+                          style: TextStyle(
+                            color: Colors.greenAccent,
+                            fontSize: isMobile ? 16 : 22,
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -60,12 +70,15 @@ class LandingPage extends StatelessWidget {
           ),
           // The footer with the "Made with love in YYC" text
           Container(
-            height: 90,
+            height: isMobile ? 60 : 90,
             alignment: Alignment.center,
-            child: const Text(
+            child: Text(
               'Construido por @GrullonDev',
               style: TextStyle(
-                  fontSize: 12, color: Colors.white24, fontFamily: 'Arial'),
+                fontSize: isMobile ? 10 : 12,
+                color: Colors.white24,
+                fontFamily: 'Arial',
+              ),
             ),
           ),
         ],
