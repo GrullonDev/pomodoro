@@ -138,11 +138,21 @@ class TimerState extends State<MyTimer> {
             _time = Duration(minutes: _timeInt);
             _currMax = _timeInt;
             _timerCount++;
+            NotificationService.showTimerNotification(
+              id: 1,
+              title: 'Pomodoro',
+              body: 'Comienza una nueva sesión de trabajo',
+            );
           } else {
             _time = _break;
             _currMax = _break.inMinutes;
             _counter++;
             _timerCount++;
+            NotificationService.showTimerNotification(
+              id: 2,
+              title: 'Pomodoro',
+              body: 'Hora de descansar',
+            );
           }
           if (_counter > _sessionCount) {
             final isMobile = context.isMobile;
@@ -196,6 +206,11 @@ class TimerState extends State<MyTimer> {
             ).show(context);
             FocusManager.instance.primaryFocus?.unfocus();
             _storeTime();
+            NotificationService.showTimerNotification(
+              id: 3,
+              title: 'Pomodoro',
+              body: 'Todas las sesiones completadas',
+            );
             Navigator.pop(context);
           }
 
