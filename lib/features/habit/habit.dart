@@ -17,12 +17,12 @@ class Habit extends StatelessWidget {
     // Definir tamaños y paddings responsivos
     final double horizontalMargin = isMobile ? 10 : 30;
     final double containerPadding = isMobile ? 10 : 20;
-    final double titleFontSize = isMobile ? 18 : 24;
-    final double labelFontSize = isMobile ? 14 : 18;
-    final double inputFontSize = isMobile ? 12 : 13;
-    final double buttonFontSize = isMobile ? 16 : 20;
-    final double buttonHeight = isMobile ? 40 : 50;
-    final double buttonWidth = isMobile ? 120 : 150;
+    final double titleFontSize = isMobile ? 22 : 28;
+    final double labelFontSize = isMobile ? 20 : 18;
+    final double inputFontSize = isMobile ? 20 : 13;
+    final double buttonFontSize = isMobile ? 20 : 20;
+    final double buttonHeight = isMobile ? 50 : 50;
+    final double buttonWidth = isMobile ? 130 : 150;
     final double fieldSpacing = isMobile ? 15 : 25;
     final double sectionSpacing = isMobile ? 10 : 20;
     final double bottomSpacing = isMobile ? 40 : 80;
@@ -162,7 +162,7 @@ class Habit extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: bottomSpacing),
-                TextButton(
+                ElevatedButton(
                   onPressed: () => Navigator.push(
                     context,
                     PageRouteBuilder(
@@ -178,17 +178,6 @@ class Habit extends StatelessWidget {
                       },
                     ),
                   ),
-                  style: TextButton.styleFrom(
-                      backgroundColor: Colors.greenAccent,
-                      padding: EdgeInsets.zero,
-                      minimumSize: Size(buttonWidth, buttonHeight),
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      alignment: Alignment.center,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                        side:
-                            const BorderSide(color: Colors.black12, width: 2.0),
-                      )),
                   child: Text(
                     "Iniciar",
                     style: TextStyle(
@@ -198,7 +187,25 @@ class Habit extends StatelessWidget {
                       fontFamily: 'Arial',
                     ),
                   ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.greenAccent,
+                    padding: EdgeInsets.zero,
+                    minimumSize: Size(buttonWidth, buttonHeight),
+                    fixedSize: Size(buttonWidth, buttonHeight),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    alignment: Alignment.center,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      side: const BorderSide(color: Colors.black12),
+                    ),
+                  ),
                 ),
+                /* TextButton(
+                  onPressed: 
+                  style: TextButton.styleFrom(
+                      
+                  child: 
+                ), */
               ],
             ),
           ),
