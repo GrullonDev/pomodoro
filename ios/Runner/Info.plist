@@ -43,7 +43,9 @@
 	</array>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
-	<key>UIApplicationSupportsIndirectInputEvents</key>
-	<true/>
+        <key>UIApplicationSupportsIndirectInputEvents</key>
+        <true/>
+        <key>NSUserNotificationUsageDescription</key>
+        <string>Esta aplicación usa notificaciones para recordarte tus sesiones</string>
 </dict>
 </plist>

@@ -46,7 +46,7 @@ class _DataState extends State<Data> {
           _longestSesh = int.parse(_sessions[i]!.split(' ')[1]);
         }
       }
-      _avgSesh = _totalMin / _seshNum;
+      _avgSesh = _seshNum == 0 ? 0 : _totalMin / _seshNum;
     });
   }
 
