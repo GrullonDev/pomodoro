@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 
-import 'package:pomodoro/app.dart';
+import 'package:pomodoro/utils/app.dart';
+import 'package:pomodoro/utils/notifications/notifications.dart'; // Importa el servicio
 
-void main() {
+void main() async {
+  final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const MyApp());
+  await NotificationService.initialize(); // Ya no pasa context
+  await NotificationService.requestPermissions();
 
-  // if (Platform.isMacOS) {
-  //   final windowManager = WindowManager.instance;
-  //   windowManager.setMinimumSize(const Size(1650, 1600));
-  //   windowManager.setMaximumSize(const Size(1650, 1600));
-  // }
+  runApp(MyApp(navigatorKey: navigatorKey));
 }

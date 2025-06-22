@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import 'package:animated_snack_bar/animated_snack_bar.dart';
+import 'package:pomodoro/utils/responsive/responsive.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MyTimer extends StatefulWidget {
@@ -18,10 +19,10 @@ class MyTimer extends StatefulWidget {
   final String workSessions;
 
   @override
-  _TimerState createState() => _TimerState();
+  TimerState createState() => TimerState();
 }
 
-class _TimerState extends State<MyTimer> {
+class TimerState extends State<MyTimer> {
   bool _isRunning = false;
   Duration _time = const Duration(minutes: 60);
   Duration _break = const Duration(minutes: 10);
@@ -36,70 +37,76 @@ class _TimerState extends State<MyTimer> {
   @override
   void initState() {
     super.initState();
-    try {
-      if (int.parse(widget.breakTime) <= 0 ||
-          int.parse(widget.workTime) <= 0 ||
-          int.parse(widget.workSessions) <= 0) {
-        throw Exception('Values must be greater than 0');
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      try {
+        if (int.parse(widget.breakTime) <= 0 ||
+            int.parse(widget.workTime) <= 0 ||
+            int.parse(widget.workSessions) <= 0) {
+          throw Exception('Values must be greater than 0');
+        }
+        _timeInt = int.parse(widget.workTime);
+        _time = Duration(minutes: _timeInt);
+        _break = Duration(minutes: int.parse(widget.breakTime));
+        _sessionCount = int.parse(widget.workSessions);
+        _currMax = _timeInt;
+      } catch (e) {
+        _timeInt = 60;
+        _time = Duration(minutes: _timeInt);
+        _break = const Duration(minutes: 10);
+        _sessionCount = 4;
+        final isMobile = context.isMobile;
+
+        AnimatedSnackBar(
+          builder: ((context) {
+            return Container(
+              padding: EdgeInsets.all(isMobile ? 6 : 16),
+              color: Colors.redAccent,
+              height: isMobile ? 60 : 80,
+              child: Flex(
+                direction: Axis.vertical,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.close,
+                        size: 30,
+                      ),
+                      SizedBox(width: isMobile ? 10 : 20),
+                      Text(
+                        'Entrada no valida',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                          fontSize: isMobile ? 16 : 20,
+                          fontFamily: 'Arial',
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      SizedBox(width: isMobile ? 20 : 50),
+                      Flexible(
+                        child: Text(
+                          "Por favor, introduzca números válidos mayores que 0 para empezar.",
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: isMobile ? 12 : 14,
+                            fontFamily: 'Arial',
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          }),
+        ).show(context);
+        Navigator.pop(context);
       }
-      _timeInt = int.parse(widget.workTime);
-      _time = Duration(minutes: _timeInt);
-      _break = Duration(minutes: int.parse(widget.breakTime));
-      _sessionCount = int.parse(widget.workSessions);
-      _currMax = _timeInt;
-    } catch (e) {
-      _timeInt = 60;
-      _time = Duration(minutes: _timeInt);
-      _break = const Duration(minutes: 10);
-      _sessionCount = 4;
-      AnimatedSnackBar(
-        builder: ((context) {
-          return Container(
-            padding: const EdgeInsets.all(8),
-            color: Colors.redAccent,
-            height: 65,
-            child: const Flex(
-              direction: Axis.vertical,
-              children: [
-                Row(
-                  children: [
-                    Icon(
-                      Icons.close,
-                      size: 30,
-                    ),
-                    SizedBox(width: 20),
-                    Text(
-                      'Entrada no valida',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20,
-                        fontFamily: 'Arial',
-                      ),
-                    ),
-                  ],
-                ),
-                Row(
-                  children: [
-                    SizedBox(width: 50),
-                    Text(
-                      "Por favor, introduzca números válidos mayores que 0 para empezar.",
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 14,
-                        fontFamily: 'Arial',
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          );
-        }),
-      ).show(context);
-      Navigator.pop(context);
-    }
-    _getPrefs();
+      _getPrefs();
+    });
   }
 
   void _getPrefs() async {
@@ -138,27 +145,30 @@ class _TimerState extends State<MyTimer> {
             _timerCount++;
           }
           if (_counter > _sessionCount) {
+            final isMobile = context.isMobile;
+
             AnimatedSnackBar(
               builder: ((context) {
                 return Container(
-                  padding: const EdgeInsets.all(8),
+                  padding: EdgeInsets.all(isMobile ? 6 : 16),
                   color: Colors.greenAccent,
-                  height: 65,
-                  child: Column(
+                  height: isMobile ? 60 : 80,
+                  child: Flex(
+                    direction: Axis.vertical,
                     children: [
-                      const Row(
+                      Row(
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.check_circle_outline,
                             size: 30,
                           ),
-                          SizedBox(width: 20),
+                          SizedBox(width: isMobile ? 10 : 20),
                           Text(
                             'Sesión Completada',
                             style: TextStyle(
                               color: Colors.black,
                               fontWeight: FontWeight.bold,
-                              fontSize: 20,
+                              fontSize: isMobile ? 16 : 20,
                               fontFamily: 'Arial',
                             ),
                           ),
@@ -166,13 +176,15 @@ class _TimerState extends State<MyTimer> {
                       ),
                       Row(
                         children: [
-                          const SizedBox(width: 50),
-                          Text(
-                            'Te registraste ${_sessionCount * _timeInt} minutos.',
-                            style: const TextStyle(
-                              color: Colors.black,
-                              fontSize: 14,
-                              fontFamily: 'Arial',
+                          SizedBox(width: isMobile ? 20 : 50),
+                          Flexible(
+                            child: Text(
+                              'Te registraste ${_sessionCount * _timeInt} minutos.',
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontSize: isMobile ? 12 : 14,
+                                fontFamily: 'Arial',
+                              ),
                             ),
                           ),
                         ],

@@ -28,6 +28,9 @@ ios/Runner.xcworkspace/contents.xcworkspacedata
 ios/Runner.xcworkspace/xcshareddata/
 ios/Runner.xcworkspace/xcshareddata/xcschemes/
 ios/Runner.xcworkspace/xcshareddata/xcschemes/Runner.xcscheme
+ios/Podfile.lock
+ios/Pods/Manifest.lock
+ios/.gitignore
 
 # Android
 *.iml
@@ -82,3 +85,12 @@ local.properties
 .dart_tool/flutter_build/9891b55fec2091e7680167b90e78e1d5/kernel_snapshot_program.d
 .dart_tool/flutter_build/9891b55fec2091e7680167b90e78e1d5/flutter_assets.d
 .dart_tool/flutter_build/9891b55fec2091e7680167b90e78e1d5/debug_ios_bundle_flutter_assets.stamp
+
+# FVM Version Cache
+.fvm/
+
+# GIT
+.dart_tool/
+.vscode/
+.fvmrc
+.metadata

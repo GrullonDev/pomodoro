@@ -8,10 +8,16 @@
       "languageVersion": "3.0"
     },
     {
-      "name": "async",
-      "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/async-2.11.0",
+      "name": "args",
+      "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/args-2.7.0",
       "packageUri": "lib/",
-      "languageVersion": "2.18"
+      "languageVersion": "3.3"
+    },
+    {
+      "name": "async",
+      "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/async-2.13.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
     },
     {
       "name": "badges",
@@ -27,25 +33,25 @@
     },
     {
       "name": "boolean_selector",
-      "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/boolean_selector-2.1.1",
+      "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/boolean_selector-2.1.2",
       "packageUri": "lib/",
-      "languageVersion": "2.17"
+      "languageVersion": "3.1"
     },
     {
       "name": "characters",
-      "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/characters-1.3.0",
+      "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/characters-1.4.0",
       "packageUri": "lib/",
-      "languageVersion": "2.12"
+      "languageVersion": "3.4"
     },
     {
       "name": "clock",
-      "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/clock-1.1.1",
+      "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/clock-1.1.2",
       "packageUri": "lib/",
-      "languageVersion": "2.12"
+      "languageVersion": "3.4"
     },
     {
       "name": "collection",
-      "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/collection-1.19.0",
+      "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/collection-1.19.1",
       "packageUri": "lib/",
       "languageVersion": "3.4"
     },
@@ -62,16 +68,22 @@
       "languageVersion": "2.12"
     },
     {
-      "name": "fake_async",
-      "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/fake_async-1.3.1",
+      "name": "dbus",
+      "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/dbus-0.7.11",
       "packageUri": "lib/",
-      "languageVersion": "2.12"
+      "languageVersion": "2.17"
+    },
+    {
+      "name": "fake_async",
+      "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/fake_async-1.3.3",
+      "packageUri": "lib/",
+      "languageVersion": "3.3"
     },
     {
       "name": "ffi",
-      "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/ffi-2.1.3",
+      "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/ffi-2.1.4",
       "packageUri": "lib/",
-      "languageVersion": "3.3"
+      "languageVersion": "3.7"
     },
     {
       "name": "file",
@@ -81,9 +93,33 @@
     },
     {
       "name": "flutter",
-      "rootUri": "file:///Users/jorgegrullon/fvm/versions/3.27.4/packages/flutter",
+      "rootUri": "file:///Volumes/DiscoMac/DevTools/flutter/versions/versions/3.32.4/packages/flutter",
       "packageUri": "lib/",
-      "languageVersion": "3.3"
+      "languageVersion": "3.7"
+    },
+    {
+      "name": "flutter_background_service",
+      "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/flutter_background_service-5.1.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.17"
+    },
+    {
+      "name": "flutter_background_service_android",
+      "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/flutter_background_service_android-6.3.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.17"
+    },
+    {
+      "name": "flutter_background_service_ios",
+      "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/flutter_background_service_ios-5.0.3",
+      "packageUri": "lib/",
+      "languageVersion": "2.17"
+    },
+    {
+      "name": "flutter_background_service_platform_interface",
+      "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/flutter_background_service_platform_interface-5.1.2",
+      "packageUri": "lib/",
+      "languageVersion": "2.17"
     },
     {
       "name": "flutter_bloc",
@@ -98,16 +134,34 @@
       "languageVersion": "3.1"
     },
     {
-      "name": "flutter_test",
-      "rootUri": "file:///Users/jorgegrullon/fvm/versions/3.27.4/packages/flutter_test",
+      "name": "flutter_local_notifications",
+      "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/flutter_local_notifications-18.0.1",
       "packageUri": "lib/",
-      "languageVersion": "3.3"
+      "languageVersion": "3.1"
+    },
+    {
+      "name": "flutter_local_notifications_linux",
+      "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/flutter_local_notifications_linux-5.0.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.1"
+    },
+    {
+      "name": "flutter_local_notifications_platform_interface",
+      "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/flutter_local_notifications_platform_interface-8.0.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.1"
+    },
+    {
+      "name": "flutter_test",
+      "rootUri": "file:///Volumes/DiscoMac/DevTools/flutter/versions/versions/3.32.4/packages/flutter_test",
+      "packageUri": "lib/",
+      "languageVersion": "3.7"
     },
     {
       "name": "flutter_web_plugins",
-      "rootUri": "file:///Users/jorgegrullon/fvm/versions/3.27.4/packages/flutter_web_plugins",
+      "rootUri": "file:///Volumes/DiscoMac/DevTools/flutter/versions/versions/3.32.4/packages/flutter_web_plugins",
       "packageUri": "lib/",
-      "languageVersion": "3.2"
+      "languageVersion": "3.7"
     },
     {
       "name": "get_it",
@@ -116,14 +170,26 @@
       "languageVersion": "3.0"
     },
     {
+      "name": "http",
+      "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/http-1.4.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "http_parser",
+      "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/http_parser-4.1.2",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
       "name": "leak_tracker",
-      "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/leak_tracker-10.0.7",
+      "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/leak_tracker-10.0.9",
       "packageUri": "lib/",
       "languageVersion": "3.2"
     },
     {
       "name": "leak_tracker_flutter_testing",
-      "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/leak_tracker_flutter_testing-3.0.8",
+      "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/leak_tracker_flutter_testing-3.0.9",
       "packageUri": "lib/",
       "languageVersion": "3.2"
     },
@@ -141,9 +207,9 @@
     },
     {
       "name": "matcher",
-      "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/matcher-0.12.16+1",
+      "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/matcher-0.12.17",
       "packageUri": "lib/",
-      "languageVersion": "3.0"
+      "languageVersion": "3.4"
     },
     {
       "name": "material_color_utilities",
@@ -153,7 +219,7 @@
     },
     {
       "name": "meta",
-      "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/meta-1.15.0",
+      "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/meta-1.16.0",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
@@ -165,9 +231,9 @@
     },
     {
       "name": "path",
-      "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/path-1.9.0",
+      "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/path-1.9.1",
       "packageUri": "lib/",
-      "languageVersion": "3.0"
+      "languageVersion": "3.4"
     },
     {
       "name": "path_provider_linux",
@@ -188,6 +254,12 @@
       "languageVersion": "3.2"
     },
     {
+      "name": "petitparser",
+      "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/petitparser-6.1.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.5"
+    },
+    {
       "name": "platform",
       "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/platform-3.1.6",
       "packageUri": "lib/",
@@ -201,21 +273,21 @@
     },
     {
       "name": "provider",
-      "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/provider-6.1.2",
+      "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/provider-6.1.5",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
     {
       "name": "shared_preferences",
-      "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/shared_preferences-2.5.2",
+      "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/shared_preferences-2.5.3",
       "packageUri": "lib/",
       "languageVersion": "3.5"
     },
     {
       "name": "shared_preferences_android",
-      "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/shared_preferences_android-2.4.6",
+      "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/shared_preferences_android-2.4.10",
       "packageUri": "lib/",
-      "languageVersion": "3.5"
+      "languageVersion": "3.6"
     },
     {
       "name": "shared_preferences_foundation",
@@ -249,45 +321,57 @@
     },
     {
       "name": "sky_engine",
-      "rootUri": "file:///Users/jorgegrullon/fvm/versions/3.27.4/bin/cache/pkg/sky_engine",
+      "rootUri": "file:///Volumes/DiscoMac/DevTools/flutter/versions/versions/3.32.4/bin/cache/pkg/sky_engine",
       "packageUri": "lib/",
-      "languageVersion": "3.2"
+      "languageVersion": "3.7"
     },
     {
       "name": "source_span",
-      "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/source_span-1.10.0",
+      "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/source_span-1.10.1",
       "packageUri": "lib/",
-      "languageVersion": "2.18"
+      "languageVersion": "3.1"
     },
     {
       "name": "stack_trace",
-      "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/stack_trace-1.12.0",
+      "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/stack_trace-1.12.1",
       "packageUri": "lib/",
       "languageVersion": "3.4"
     },
     {
       "name": "stream_channel",
-      "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/stream_channel-2.1.2",
+      "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/stream_channel-2.1.4",
       "packageUri": "lib/",
-      "languageVersion": "2.19"
+      "languageVersion": "3.3"
     },
     {
       "name": "string_scanner",
-      "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/string_scanner-1.3.0",
+      "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/string_scanner-1.4.1",
       "packageUri": "lib/",
       "languageVersion": "3.1"
     },
     {
       "name": "term_glyph",
-      "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/term_glyph-1.2.1",
+      "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/term_glyph-1.2.2",
       "packageUri": "lib/",
-      "languageVersion": "2.12"
+      "languageVersion": "3.1"
     },
     {
       "name": "test_api",
-      "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/test_api-0.7.3",
+      "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/test_api-0.7.4",
       "packageUri": "lib/",
-      "languageVersion": "3.4"
+      "languageVersion": "3.5"
+    },
+    {
+      "name": "timezone",
+      "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/timezone-0.10.1",
+      "packageUri": "lib/",
+      "languageVersion": "2.19"
+    },
+    {
+      "name": "typed_data",
+      "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/typed_data-1.4.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.5"
     },
     {
       "name": "vector_math",
@@ -297,7 +381,7 @@
     },
     {
       "name": "vm_service",
-      "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/vm_service-14.3.0",
+      "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/vm_service-15.0.0",
       "packageUri": "lib/",
       "languageVersion": "3.3"
     },
@@ -314,16 +398,21 @@
       "languageVersion": "3.3"
     },
     {
+      "name": "xml",
+      "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/xml-6.5.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
+    },
+    {
       "name": "pomodoro",
       "rootUri": "../",
       "packageUri": "lib/",
       "languageVersion": "3.4"
     }
   ],
-  "generated": "2025-03-03T19:16:23.228509Z",
   "generator": "pub",
-  "generatorVersion": "3.6.2",
-  "flutterRoot": "file:///Users/jorgegrullon/fvm/versions/3.27.4",
-  "flutterVersion": "3.27.4",
+  "generatorVersion": "3.8.1",
+  "flutterRoot": "file:///Volumes/DiscoMac/DevTools/flutter/versions/versions/3.32.4",
+  "flutterVersion": "3.32.4",
   "pubCache": "file:///Users/jorgegrullon/.pub-cache"
 }

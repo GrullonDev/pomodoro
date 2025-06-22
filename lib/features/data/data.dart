@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:pomodoro/utils/responsive/responsive.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Data extends StatefulWidget {
   const Data({super.key});
 
   @override
-  State<StatefulWidget> createState() {
-    // TODO: implement createState
-    return _DataState();
-  }
+  State<Data> createState() => _DataState();
 }
 
 class _DataState extends State<Data> {
@@ -54,177 +52,186 @@ class _DataState extends State<Data> {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = context.isMobile;
+
+    // Ajusta el número de columnas según el tamaño de pantalla
+    final crossAxisCount = isMobile ? 1 : 2;
+    final cardPadding =
+        isMobile ? const EdgeInsets.all(12.0) : const EdgeInsets.all(26.0);
+    final iconSize = isMobile ? 36.0 : 50.0;
+    final fontSize = isMobile ? 18.0 : 24.0;
+    final subtitleFontSize = isMobile ? 12.0 : 16.0;
+
     return Scaffold(
       backgroundColor: Colors.black,
-      // padding: const EdgeInsets.all(20.0),
       appBar: AppBar(
-          automaticallyImplyLeading: false,
-          centerTitle: false,
-          backgroundColor: Colors.black,
-          title: const Text.rich(
-            TextSpan(
-              text: 'Almacén',
-              style: TextStyle(
-                fontSize: 24,
-                color: Colors.greenAccent,
-                fontFamily: 'Arial',
-              ),
+        automaticallyImplyLeading: false,
+        centerTitle: false,
+        backgroundColor: Colors.black,
+        title: const Text.rich(
+          TextSpan(
+            text: 'Almacén',
+            style: TextStyle(
+              fontSize: 24,
+              color: Colors.greenAccent,
+              fontFamily: 'Arial',
             ),
-          )),
-      body: SizedBox(
-        width: 600,
-        height: 600,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(25.0),
-              child: GridView(
-                shrinkWrap: true,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 2,
-                  mainAxisSpacing: 0,
+          ),
+        ),
+      ),
+      body: Center(
+        child: Padding(
+          padding:
+              isMobile ? const EdgeInsets.all(8.0) : const EdgeInsets.all(25.0),
+          child: GridView(
+            shrinkWrap: true,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: crossAxisCount,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+              childAspectRatio: isMobile ? 2.5 : 1.2,
+            ),
+            children: [
+              Card(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(25.0),
                 ),
-                children: [
-                  Card(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(25.0),
-                    ),
-                    clipBehavior: Clip.antiAlias,
-                    color: Colors.black,
-                    shadowColor: Colors.greenAccent,
-                    elevation: 15,
-                    child: Padding(
-                      padding: const EdgeInsets.all(26.0),
-                      child: Column(
-                        children: [
-                          const Icon(
-                            Icons.access_time_filled_outlined,
-                            color: Colors.greenAccent,
-                            size: 50,
-                          ),
-                          Text(_totalMin.toString(),
-                              style: const TextStyle(
-                                  color: Colors.greenAccent,
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: 'Arial')),
-                          const Text('Total de tiempo',
-                              style: TextStyle(
-                                  color: Colors.greenAccent,
-                                  fontSize: 16,
-                                  fontFamily: 'Arial',
-                                  fontStyle: FontStyle.italic)),
-                        ],
+                clipBehavior: Clip.antiAlias,
+                color: Colors.black,
+                shadowColor: Colors.greenAccent,
+                elevation: 15,
+                child: Padding(
+                  padding: cardPadding,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.access_time_filled_outlined,
+                        color: Colors.greenAccent,
+                        size: iconSize,
                       ),
-                    ),
+                      Text(_totalMin.toString(),
+                          style: TextStyle(
+                              color: Colors.greenAccent,
+                              fontSize: fontSize,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Arial')),
+                      Text('Total de tiempo',
+                          style: TextStyle(
+                              color: Colors.greenAccent,
+                              fontSize: subtitleFontSize,
+                              fontFamily: 'Arial',
+                              fontStyle: FontStyle.italic)),
+                    ],
                   ),
-                  Card(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(25.0),
-                    ),
-                    clipBehavior: Clip.antiAlias,
-                    color: Colors.black,
-                    shadowColor: Colors.greenAccent,
-                    elevation: 15,
-                    child: Padding(
-                      padding: const EdgeInsets.all(26.0),
-                      child: Column(
-                        children: [
-                          const Icon(
-                            Icons.emoji_events,
-                            color: Colors.greenAccent,
-                            size: 50,
-                          ),
-                          Text(_longestSesh.toString(),
-                              style: const TextStyle(
-                                  color: Colors.greenAccent,
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: 'Arial')),
-                          const Text('sesión más larga',
-                              style: TextStyle(
-                                  color: Colors.greenAccent,
-                                  fontSize: 16,
-                                  fontFamily: 'Arial',
-                                  fontStyle: FontStyle.italic)),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Card(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(25.0),
-                    ),
-                    clipBehavior: Clip.antiAlias,
-                    color: Colors.black,
-                    shadowColor: Colors.greenAccent,
-                    elevation: 15,
-                    child: Padding(
-                      padding: const EdgeInsets.all(26.0),
-                      child: Column(
-                        children: [
-                          const Icon(
-                            Icons.calendar_month_rounded,
-                            color: Colors.greenAccent,
-                            size: 50,
-                          ),
-                          Text(_seshNum.toString(),
-                              style: const TextStyle(
-                                  color: Colors.greenAccent,
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: 'Arial')),
-                          const Text('numero de sesiones',
-                              style: TextStyle(
-                                  color: Colors.greenAccent,
-                                  fontSize: 16,
-                                  fontFamily: 'Arial',
-                                  fontStyle: FontStyle.italic)),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Card(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(25.0),
-                    ),
-                    clipBehavior: Clip.antiAlias,
-                    color: Colors.black,
-                    shadowColor: Colors.greenAccent,
-                    elevation: 15,
-                    child: Padding(
-                      padding: const EdgeInsets.all(26.0),
-                      child: Column(
-                        children: [
-                          const Icon(
-                            Icons.bar_chart_rounded,
-                            color: Colors.greenAccent,
-                            size: 50,
-                          ),
-                          Text(
-                              double.parse((_avgSesh).toStringAsFixed(2))
-                                  .toString(),
-                              style: const TextStyle(
-                                  color: Colors.greenAccent,
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: 'Arial')),
-                          const Text('total de tiempo promedio',
-                              style: TextStyle(
-                                  color: Colors.greenAccent,
-                                  fontSize: 16,
-                                  fontFamily: 'Arial',
-                                  fontStyle: FontStyle.italic)),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
-          ],
+              Card(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(25.0),
+                ),
+                clipBehavior: Clip.antiAlias,
+                color: Colors.black,
+                shadowColor: Colors.greenAccent,
+                elevation: 15,
+                child: Padding(
+                  padding: cardPadding,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.emoji_events,
+                        color: Colors.greenAccent,
+                        size: iconSize,
+                      ),
+                      Text(_longestSesh.toString(),
+                          style: TextStyle(
+                              color: Colors.greenAccent,
+                              fontSize: fontSize,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Arial')),
+                      Text('sesión más larga',
+                          style: TextStyle(
+                              color: Colors.greenAccent,
+                              fontSize: subtitleFontSize,
+                              fontFamily: 'Arial',
+                              fontStyle: FontStyle.italic)),
+                    ],
+                  ),
+                ),
+              ),
+              Card(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(25.0),
+                ),
+                clipBehavior: Clip.antiAlias,
+                color: Colors.black,
+                shadowColor: Colors.greenAccent,
+                elevation: 15,
+                child: Padding(
+                  padding: cardPadding,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.calendar_month_rounded,
+                        color: Colors.greenAccent,
+                        size: iconSize - 5,
+                      ),
+                      Text(_seshNum.toString(),
+                          style: TextStyle(
+                              color: Colors.greenAccent,
+                              fontSize: fontSize,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Arial')),
+                      Text('numero de sesiones',
+                          style: TextStyle(
+                              color: Colors.greenAccent,
+                              fontSize: subtitleFontSize,
+                              fontFamily: 'Arial',
+                              fontStyle: FontStyle.italic)),
+                    ],
+                  ),
+                ),
+              ),
+              Card(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(25.0),
+                ),
+                clipBehavior: Clip.antiAlias,
+                color: Colors.black,
+                shadowColor: Colors.greenAccent,
+                elevation: 15,
+                child: Padding(
+                  padding: cardPadding,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.bar_chart_rounded,
+                        color: Colors.greenAccent,
+                        size: iconSize - 5,
+                      ),
+                      Text(
+                          double.parse((_avgSesh).toStringAsFixed(2))
+                              .toString(),
+                          style: TextStyle(
+                              color: Colors.greenAccent,
+                              fontSize: fontSize,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Arial')),
+                      Text('total de tiempo promedio',
+                          style: TextStyle(
+                              color: Colors.greenAccent,
+                              fontSize: subtitleFontSize,
+                              fontFamily: 'Arial',
+                              fontStyle: FontStyle.italic)),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
