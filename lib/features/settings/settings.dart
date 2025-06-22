@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pomodoro/utils/responsive/responsive.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Settings extends StatefulWidget {
@@ -93,24 +94,35 @@ class _SettingsState extends State<Settings> {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = context.isMobile;
+
+    // Define responsive paddings, font sizes, and card heights
+    final double horizontalMargin = isMobile ? 10.0 : 40.0;
+    final double cardHeight = isMobile ? 65.0 : 90.0;
+    final double titleFontSize = isMobile ? 24 : 32;
+    final double contentFontSize = isMobile ? 20 : 28;
+    final double iconSize = isMobile ? 30 : 40;
+
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         centerTitle: false,
         backgroundColor: Colors.black,
-        title: const Text.rich(
+        title: Text.rich(
           TextSpan(
             text: 'Historial',
             style: TextStyle(
-                fontSize: 24, color: Colors.greenAccent, fontFamily: 'Arial'),
+                fontSize: titleFontSize,
+                color: Colors.greenAccent,
+                fontFamily: 'Arial'),
           ),
         ),
         actions: [
           IconButton(
-            padding: const EdgeInsets.only(right: 10.0),
-            icon: const Icon(Icons.delete_outline,
-                color: Colors.greenAccent, size: 30),
+            padding: EdgeInsets.only(right: isMobile ? 10.0 : 30.0),
+            icon: Icon(Icons.delete_outline,
+                color: Colors.greenAccent, size: iconSize),
             onPressed: _showDeleteConfirmation,
           ),
         ],
@@ -123,19 +135,19 @@ class _SettingsState extends State<Settings> {
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(
+            return Center(
               child: Text(
                 'No hay datos',
                 style: TextStyle(
                   color: Colors.greenAccent,
-                  fontSize: 24,
+                  fontSize: titleFontSize,
                 ),
               ),
             );
           } else {
             final sessionEntries = snapshot.data!;
             return ListView.builder(
-              padding: const EdgeInsets.all(5.0),
+              padding: EdgeInsets.all(isMobile ? 5.0 : 20.0),
               itemCount: sessionEntries.length,
               itemBuilder: (BuildContext context, int index) {
                 final session =
@@ -146,8 +158,9 @@ class _SettingsState extends State<Settings> {
                     split.length > 1 ? split[1] : 'No session info';
 
                 return Container(
-                  margin: const EdgeInsets.fromLTRB(20, 0, 20, 5),
-                  height: 65.0,
+                  margin: EdgeInsets.fromLTRB(
+                      horizontalMargin, 0, horizontalMargin, isMobile ? 5 : 15),
+                  height: cardHeight,
                   child: Card(
                     elevation: 15,
                     shadowColor: Colors.greenAccent,
@@ -155,7 +168,8 @@ class _SettingsState extends State<Settings> {
                     shape: RoundedRectangleBorder(
                       side:
                           const BorderSide(color: Colors.greenAccent, width: 1),
-                      borderRadius: BorderRadius.circular(25.0),
+                      borderRadius:
+                          BorderRadius.circular(isMobile ? 25.0 : 35.0),
                     ),
                     color: Colors.black,
                     child: Row(
@@ -165,9 +179,9 @@ class _SettingsState extends State<Settings> {
                           child: Center(
                             child: Text(
                               date,
-                              style: const TextStyle(
+                              style: TextStyle(
                                   color: Colors.greenAccent,
-                                  fontSize: 20,
+                                  fontSize: contentFontSize,
                                   fontFamily: 'Arial'),
                             ),
                           ),
@@ -176,9 +190,9 @@ class _SettingsState extends State<Settings> {
                           child: Center(
                             child: Text(
                               sessionInfo,
-                              style: const TextStyle(
+                              style: TextStyle(
                                   color: Colors.greenAccent,
-                                  fontSize: 20,
+                                  fontSize: contentFontSize,
                                   fontFamily: 'Arial'),
                             ),
                           ),

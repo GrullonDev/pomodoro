@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Importar para usar FilteringTextInputFormatter
+import 'package:pomodoro/utils/responsive/responsive.dart';
 import 'package:pomodoro/utils/timer.dart';
 
 class Habit extends StatelessWidget {
@@ -7,9 +8,24 @@ class Habit extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = context.isMobile;
+
     final TextEditingController workController = TextEditingController();
     final TextEditingController breakController = TextEditingController();
     final TextEditingController sessionController = TextEditingController();
+
+    // Definir tamaños y paddings responsivos
+    final double horizontalMargin = isMobile ? 10 : 30;
+    final double containerPadding = isMobile ? 10 : 20;
+    final double titleFontSize = isMobile ? 18 : 24;
+    final double labelFontSize = isMobile ? 14 : 18;
+    final double inputFontSize = isMobile ? 12 : 13;
+    final double buttonFontSize = isMobile ? 16 : 20;
+    final double buttonHeight = isMobile ? 40 : 50;
+    final double buttonWidth = isMobile ? 120 : 150;
+    final double fieldSpacing = isMobile ? 15 : 25;
+    final double sectionSpacing = isMobile ? 10 : 20;
+    final double bottomSpacing = isMobile ? 40 : 80;
 
     return GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
@@ -20,11 +36,11 @@ class Habit extends StatelessWidget {
             automaticallyImplyLeading: false,
             centerTitle: false,
             backgroundColor: Colors.black,
-            title: const Text.rich(
+            title: Text.rich(
               TextSpan(
                 text: 'Iniciar Pomodoro',
                 style: TextStyle(
-                  fontSize: 24,
+                  fontSize: titleFontSize,
                   color: Colors.greenAccent,
                   fontFamily: 'Arial',
                 ),
@@ -34,24 +50,24 @@ class Habit extends StatelessWidget {
           child: Container(
             width: double.infinity,
             color: Colors.black38,
-            margin: const EdgeInsets.all(30),
-            padding: const EdgeInsets.all(20),
+            margin: EdgeInsets.all(horizontalMargin),
+            padding: EdgeInsets.all(containerPadding),
             child: Column(
               children: [
-                const Text(
+                Text(
                   "Duración de trabajo",
                   style: TextStyle(
-                    fontSize: 18,
+                    fontSize: labelFontSize,
                     color: Colors.white70,
                     fontFamily: 'Arial',
                   ),
                 ),
-                const SizedBox(height: 10),
+                SizedBox(height: sectionSpacing),
                 TextField(
                   controller: workController,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 13,
+                  style: TextStyle(
+                    fontSize: inputFontSize,
                     color: Colors.white70,
                     fontFamily: 'Arial',
                   ),
@@ -61,7 +77,6 @@ class Habit extends StatelessWidget {
                     FilteringTextInputFormatter.allow(RegExp(r'^[1-9][0-9]?$')),
                   ],
                   decoration: const InputDecoration(
-                    // filled: true,
                     fillColor: Colors.black12,
                     labelText: '(En minutos)',
                     labelStyle: TextStyle(color: Colors.white70),
@@ -73,21 +88,21 @@ class Habit extends StatelessWidget {
                         borderSide: BorderSide(color: Colors.white10)),
                   ),
                 ),
-                const SizedBox(height: 25),
-                const Text(
+                SizedBox(height: fieldSpacing),
+                Text(
                   "Duración de descanso",
                   style: TextStyle(
-                    fontSize: 18,
+                    fontSize: labelFontSize,
                     color: Colors.white70,
                     fontFamily: 'Arial',
                   ),
                 ),
-                const SizedBox(height: 20),
+                SizedBox(height: sectionSpacing),
                 TextField(
                   controller: breakController,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 13,
+                  style: TextStyle(
+                    fontSize: inputFontSize,
                     color: Colors.white70,
                     fontFamily: 'Arial',
                   ),
@@ -109,23 +124,21 @@ class Habit extends StatelessWidget {
                         borderSide: BorderSide(color: Colors.white10)),
                   ),
                 ),
-                const SizedBox(
-                    height:
-                        25), // add a space between the text and the input field
-                const Text(
+                SizedBox(height: fieldSpacing),
+                Text(
                   "Sesiones",
                   style: TextStyle(
-                    fontSize: 18,
+                    fontSize: labelFontSize,
                     color: Colors.white70,
                     fontFamily: 'Arial',
                   ),
                 ),
-                const SizedBox(height: 20),
+                SizedBox(height: sectionSpacing),
                 TextField(
                   controller: sessionController,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 13,
+                  style: TextStyle(
+                    fontSize: inputFontSize,
                     color: Colors.white70,
                     fontFamily: 'Arial',
                   ),
@@ -135,7 +148,6 @@ class Habit extends StatelessWidget {
                     FilteringTextInputFormatter.allow(RegExp(r'^[1-9][0-9]?$')),
                   ],
                   decoration: const InputDecoration(
-                    // filled: true,
                     fillColor: Colors.black12,
                     labelText: '(Número de sesiones)',
                     labelStyle: TextStyle(
@@ -149,7 +161,7 @@ class Habit extends StatelessWidget {
                         borderSide: BorderSide(color: Colors.white10)),
                   ),
                 ),
-                const SizedBox(height: 80),
+                SizedBox(height: bottomSpacing),
                 TextButton(
                   onPressed: () => Navigator.push(
                     context,
@@ -169,7 +181,7 @@ class Habit extends StatelessWidget {
                   style: TextButton.styleFrom(
                       backgroundColor: Colors.greenAccent,
                       padding: EdgeInsets.zero,
-                      minimumSize: const Size(150, 50),
+                      minimumSize: Size(buttonWidth, buttonHeight),
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       alignment: Alignment.center,
                       shape: RoundedRectangleBorder(
@@ -177,10 +189,10 @@ class Habit extends StatelessWidget {
                         side:
                             const BorderSide(color: Colors.black12, width: 2.0),
                       )),
-                  child: const Text(
+                  child: Text(
                     "Iniciar",
                     style: TextStyle(
-                      fontSize: 20,
+                      fontSize: buttonFontSize,
                       color: Colors.black,
                       fontWeight: FontWeight.bold,
                       fontFamily: 'Arial',
