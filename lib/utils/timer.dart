@@ -3,8 +3,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import 'package:animated_snack_bar/animated_snack_bar.dart';
-import 'package:pomodoro/utils/responsive/responsive.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'package:pomodoro/utils/notifications/notifications.dart';
+import 'package:pomodoro/utils/responsive/responsive.dart';
 
 class MyTimer extends StatefulWidget {
   const MyTimer({

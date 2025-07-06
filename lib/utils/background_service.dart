@@ -1,9 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter_background_service/flutter_background_service.dart';
-import 'package:flutter_background_service_android/flutter_background_service_android.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 
 import 'notifications/notifications.dart';
 
@@ -30,8 +27,6 @@ Future<void> initializeService() async {
 
 @pragma('vm:entry-point')
 void onStart(ServiceInstance service) async {
-  DartPluginRegistrant.ensureInitialized();
-
   if (service is AndroidServiceInstance) {
     service.setForegroundNotificationInfo(
       title: 'Pomodoro',
@@ -50,6 +45,7 @@ void onStart(ServiceInstance service) async {
 
 @pragma('vm:entry-point')
 Future<bool> onIosBackground(ServiceInstance service) async {
-  DartPluginRegistrant.ensureInitialized();
+  // If you need to register plugins, uncomment the following line:
+  // DartPluginRegistrant.ensureInitialized();
   return true;
 }
