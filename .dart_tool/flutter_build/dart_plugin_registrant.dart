@@ -6,19 +6,24 @@
 // @dart = 3.4
 
 import 'dart:io'; // flutter_ignore: dart_io_import.
-import 'package:flutter_background_service_android/flutter_background_service_android.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:path_provider_android/path_provider_android.dart';
 import 'package:shared_preferences_android/shared_preferences_android.dart';
-import 'package:flutter_background_service_ios/flutter_background_service_ios.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:path_provider_foundation/path_provider_foundation.dart';
 import 'package:shared_preferences_foundation/shared_preferences_foundation.dart';
 import 'package:flutter_local_notifications_linux/flutter_local_notifications_linux.dart';
 import 'package:path_provider_linux/path_provider_linux.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences_linux/shared_preferences_linux.dart';
+import 'package:url_launcher_linux/url_launcher_linux.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:path_provider_foundation/path_provider_foundation.dart';
 import 'package:shared_preferences_foundation/shared_preferences_foundation.dart';
 import 'package:path_provider_windows/path_provider_windows.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences_windows/shared_preferences_windows.dart';
+import 'package:url_launcher_windows/url_launcher_windows.dart';
 
 @pragma('vm:entry-point')
 class _PluginRegistrant {
@@ -27,19 +32,19 @@ class _PluginRegistrant {
   static void register() {
     if (Platform.isAndroid) {
       try {
-        FlutterBackgroundServiceAndroid.registerWith();
+        AndroidFlutterLocalNotificationsPlugin.registerWith();
       } catch (err) {
         print(
-          '`flutter_background_service_android` threw an error: $err. '
+          '`flutter_local_notifications` threw an error: $err. '
           'The app may not function as expected until you remove this plugin from pubspec.yaml'
         );
       }
 
       try {
-        AndroidFlutterLocalNotificationsPlugin.registerWith();
+        PathProviderAndroid.registerWith();
       } catch (err) {
         print(
-          '`flutter_local_notifications` threw an error: $err. '
+          '`path_provider_android` threw an error: $err. '
           'The app may not function as expected until you remove this plugin from pubspec.yaml'
         );
       }
@@ -55,19 +60,19 @@ class _PluginRegistrant {
 
     } else if (Platform.isIOS) {
       try {
-        FlutterBackgroundServiceIOS.registerWith();
+        IOSFlutterLocalNotificationsPlugin.registerWith();
       } catch (err) {
         print(
-          '`flutter_background_service_ios` threw an error: $err. '
+          '`flutter_local_notifications` threw an error: $err. '
           'The app may not function as expected until you remove this plugin from pubspec.yaml'
         );
       }
 
       try {
-        IOSFlutterLocalNotificationsPlugin.registerWith();
+        PathProviderFoundation.registerWith();
       } catch (err) {
         print(
-          '`flutter_local_notifications` threw an error: $err. '
+          '`path_provider_foundation` threw an error: $err. '
           'The app may not function as expected until you remove this plugin from pubspec.yaml'
         );
       }
@@ -101,10 +106,28 @@ class _PluginRegistrant {
       }
 
       try {
+        SharePlusLinuxPlugin.registerWith();
+      } catch (err) {
+        print(
+          '`share_plus` threw an error: $err. '
+          'The app may not function as expected until you remove this plugin from pubspec.yaml'
+        );
+      }
+
+      try {
         SharedPreferencesLinux.registerWith();
       } catch (err) {
         print(
           '`shared_preferences_linux` threw an error: $err. '
+          'The app may not function as expected until you remove this plugin from pubspec.yaml'
+        );
+      }
+
+      try {
+        UrlLauncherLinux.registerWith();
+      } catch (err) {
+        print(
+          '`url_launcher_linux` threw an error: $err. '
           'The app may not function as expected until you remove this plugin from pubspec.yaml'
         );
       }
@@ -115,6 +138,15 @@ class _PluginRegistrant {
       } catch (err) {
         print(
           '`flutter_local_notifications` threw an error: $err. '
+          'The app may not function as expected until you remove this plugin from pubspec.yaml'
+        );
+      }
+
+      try {
+        PathProviderFoundation.registerWith();
+      } catch (err) {
+        print(
+          '`path_provider_foundation` threw an error: $err. '
           'The app may not function as expected until you remove this plugin from pubspec.yaml'
         );
       }
@@ -139,10 +171,28 @@ class _PluginRegistrant {
       }
 
       try {
+        SharePlusWindowsPlugin.registerWith();
+      } catch (err) {
+        print(
+          '`share_plus` threw an error: $err. '
+          'The app may not function as expected until you remove this plugin from pubspec.yaml'
+        );
+      }
+
+      try {
         SharedPreferencesWindows.registerWith();
       } catch (err) {
         print(
           '`shared_preferences_windows` threw an error: $err. '
+          'The app may not function as expected until you remove this plugin from pubspec.yaml'
+        );
+      }
+
+      try {
+        UrlLauncherWindows.registerWith();
+      } catch (err) {
+        print(
+          '`url_launcher_windows` threw an error: $err. '
           'The app may not function as expected until you remove this plugin from pubspec.yaml'
         );
       }
