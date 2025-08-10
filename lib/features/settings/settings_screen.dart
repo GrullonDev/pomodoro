@@ -43,6 +43,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
+          automaticallyImplyLeading: false,
           backgroundColor: Colors.black,
           title: Text(t.settings,
               style: const TextStyle(color: Colors.greenAccent))),
