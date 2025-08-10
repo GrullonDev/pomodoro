@@ -12,8 +12,9 @@ class NotificationService {
   static Future<void> initialize() async {
     tz.initializeTimeZones();
     // Android initialization
-    const AndroidInitializationSettings androidSettings =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+  const AndroidInitializationSettings androidSettings =
+    // Use dedicated status bar icon (monochrome / flat) for better contrast.
+    AndroidInitializationSettings('@drawable/ic_stat_pomodoro');
 
     // iOS initialization
     final pauseResumeAction = DarwinNotificationAction.plain(
@@ -45,9 +46,10 @@ class NotificationService {
       iOS: iosSettings,
     );
 
-    await _notificationsPlugin.initialize(settings,
-        onDidReceiveNotificationResponse:
-            (NotificationResponse response) async {
+    try {
+      await _notificationsPlugin.initialize(settings,
+          onDidReceiveNotificationResponse:
+              (NotificationResponse response) async {
       if (response.actionId == 'pause_resume') {
         TimerActionBus.instance.add('toggle');
       } else if (response.actionId == 'skip') {
@@ -59,7 +61,13 @@ class NotificationService {
           TimerActionBus.instance.add(action);
         }
       }
-    });
+          });
+    } catch (e) {
+      // Silently continue if initialization fails due to a resource issue; app can still function.
+      if (kDebugMode) {
+        print('Notification init failed: $e');
+      }
+    }
   }
 
   static Future<void> requestPermissions() async {
@@ -83,8 +91,7 @@ class NotificationService {
     required String title,
     required String body,
   }) async {
-    const AndroidNotificationDetails androidDetails =
-        AndroidNotificationDetails(
+    const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
       'pomodoro_timer_channel',
       'Pomodoro Timer',
       channelDescription: 'Timer notifications for Pomodoro app',
@@ -95,6 +102,7 @@ class NotificationService {
       enableVibration: true,
       playSound: true,
       // For dynamic island (Android 14+), use styleInformation if needed
+      icon: '@drawable/ic_stat_pomodoro',
     );
 
     const DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
@@ -126,6 +134,7 @@ class NotificationService {
       channelDescription: 'Otras notificaciones',
       importance: Importance.high,
       priority: Priority.high,
+      icon: '@drawable/ic_stat_pomodoro',
     );
     const ios = DarwinNotificationDetails();
     await _notificationsPlugin.show(id, title, body,
@@ -152,6 +161,7 @@ class NotificationService {
       enableVibration: true,
       playSound: true,
       // sound: RawResourceAndroidNotificationSound('timer_end'), // <-- Re‑habilitar cuando exista el archivo
+      icon: '@drawable/ic_stat_pomodoro',
     );
     const iosDetails = DarwinNotificationDetails(
       presentAlert: true,
@@ -296,7 +306,7 @@ class NotificationService {
         ),
       ],
     );
-    final ios = const DarwinNotificationDetails(
+    const ios = DarwinNotificationDetails(
         presentAlert: false,
         presentSound: false,
         presentBadge: false,

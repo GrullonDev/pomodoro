@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:pomodoro/l10n/app_localizations.dart';
 
-import 'package:pomodoro/utils/landing.dart';
+import 'package:pomodoro/utils/home_page.dart';
+import 'package:pomodoro/core/data/session_repository.dart';
+import 'package:pomodoro/features/auth/screens/onboarding_screen.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key, required this.navigatorKey});
@@ -45,7 +47,44 @@ class MyApp extends StatelessWidget {
         GlobalWidgetsLocalizations.delegate,
       ],
       supportedLocales: const [Locale('en'), Locale('es')],
-      home: const AnimatedGradientShell(child: LandingPage()),
+      home: FutureBuilder<bool>(
+        future: SessionRepository().isOnboardingSeen(),
+        builder: (context, snap) {
+          if (!snap.hasData) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          final seen = snap.data ?? false;
+          if (seen) {
+            return const AnimatedGradientShell(child: HomePage());
+          }
+          return AnimatedGradientShell(
+            child: OnboardingScreen(
+              onGetStarted: () async {
+                await SessionRepository().setOnboardingSeen();
+                if (navigatorKey.currentState?.mounted ?? false) {
+                  navigatorKey.currentState!.pushReplacement(
+                    MaterialPageRoute(
+                        builder: (_) => const AnimatedGradientShell(
+                              child: HomePage(),
+                            )),
+                  );
+                }
+              },
+              onSkip: () async {
+                await SessionRepository().setOnboardingSeen();
+                if (navigatorKey.currentState?.mounted ?? false) {
+                  navigatorKey.currentState!.pushReplacement(
+                    MaterialPageRoute(
+                        builder: (_) => const AnimatedGradientShell(
+                              child: HomePage(),
+                            )),
+                  );
+                }
+              },
+            ),
+          );
+        },
+      ),
     );
   }
 }

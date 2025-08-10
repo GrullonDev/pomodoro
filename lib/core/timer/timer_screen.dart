@@ -64,10 +64,12 @@ class _TimerViewState extends State<_TimerView>
   final _repo = SessionRepository();
   AnimationController? _pulseController; // nullable for hot reload safety
   late final AudioPlayer _audioPlayer;
+  late final AudioPlayer _tickingPlayer; // continuous ticking
   bool _flashing = false;
   Timer? _flashTimer;
   bool _flashEnabled = true;
   bool _soundEnabled = true;
+  bool _tickingEnabled = true;
   bool _audioPreloaded = false;
   Uint8List? _generatedBeep; // fallback bytes if asset missing
 
@@ -82,6 +84,7 @@ class _TimerViewState extends State<_TimerView>
     super.initState();
     _initPulse();
     _audioPlayer = AudioPlayer();
+  _tickingPlayer = AudioPlayer();
     _repo.goalRemainingStream.listen((val) {
       if (mounted) setState(() => _todayGoalRemaining = val);
     });
@@ -91,6 +94,9 @@ class _TimerViewState extends State<_TimerView>
     });
     _repo.isLast5SoundEnabled().then((v) {
       if (mounted) setState(() => _soundEnabled = v);
+    });
+    _repo.isTickingSoundEnabled().then((v) {
+      if (mounted) setState(() => _tickingEnabled = v);
     });
     // Preload audio (fire & forget)
     () async {
@@ -130,6 +136,7 @@ class _TimerViewState extends State<_TimerView>
     _pulseController?.dispose();
     _flashTimer?.cancel();
     _audioPlayer.dispose();
+  _tickingPlayer.dispose();
     super.dispose();
   }
 
@@ -194,7 +201,8 @@ class _TimerViewState extends State<_TimerView>
     // RIFF header
     final header = BytesBuilder();
     void writeString(String s) => header.add(s.codeUnits);
-    void write32(int v) => header.add([v & 0xFF, (v >> 8) & 0xFF, (v >> 16) & 0xFF, (v >> 24) & 0xFF]);
+    void write32(int v) => header
+        .add([v & 0xFF, (v >> 8) & 0xFF, (v >> 16) & 0xFF, (v >> 24) & 0xFF]);
     void write16(int v) => header.add([v & 0xFF, (v >> 8) & 0xFF]);
     writeString('RIFF');
     write32(totalDataLen);
@@ -232,7 +240,9 @@ class _TimerViewState extends State<_TimerView>
   @override
   Widget build(BuildContext context) {
     final background =
-        _flashing ? Colors.greenAccent.withOpacity(0.10) : Colors.black;
+    _flashing
+      ? Colors.greenAccent.withValues(alpha: 0.10)
+      : Colors.black;
     return AnimatedOpacity(
         duration: const Duration(milliseconds: 220),
         opacity: _flashing ? 0.92 : 1.0,
@@ -257,6 +267,15 @@ class _TimerViewState extends State<_TimerView>
                   final loc = AppLocalizations.of(context);
                   if (state is TimerRunInProgress) {
                     final sec = state.remaining;
+                    final isWorkPhase = state.phase == TimerPhase.work;
+                    // Manage ticking sound start/stop
+                    if (_tickingEnabled) {
+                      if (!state.paused && isWorkPhase) {
+                        _ensureTicking();
+                      } else {
+                        _stopTicking();
+                      }
+                    }
                     if (sec != _lastNotifSecond) {
                       // update at most once per second
                       _lastNotifSecond = sec;
@@ -289,6 +308,7 @@ class _TimerViewState extends State<_TimerView>
                         if (enabled && !_last5AlertPlayed) {
                           _last5AlertPlayed = true;
                           HapticFeedback.mediumImpact();
+                          _stopTicking(); // avoid overlap
                           // ignore: discarded_futures
                           _playLast5Sound();
                           _startFlash();
@@ -298,8 +318,12 @@ class _TimerViewState extends State<_TimerView>
                     if (sec > 5) {
                       _last5AlertPlayed = false; // reset for next cycle
                       _stopFlash();
+                      if (_tickingEnabled && !state.paused && isWorkPhase) {
+                        _ensureTicking();
+                      }
                     }
                   } else if (state is TimerCompleted) {
+                    _stopTicking();
                     final totalSessions = state.totalSessions;
                     final workDur = state.workDuration;
                     Navigator.of(context).pushReplacement(
@@ -503,6 +527,24 @@ class _TimerViewState extends State<_TimerView>
           ),
         ));
   }
+
+  Future<void> _ensureTicking() async {
+  // Best-effort: try starting; errors ignored. No direct getState API in v6.
+    try {
+      await _tickingPlayer.setReleaseMode(ReleaseMode.loop);
+      await _tickingPlayer.setVolume(0.35);
+      await _tickingPlayer.setSource(AssetSource('sounds/cronometro.mp3'));
+      await _tickingPlayer.resume();
+    } catch (e) {
+      debugPrint('Ticking start failed: $e');
+    }
+  }
+
+  Future<void> _stopTicking() async {
+    try {
+      await _tickingPlayer.stop();
+    } catch (_) {}
+  }
 }
 
 class _TimerButton extends StatelessWidget {
@@ -606,13 +648,14 @@ class _GoalProgressBar extends StatelessWidget {
           child: LinearProgressIndicator(
             minHeight: 10,
             value: pct.clamp(0, 1),
-            backgroundColor: barColor.withOpacity(0.15),
+            backgroundColor: barColor.withValues(alpha: 0.15),
             valueColor: const AlwaysStoppedAnimation(barColor),
           ),
         ),
         const SizedBox(height: 4),
         Text(AppLocalizations.of(context).goalProgressLabel(done, goalMinutes),
-            style: TextStyle(fontSize: 12, color: barColor.withOpacity(0.9)))
+      style: TextStyle(
+        fontSize: 12, color: barColor.withValues(alpha: 0.9)))
       ],
     );
   }

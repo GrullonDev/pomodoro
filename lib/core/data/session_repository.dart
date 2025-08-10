@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:async';
 
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class PomodoroSession {
   final DateTime endTime; // momento fin de la fase de trabajo
@@ -21,7 +23,9 @@ class PomodoroSession {
 }
 
 class SessionRepository {
-  static const _key = 'sessions_json';
+  static const _key = 'sessions_json'; // legacy (guest / pre-auth)
+  // Per-user key prefix when storing locally; final key: sessions_json_<uid>
+  static String _userKey(String? uid) => uid == null ? _key : '${_key}_$uid';
   static const _goalKey = 'daily_goal_minutes';
   static const _longBreakIntervalKey = 'long_break_interval';
   static const _longBreakDurationKey = 'long_break_duration_minutes';
@@ -29,6 +33,8 @@ class SessionRepository {
   static const _last5AlertKey = 'last5_alert_enabled';
   static const _last5SoundKey = 'last5_sound_enabled';
   static const _last5FlashKey = 'last5_flash_enabled';
+  static const _tickingSoundKey = 'ticking_sound_enabled';
+  static const _onboardingSeenKey = 'onboarding_seen';
   // Stream for live daily goal remaining updates
   static final SessionRepository _singleton = SessionRepository._internal();
   factory SessionRepository() => _singleton;
@@ -54,7 +60,8 @@ class SessionRepository {
 
   Future<List<PomodoroSession>> loadSessions() async {
     final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(_key);
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    final raw = prefs.getString(_userKey(uid));
     if (raw == null || raw.isEmpty) return [];
     try {
       final list = (jsonDecode(raw) as List)
@@ -68,11 +75,22 @@ class SessionRepository {
 
   Future<void> addSession(PomodoroSession session) async {
     final prefs = await SharedPreferences.getInstance();
+    final uid = FirebaseAuth.instance.currentUser?.uid;
     final current = await loadSessions();
     current.add(session);
     await prefs.setString(
-        _key, jsonEncode(current.map((e) => e.toMap()).toList()));
-    // push update asynchronously
+        _userKey(uid), jsonEncode(current.map((e) => e.toMap()).toList()));
+    // Firestore sync (best effort)
+    if (uid != null) {
+      try {
+        final doc = FirebaseFirestore.instance
+            .collection('users')
+            .doc(uid)
+            .collection('sessions')
+            .doc();
+        await doc.set(session.toMap());
+      } catch (_) {}
+    }
     scheduleMicrotask(() => refreshGoalRemaining());
   }
 
@@ -167,6 +185,26 @@ class SessionRepository {
     return prefs.getBool(_last5FlashKey) ?? true; // default enabled
   }
 
+  Future<void> setTickingSoundEnabled(bool enabled) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_tickingSoundKey, enabled);
+  }
+
+  Future<bool> isTickingSoundEnabled() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_tickingSoundKey) ?? true; // default enabled
+  }
+
+  Future<void> setOnboardingSeen() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_onboardingSeenKey, true);
+  }
+
+  Future<bool> isOnboardingSeen() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_onboardingSeenKey) ?? false;
+  }
+
   Future<double> todayProgress() async {
     final goal = await getDailyGoalMinutes();
     final todaySec = await todayWorkSeconds();
@@ -177,8 +215,11 @@ class SessionRepository {
   // MIGRATION from legacy 'time' string storage
   Future<void> migrateLegacyIfNeeded() async {
     final prefs = await SharedPreferences.getInstance();
+    // Only migrate into guest key if user has no per-user data
     final existing = prefs.getString(_key);
-    if (existing != null && existing.isNotEmpty) return; // already migrated
+    if (existing != null && existing.isNotEmpty) {
+      return; // already migrated (guest)
+    }
     final legacy = prefs.getString('time');
     if (legacy == null || legacy.isEmpty) return;
     final split = legacy.split('/');
