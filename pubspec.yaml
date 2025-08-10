@@ -10,6 +10,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
 
   cupertino_icons: ^1.0.6
   flutter_bloc: ^8.1.6
@@ -19,7 +21,12 @@ dependencies:
   animated_snack_bar: ^0.4.0
   curved_navigation_bar: ^1.0.6
   flutter_local_notifications: ^18.0.1
-  flutter_background_service: ^5.1.0
+  timezone: ^0.9.4
+  equatable: ^2.0.5
+  share_plus: ^10.0.2
+  path_provider: ^2.1.4
+  intl: ^0.20.2
+  audioplayers: ^6.1.0
 
 dev_dependencies:
   flutter_test:
@@ -29,6 +36,12 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  generate: true
+
+  assets:
+    # Short alert clip (e.g. 500ms) used for last 5-second cue.
+    - assets/sounds/last5.mp3
+    - assets/sounds/
 
   # To add assets to your application, add an assets section, like this:
   # assets:
