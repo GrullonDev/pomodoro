@@ -63,7 +63,7 @@ class _DataState extends State<Data> {
     final subtitleFontSize = isMobile ? 12.0 : 16.0;
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         centerTitle: false,
