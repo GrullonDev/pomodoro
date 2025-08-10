@@ -1,3 +1,4 @@
+// NOTE: This Kotlin DSL build script is now superseded by build.gradle (Groovy) and will be removed.
 plugins {
     id("com.android.application")
     id("kotlin-android")

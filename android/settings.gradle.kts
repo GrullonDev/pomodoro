@@ -1,3 +1,4 @@
+// DEPRECATED duplicate settings (Kotlin DSL). The Groovy settings.gradle is authoritative and this file will be deleted.
 pluginManagement {
     val flutterSdkPath = run {
         val properties = java.util.Properties()
