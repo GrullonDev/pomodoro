@@ -1,0 +1,66 @@
+{
+  "appTitle": "Pomodoro Focus",
+  "timerReady": "Ready",
+  "workPhase": "Work {current}/{total}",
+  "breakPhase": "Break",
+  "pause": "Pause",
+  "resume": "Resume",
+  "skip": "Skip",
+  "start": "Start",
+  "newSession": "New Session",
+  "share": "Share",
+  "sessionCompleted": "Session Completed!",
+  "todayProgress": "Today's Progress",
+  "last7Days": "Last 7 days",
+  "dailyGoal": "Daily goal: {minutes} min",
+  "longBreakEvery": "Long break every {count} sessions",
+  "longBreak": "Long break",
+  "settings": "Settings",
+  "minutesShort": "{minutes}m",
+  "dailyGoalReached": "Daily goal reached",
+  "goalReachedBody": "Great! You hit your focus goal.",
+  "phaseEndedBody": "Phase ended, tap to continue",
+  "phaseWorkTitle": "Work phase",
+  "phaseBreakTitle": "Break phase"
+  ,"shareImage": "Share Image"
+  ,"generatingImage": "Generating image..."
+  ,"longBreakIntervalLabel": "Long break every (sessions)"
+  ,"longBreakDurationLabel": "Long break minutes"
+  ,"configuredLongBreak": "Configured long break"
+  ,"advancedChartTitle": "Focus last 7 days"
+  ,"avgLabel": "Avg"
+  ,"pauseAction": "Pause"
+  ,"resumeAction": "Resume"
+  ,"skipAction": "Skip"
+  ,"focusPersistentTitle": "Focus Mode"
+  ,"focusPersistentBody": "Tap actions to control timer"
+  ,"history": "History"
+  ,"configure": "Configure"
+  ,"noHistory": "No focus history yet"
+  ,"habitTitle": "Start Pomodoro"
+  ,"workDurationLabel": "Work duration"
+  ,"breakDurationLabel": "Break duration"
+  ,"sessionsLabel": "Sessions"
+  ,"minutesHint": "(In minutes)"
+  ,"sessionsHint": "(Number of sessions)"
+  ,"dailyGoalLabel": "Daily goal (min)"
+  ,"dailyGoalHint": "(Eg: 120)"
+  ,"longBreakConfigTitle": "Long break (config)"
+  ,"presetFast": "Fast 15/3 x4"
+  ,"presetClassic": "Classic 25/5 x4"
+  ,"presetDeep": "Deep 50/10 x3"
+  ,"settingsPersistentNotif": "Persistent notification"
+  ,"settingsPersistentNotifDesc": "Show ongoing notification controls"
+  ,"dayDetailTitle": "Focus day"
+  ,"totalFocus": "Total focus"
+  ,"sessionsCount": "{count} sessions"
+  ,"noSessionsDay": "No sessions this day"
+  ,"last5AlertTitle": "Final 5s alert"
+  ,"last5AlertDesc": "Sound & flash during last 5 seconds"
+  ,"dailyGoalRemaining": "Remaining to goal: {minutes}m"
+  ,"last5SoundTitle": "Play sound (last 5s)"
+  ,"last5SoundDesc": "Audible cue in the final 5 seconds"
+  ,"goalProgressLabel": "Goal progress: {done}m / {total}m"
+  ,"last5FlashTitle": "Flash screen (last 5s)"
+  ,"last5FlashDesc": "Visual flash during final 5 seconds"
+}

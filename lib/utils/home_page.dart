@@ -1,60 +1,63 @@
 import 'package:flutter/material.dart';
 
-import 'package:curved_navigation_bar/curved_navigation_bar.dart';
-
-import 'package:pomodoro/features/data/data.dart';
 import 'package:pomodoro/features/habit/habit.dart';
-import 'package:pomodoro/features/settings/settings.dart';
+import 'package:pomodoro/features/history/history_screen.dart';
+import 'package:pomodoro/l10n/app_localizations.dart';
+import 'package:pomodoro/features/settings/settings_screen.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
-
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  int index = 1;
+  int _index = 0;
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      bottomNavigationBar: SafeArea(
-        child: CurvedNavigationBar(
-          height: 50,
-          animationCurve: Curves.easeInOut,
-          backgroundColor: Colors.black,
-          buttonBackgroundColor: Colors.greenAccent,
-          color: Colors.greenAccent,
-          animationDuration: const Duration(milliseconds: 350),
-          onTap: (selectedIndex) {
-            setState(() {
-              index = selectedIndex;
-            });
-          },
-          index: 1,
-          items: const [
-            Icon(Icons.timelapse_rounded, size: 20, color: Colors.black),
-            Icon(Icons.fitbit_rounded, size: 20, color: Colors.black),
-            Icon(Icons.history_rounded, size: 20, color: Colors.black),
-          ],
-        ),
-      ),
-      body: Container(
-        child: getSelectedWidget(index: index),
-      ),
-    );
-  }
-
-  Widget getSelectedWidget({required int index}) {
-    switch (index) {
-      case 0:
-        return const Data();
+  Widget _pageFor(int i) {
+    switch (i) {
+      case 1:
+        return const HistoryScreen();
       case 2:
-        return const Settings();
+        return const SettingsScreen();
+      case 0:
       default:
         return const Habit();
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 300),
+        child: _pageFor(_index),
+      ),
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _index,
+        backgroundColor: Colors.black,
+        indicatorColor: Colors.greenAccent.withValues(alpha: 0.15),
+        onDestinationSelected: (i) => setState(() => _index = i),
+        destinations: [
+          NavigationDestination(
+            icon: const Icon(Icons.timer_outlined),
+            selectedIcon: const Icon(Icons.timer),
+            label: t.configure,
+          ),
+          NavigationDestination(
+            icon: const Icon(Icons.history_outlined),
+            selectedIcon: const Icon(Icons.history),
+            label: t.history,
+          ),
+          NavigationDestination(
+            icon: const Icon(Icons.settings_outlined),
+            selectedIcon: const Icon(Icons.settings),
+            label: t.settings,
+          ),
+        ],
+      ),
+    );
   }
 }

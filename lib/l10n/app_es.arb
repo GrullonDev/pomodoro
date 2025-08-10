@@ -1,0 +1,66 @@
+{
+  "appTitle": "Pomodoro Enfoque",
+  "timerReady": "Listo",
+  "workPhase": "Trabajo {current}/{total}",
+  "breakPhase": "Descanso",
+  "pause": "Pausar",
+  "resume": "Reanudar",
+  "skip": "Saltar",
+  "start": "Iniciar",
+  "newSession": "Nueva Sesión",
+  "share": "Compartir",
+  "sessionCompleted": "¡Sesión completada!",
+  "todayProgress": "Progreso de Hoy",
+  "last7Days": "Últimos 7 días",
+  "dailyGoal": "Meta diaria: {minutes} min",
+  "longBreakEvery": "Descanso largo cada {count} sesiones",
+  "longBreak": "Descanso largo",
+  "settings": "Configuración",
+  "minutesShort": "{minutes}m",
+  "dailyGoalReached": "Meta diaria alcanzada",
+  "goalReachedBody": "Excelente! Llegaste a tu objetivo.",
+  "phaseEndedBody": "La fase ha terminado, toca para continuar",
+  "phaseWorkTitle": "Fase de trabajo",
+  "phaseBreakTitle": "Fase de descanso"
+  ,"shareImage": "Compartir Imagen"
+  ,"generatingImage": "Generando imagen..."
+  ,"longBreakIntervalLabel": "Descanso largo cada (sesiones)"
+  ,"longBreakDurationLabel": "Minutos de descanso largo"
+  ,"configuredLongBreak": "Descanso largo configurado"
+  ,"advancedChartTitle": "Enfoque últimos 7 días"
+  ,"avgLabel": "Prom"
+  ,"pauseAction": "Pausar"
+  ,"resumeAction": "Reanudar"
+  ,"skipAction": "Saltar"
+  ,"focusPersistentTitle": "Modo Focus"
+  ,"focusPersistentBody": "Toca acciones para controlar"
+  ,"history": "Historial"
+  ,"configure": "Configurar"
+  ,"noHistory": "Sin historial aún"
+  ,"habitTitle": "Iniciar Pomodoro"
+  ,"workDurationLabel": "Duración de trabajo"
+  ,"breakDurationLabel": "Duración de descanso"
+  ,"sessionsLabel": "Sesiones"
+  ,"minutesHint": "(En minutos)"
+  ,"sessionsHint": "(Número de sesiones)"
+  ,"dailyGoalLabel": "Meta diaria (min)"
+  ,"dailyGoalHint": "(Ej: 120)"
+  ,"longBreakConfigTitle": "Descanso largo (config)"
+  ,"presetFast": "Rápido 15/3 x4"
+  ,"presetClassic": "Clásico 25/5 x4"
+  ,"presetDeep": "Profundo 50/10 x3"
+  ,"settingsPersistentNotif": "Notificación persistente"
+  ,"settingsPersistentNotifDesc": "Mostrar controles en notificación"
+  ,"dayDetailTitle": "Día de enfoque"
+  ,"totalFocus": "Enfoque total"
+  ,"sessionsCount": "{count} sesiones"
+  ,"noSessionsDay": "Sin sesiones este día"
+  ,"last5AlertTitle": "Alerta últimos 5s"
+  ,"last5AlertDesc": "Sonido y flash durante los últimos 5 segundos"
+  ,"dailyGoalRemaining": "Restante para meta: {minutes}m"
+  ,"last5SoundTitle": "Reproducir sonido (últimos 5s)"
+  ,"last5SoundDesc": "Aviso audible en los últimos 5 segundos"
+  ,"goalProgressLabel": "Progreso meta: {done}m / {total}m"
+  ,"last5FlashTitle": "Parpadear pantalla (últimos 5s)"
+  ,"last5FlashDesc": "Flash visual durante los últimos 5 segundos"
+}

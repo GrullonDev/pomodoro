@@ -16,10 +16,13 @@ pluginManagement {
     }
 }
 
+// Unified (Groovy) settings file; .kts variant will be removed to avoid ambiguity.
 plugins {
     id "dev.flutter.flutter-plugin-loader" version "1.0.0"
-    id "com.android.application" version "8.2.1" apply false
-    id "org.jetbrains.kotlin.android" version "1.9.24" apply false
+    // Upgraded AGP (was 8.2.1) to satisfy Flutter minimum >=8.3.0
+    id "com.android.application" version "8.7.3" apply false
+    // Align Kotlin with modern version matching .kts file
+    id "org.jetbrains.kotlin.android" version "2.1.0" apply false
 }
 
 include ":app"

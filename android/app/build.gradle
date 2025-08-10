@@ -1,7 +1,7 @@
+// Single authoritative (Groovy) build script. The duplicate build.gradle.kts will be removed.
 plugins {
     id "com.android.application"
-    id "kotlin-android"
-    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
+    id "org.jetbrains.kotlin.android"
     id "dev.flutter.flutter-gradle-plugin"
 }
 
@@ -24,9 +24,10 @@ if (flutterVersionName == null) {
 }
 
 android {
-    namespace = "com.example.pomodoro"
+    namespace = "com.grullondev.pomodoro"
     compileSdk = 35
-    ndkVersion = flutter.ndkVersion
+    // Force NDK version required by Firebase & other plugins.
+    ndkVersion = "27.0.12077973"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -34,15 +35,12 @@ android {
         coreLibraryDesugaringEnabled true
     }
 
-        kotlinOptions {
+    kotlinOptions {
         jvmTarget = "17"
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.grullondev.pomodoro"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
         minSdk = localProperties.get("flutter.minSdkVersion")?.toInteger() ?: 21
         targetSdk = 35
         versionCode = flutterVersionCode.toInteger()
@@ -63,6 +61,6 @@ flutter {
 }
 
 dependencies {
-    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.0.4'
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.2'
 }
 

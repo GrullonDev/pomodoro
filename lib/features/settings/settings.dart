@@ -104,7 +104,7 @@ class _SettingsState extends State<Settings> {
     final double iconSize = isMobile ? 30 : 40;
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         centerTitle: false,

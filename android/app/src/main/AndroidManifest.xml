@@ -1,10 +1,14 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Removed FOREGROUND_SERVICE permissions because background service was eliminated -->
+    <!-- Optional: exact alarm (Android 14+) only if really needed -->
+    <!-- Removed USE_EXACT_ALARM to avoid permission denial crash; using inexact scheduling fallback -->
     <application
         android:label="pomodoro"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+    android:icon="@mipmap/app_icon"
+        android:enableOnBackInvokedCallback="true">
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -32,11 +36,7 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
-        <service
-            android:name="id.flutter.flutter_background_service.BackgroundService"
-            android:exported="false"
-            android:foregroundServiceType="dataSync"
-            tools:replace="android:exported" />
+    <!-- Removed obsolete flutter_background_service declaration to prevent system from trying to start it -->
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and
