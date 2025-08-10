@@ -26,7 +26,8 @@ if (flutterVersionName == null) {
 android {
     namespace = "com.grullondev.pomodoro"
     compileSdk = 35
-    ndkVersion = flutter.ndkVersion
+    // Force NDK version required by Firebase & other plugins.
+    ndkVersion = "27.0.12077973"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
