@@ -13,7 +13,7 @@ class LandingPage extends StatelessWidget {
     final isMobile = context.isMobile;
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.transparent,
       body: Column(
         children: [
           // The main content of the page

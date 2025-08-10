@@ -135,7 +135,22 @@ class TimerState extends State<MyTimer> {
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
         _time = _time - const Duration(seconds: 1);
+        // Notificación con el tiempo restante
+        NotificationService.showTimerNotification(
+          id: 0,
+          title: 'Pomodoro',
+          body: 'Tiempo restante: '
+              '${_time.inMinutes.toString().padLeft(2, '0')}:'
+              '${(_time.inSeconds % 60).toString().padLeft(2, '0')}',
+        );
         if (_time.inSeconds <= 0) {
+          // Notificación sonora al finalizar el temporizador
+          NotificationService.showTimerFinishedNotification(
+            id: 99,
+            title: '¡Pomodoro terminado!',
+            body:
+                'El cronómetro ha finalizado. ¡Toma un descanso o inicia una nueva sesión!',
+          );
           if (_timerCount % 2 == 1) {
             _time = Duration(minutes: _timeInt);
             _currMax = _timeInt;
