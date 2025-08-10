@@ -1,96 +1,81 @@
-# Flutter/Dart/Pub related
+###########################
+# Flutter / Dart (limpio) #
+###########################
+.dart_tool/
+.packages
 .flutter-plugins
 .flutter-plugins-dependencies
 .flutter-versions
-.packages
 .pub-cache/
 .pub/
 build/
-dart_tool/
-.flutter-plugins
-.flutter-plugins-dependencies
-.flutter-versions
-.flutter-plugins
-.flutter-plugins-dependencies
+untranslated_messages.txt
+coverage/
+
+# Bloqueo de dependencias (para apps normalmente se versiona, aquí se ignora por tu preferencia)
 pubspec.lock
 
-# iOS
+###########
+# Plataformas NO móviles incluidas por flutter create que quieres excluir
+###########
+web/
+windows/
+macos/
+linux/
+
+################
+# iOS (regenerable)
+################
 ios/Flutter/.last_build_id
-ios/Pods/
 ios/.symlinks/
+ios/Pods/
+ios/Podfile.lock
+ios/Pods/Manifest.lock
+ios/Runner.xcworkspace/
 ios/Flutter/Flutter.framework/
 ios/Flutter/Flutter.podspec
 ios/Flutter/Generated.xcconfig
 ios/Flutter/Debug.xcconfig
 ios/Flutter/Release.xcconfig
-ios/Runner.xcworkspace/
-ios/Runner.xcworkspace/contents.xcworkspacedata
-ios/Runner.xcworkspace/xcshareddata/
-ios/Runner.xcworkspace/xcshareddata/xcschemes/
-ios/Runner.xcworkspace/xcshareddata/xcschemes/Runner.xcscheme
-ios/Podfile.lock
-ios/Pods/Manifest.lock
-ios/.gitignore
 
-# Android
+################
+# Android (regenerable)
+################
+android/.gradle/
+android/.cxx/
+android/local.properties
 *.iml
-.gradle/
-build/
-local.properties
-.cxx/
-.idea/
 *.hprof
 *.log
 *.pyc
 *.pyo
 *.pyd
+.gradle/
+.idea/
 
-# Windows
-*.cab
-*.pdb
-*.rpt
-*.suo
-*.user
-*.userosscache
-*.suo
-*.ncb
-*.sdf
-*.suo
-*.dbmdl
-*.bak
-*.log
-
-# Mac
+################
+# SO / Editor
+################
 *.DS_Store
 *.AppleDouble
 *.LSOverride
-
-# Linux
 *~
-
-# Ignorar archivos modificados
-.dart_tool/package_config_subset
-.dart_tool/flutter_build/
-.dart_tool/flutter_build/2aaa42e593d3a95cfd57a0c311bfbe0b/kernel_snapshot_program.stamp
-.dart_tool/flutter_build/2aaa42e593d3a95cfd57a0c311bfbe0b/kernel_snapshot_program.d
-.dart_tool/flutter_build/2aaa42e593d3a95cfd57a0c311bfbe0b/kernel_snapshot_native_assets.stamp
-.dart_tool/flutter_build/2aaa42e593d3a95cfd57a0c311bfbe0b/gen_dart_plugin_registrant.stamp
-.dart_tool/flutter_build/2aaa42e593d3a95cfd57a0c311bfbe0b/flutter_assets.d
-.dart_tool/flutter_build/2aaa42e593d3a95cfd57a0c311bfbe0b/debug_android_application.stamp
-.dart_tool/flutter_build/2aaa42e593d3a95cfd57a0c311bfbe0b/.filecache
-.dart_tool/flutter_build/9891b55fec2091e7680167b90e78e1d5/.filecache
-.dart_tool/flutter_build/2aaa42e593d3a95cfd57a0c311bfbe0b/outputs.json
-.dart_tool/flutter_build/2aaa42e593d3a95cfd57a0c311bfbe0b/native_assets.yaml
-.dart_tool/flutter_build/9891b55fec2091e7680167b90e78e1d5/kernel_snapshot_program.stamp
-.dart_tool/flutter_build/9891b55fec2091e7680167b90e78e1d5/kernel_snapshot_program.d
-.dart_tool/flutter_build/9891b55fec2091e7680167b90e78e1d5/flutter_assets.d
-.dart_tool/flutter_build/9891b55fec2091e7680167b90e78e1d5/debug_ios_bundle_flutter_assets.stamp
-
-# FVM Version Cache
-.fvm/
-
-# GIT
-.dart_tool/
 .vscode/
-.fvmrc
 .metadata
+
+################
+# FVM
+################
+.fvm/
+.fvmrc
+
+################
+# Otros generados específicos (antes listados individualmente)
+################
+.dart_tool/flutter_build/
+.dart_tool/package_config_subset
+
+# Mantener fuera posibles archivos de claves / secretos (añade si los creas):
+key.properties
+**/*.keystore
+**/*.jks
