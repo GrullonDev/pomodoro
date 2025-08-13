@@ -18,6 +18,7 @@
         "firebase_core",
         "flutter",
         "flutter_bloc",
+        "flutter_dnd",
         "flutter_local_notifications",
         "flutter_localizations",
         "get_it",
@@ -49,7 +50,7 @@
     },
     {
       "name": "flutter_lints",
-      "version": "3.0.2",
+      "version": "6.0.0",
       "dependencies": [
         "lints"
       ]
@@ -80,6 +81,13 @@
         "test_api",
         "vector_math",
         "vm_service"
+      ]
+    },
+    {
+      "name": "flutter_dnd",
+      "version": "0.1.4+1",
+      "dependencies": [
+        "flutter"
       ]
     },
     {
@@ -353,7 +361,7 @@
     },
     {
       "name": "lints",
-      "version": "3.0.0",
+      "version": "6.0.0",
       "dependencies": []
     },
     {

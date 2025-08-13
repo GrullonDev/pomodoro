@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:math'; // used for sine wave generation
 import 'dart:typed_data';
 
@@ -8,6 +9,7 @@ import 'package:flutter/services.dart';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dnd/flutter_dnd.dart';
 
 import 'package:pomodoro/core/data/session_repository.dart';
 import 'package:pomodoro/core/timer/ticker.dart';
@@ -55,6 +57,7 @@ class _TimerView extends StatefulWidget {
 
 class _TimerViewState extends State<_TimerView>
     with SingleTickerProviderStateMixin {
+  int? _previousDndFilter;
   late final StreamSubscription<String> _actionSub;
   int _lastNotifSecond = -1; // throttling control
   int _lastHapticToggleStamp = 0;
@@ -85,6 +88,14 @@ class _TimerViewState extends State<_TimerView>
     _initPulse();
     _audioPlayer = AudioPlayer();
   _tickingPlayer = AudioPlayer();
+    // Solicitar permisos DND en Android
+    if (Platform.isAndroid) {
+      FlutterDnd.isNotificationPolicyAccessGranted.then((granted) {
+        if (!granted!) {
+          FlutterDnd.gotoPolicySettings();
+        }
+      });
+    }
     _repo.goalRemainingStream.listen((val) {
       if (mounted) setState(() => _todayGoalRemaining = val);
     });
@@ -265,6 +276,27 @@ class _TimerViewState extends State<_TimerView>
                 listener: (context, state) {
                   if (!mounted) return;
                   final loc = AppLocalizations.of(context);
+                  // Activar DND al iniciar trabajo
+                  if (state is TimerRunInProgress && state.phase == TimerPhase.work && !state.paused) {
+                    if (Platform.isAndroid) {
+                      FlutterDnd.getCurrentInterruptionFilter().then((filter) {
+                        _previousDndFilter = filter;
+                        FlutterDnd.setInterruptionFilter(FlutterDnd.INTERRUPTION_FILTER_NONE);
+                      });
+                    } else if (Platform.isIOS) {
+                      // iOS: mostrar mensaje informativo
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Modo DND no soportado automáticamente en iOS.')),
+                      );
+                    }
+                  }
+                  // Restaurar DND al finalizar sesión
+                  if (state is TimerCompleted) {
+                    if (Platform.isAndroid && _previousDndFilter != null) {
+                      FlutterDnd.setInterruptionFilter(_previousDndFilter!);
+                      _previousDndFilter = null;
+                    }
+                  }
                   if (state is TimerRunInProgress) {
                     final sec = state.remaining;
                     final isWorkPhase = state.phase == TimerPhase.work;

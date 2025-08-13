@@ -41,7 +41,9 @@ android {
 
     defaultConfig {
         applicationId = "com.grullondev.pomodoro"
-        minSdk = localProperties.get("flutter.minSdkVersion")?.toInteger() ?: 21
+    // Firebase Auth requires minSdk 23+, bump default to 23 while still honoring
+    // any explicit value set in local.properties via flutter.minSdkVersion.
+    minSdk = localProperties.get("flutter.minSdkVersion")?.toInteger() ?: 23
         targetSdk = 35
         versionCode = flutterVersionCode.toInteger()
         versionName = flutterVersionName
