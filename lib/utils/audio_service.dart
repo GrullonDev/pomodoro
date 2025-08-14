@@ -93,7 +93,8 @@ class AudioService {
     final totalDataLen = dataBytes.length + 36;
     final header = BytesBuilder();
     void writeString(String s) => header.add(s.codeUnits);
-    void write32(int v) => header.add([v & 0xFF, (v >> 8) & 0xFF, (v >> 16) & 0xFF, (v >> 24) & 0xFF]);
+    void write32(int v) => header
+        .add([v & 0xFF, (v >> 8) & 0xFF, (v >> 16) & 0xFF, (v >> 24) & 0xFF]);
     void write16(int v) => header.add([v & 0xFF, (v >> 8) & 0xFF]);
     writeString('RIFF');
     write32(totalDataLen);

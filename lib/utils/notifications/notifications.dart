@@ -13,13 +13,15 @@ class NotificationService {
   // importance for notifications to mimic a local 'silent' mode when the
   // system DND is not available/granted.
   static bool appSilentMode = false;
+  // When true, the service will no-op platform interactions (used in tests)
+  static bool testMode = false;
 
   static Future<void> initialize() async {
     tz.initializeTimeZones();
     // Android initialization
-  final AndroidInitializationSettings androidSettings =
-  // Use dedicated status bar icon (monochrome / flat) for better contrast.
-  AndroidInitializationSettings('@drawable/ic_stat_pomodoro');
+    final AndroidInitializationSettings androidSettings =
+        // Use dedicated status bar icon (monochrome / flat) for better contrast.
+        AndroidInitializationSettings('@drawable/ic_stat_pomodoro');
 
     // iOS initialization
     final pauseResumeAction = DarwinNotificationAction.plain(
@@ -55,18 +57,18 @@ class NotificationService {
       await _notificationsPlugin.initialize(settings,
           onDidReceiveNotificationResponse:
               (NotificationResponse response) async {
-      if (response.actionId == 'pause_resume') {
-        TimerActionBus.instance.add('toggle');
-      } else if (response.actionId == 'skip') {
-        TimerActionBus.instance.add('skip');
-      } else {
-        final payload = response.payload;
-        if (payload != null && payload.startsWith('action:')) {
-          final action = payload.substring('action:'.length);
-          TimerActionBus.instance.add(action);
+        if (response.actionId == 'pause_resume') {
+          TimerActionBus.instance.add('toggle');
+        } else if (response.actionId == 'skip') {
+          TimerActionBus.instance.add('skip');
+        } else {
+          final payload = response.payload;
+          if (payload != null && payload.startsWith('action:')) {
+            final action = payload.substring('action:'.length);
+            TimerActionBus.instance.add(action);
+          }
         }
-      }
-          });
+      });
     } catch (e) {
       // Silently continue if initialization fails due to a resource issue; app can still function.
       if (kDebugMode) {
@@ -114,7 +116,8 @@ class NotificationService {
       presentSound: !appSilentMode,
     );
 
-    final platformDetails = NotificationDetails(android: androidDetails, iOS: iosDetails);
+    final platformDetails =
+        NotificationDetails(android: androidDetails, iOS: iosDetails);
 
     await _notificationsPlugin.show(
       id,
@@ -146,6 +149,7 @@ class NotificationService {
     required String title,
     required String body,
   }) async {
+  if (testMode) return;
     // Usamos el sonido por defecto del sistema para evitar el crash
     // (PlatformException invalid_sound) mientras no exista el recurso
     // raw "timer_end" (android/app/src/main/res/raw/timer_end.*) y el
@@ -165,7 +169,8 @@ class NotificationService {
     final iosDetails = DarwinNotificationDetails(
       presentAlert: true,
       presentBadge: true,
-      presentSound: !appSilentMode, // Usa sonido por defecto si no estamos en appSilentMode
+      presentSound:
+          !appSilentMode, // Usa sonido por defecto si no estamos en appSilentMode
     );
 
     try {
@@ -186,6 +191,7 @@ class NotificationService {
     required String title,
     required String body,
   }) async {
+  if (testMode) return;
     final scheduled =
         tz.TZDateTime.now(tz.local).add(Duration(seconds: seconds));
     final androidDetails = AndroidNotificationDetails(
@@ -199,7 +205,7 @@ class NotificationService {
     final ios = DarwinNotificationDetails(presentSound: !appSilentMode);
     try {
       await _notificationsPlugin.zonedSchedule(500, title, body, scheduled,
-    NotificationDetails(android: androidDetails, iOS: ios),
+          NotificationDetails(android: androidDetails, iOS: ios),
           uiLocalNotificationDateInterpretation:
               UILocalNotificationDateInterpretation.absoluteTime,
           payload: 'phase_end',
@@ -255,11 +261,11 @@ class NotificationService {
       usesChronometer: true,
       chronometerCountDown: true,
     );
-  final ios = DarwinNotificationDetails(
-    presentAlert: false,
-    presentSound: !appSilentMode,
-    presentBadge: false,
-    categoryIdentifier: 'FOCUS_TIMER');
+    final ios = DarwinNotificationDetails(
+        presentAlert: false,
+        presentSound: !appSilentMode,
+        presentBadge: false,
+        categoryIdentifier: 'FOCUS_TIMER');
     await _notificationsPlugin.show(
       persistentId,
       title,
@@ -307,11 +313,11 @@ class NotificationService {
         ),
       ],
     );
-  final ios = DarwinNotificationDetails(
-    presentAlert: false,
-    presentSound: !appSilentMode,
-    presentBadge: false,
-    categoryIdentifier: 'FOCUS_TIMER');
+    final ios = DarwinNotificationDetails(
+        presentAlert: false,
+        presentSound: !appSilentMode,
+        presentBadge: false,
+        categoryIdentifier: 'FOCUS_TIMER');
     await _notificationsPlugin.show(
       persistentId,
       phaseTitle,
