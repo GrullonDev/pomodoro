@@ -1,15 +1,16 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:math'; // used for sine wave generation
-import 'dart:typed_data';
+// dart:math/typed_data once used for in-file beep generation; now moved to AudioService
 
 // ignore_for_file: use_build_context_synchronously
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:audioplayers/audioplayers.dart';
+// audio handled by AudioService singleton
+import 'package:pomodoro/utils/audio_service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_dnd/flutter_dnd.dart';
+import 'package:pomodoro/utils/dnd.dart';
+import 'package:pomodoro/utils/notifications/notifications.dart';
 
 import 'package:pomodoro/core/data/session_repository.dart';
 import 'package:pomodoro/core/timer/ticker.dart';
@@ -17,7 +18,6 @@ import 'package:pomodoro/core/timer/timer_action_bus.dart';
 import 'package:pomodoro/core/timer/timer_bloc.dart';
 import 'package:pomodoro/features/summary/session_summary_screen.dart';
 import 'package:pomodoro/l10n/app_localizations.dart';
-import 'package:pomodoro/utils/notifications/notifications.dart';
 
 class TimerScreen extends StatelessWidget {
   final int workMinutes;
@@ -58,6 +58,7 @@ class _TimerView extends StatefulWidget {
 class _TimerViewState extends State<_TimerView>
     with SingleTickerProviderStateMixin {
   int? _previousDndFilter;
+  bool _dndPromptShown = false;
   late final StreamSubscription<String> _actionSub;
   int _lastNotifSecond = -1; // throttling control
   int _lastHapticToggleStamp = 0;
@@ -66,15 +67,15 @@ class _TimerViewState extends State<_TimerView>
   int _dailyGoalMinutes = 0;
   final _repo = SessionRepository();
   AnimationController? _pulseController; // nullable for hot reload safety
-  late final AudioPlayer _audioPlayer;
-  late final AudioPlayer _tickingPlayer; // continuous ticking
+  // Audio playback delegated to a singleton service to avoid repeated
+  // create/dispose churn which on some Android devices led to MediaPlayer
+  // errors and OOM.
   bool _flashing = false;
   Timer? _flashTimer;
   bool _flashEnabled = true;
   bool _soundEnabled = true;
   bool _tickingEnabled = true;
-  bool _audioPreloaded = false;
-  Uint8List? _generatedBeep; // fallback bytes if asset missing
+  // audio state moved to AudioService
 
   String _format(int seconds) {
     final m = (seconds / 60).floor();
@@ -86,13 +87,55 @@ class _TimerViewState extends State<_TimerView>
   void initState() {
     super.initState();
     _initPulse();
-    _audioPlayer = AudioPlayer();
-  _tickingPlayer = AudioPlayer();
-    // Solicitar permisos DND en Android
+  // Preload sound assets via AudioService (best-effort)
+  AudioService.instance.preload();
+    // Solicitar permisos DND en Android (best-effort). If not granted, show a
+    // friendly dialog offering to open settings or use an app-local silent mode.
     if (Platform.isAndroid) {
-      FlutterDnd.isNotificationPolicyAccessGranted.then((granted) {
-        if (!granted!) {
-          FlutterDnd.gotoPolicySettings();
+      Dnd.isPolicyGranted().then((granted) {
+        if (!granted && mounted && !_dndPromptShown) {
+          _dndPromptShown = true;
+          // Show after first frame so context is valid
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
+            showDialog<void>(
+              context: context,
+              barrierDismissible: true,
+              builder: (ctx) => AlertDialog(
+                title: const Text('Permiso de No Interrumpir'),
+                content: const Text(
+                    'Para silenciar todo el teléfono durante tus sesiones de trabajo, concede acceso al Modo No Interrumpir. Si prefieres no concederlo, puedes silenciar solo las notificaciones de la app.'),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      // Use app-level silent mode as fallback
+                      // Import NotificationService and set flag
+                      NotificationService.appSilentMode = true;
+                      Navigator.of(ctx).pop();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Modo silencioso de la app activado')),
+                      );
+                    },
+                    child: const Text('Usar modo silencioso de la app'),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(ctx).pop();
+                    },
+                    child: const Text('Recordar después'),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(ctx).pop();
+                      // Abrir ajustes de permiso DND
+                      Dnd.gotoPolicySettings();
+                    },
+                    child: const Text('Abrir ajustes'),
+                  ),
+                ],
+              ),
+            );
+          });
         }
       });
     }
@@ -109,23 +152,8 @@ class _TimerViewState extends State<_TimerView>
     _repo.isTickingSoundEnabled().then((v) {
       if (mounted) setState(() => _tickingEnabled = v);
     });
-    // Preload audio (fire & forget)
-    () async {
-      try {
-        await _audioPlayer.setSource(AssetSource('sounds/last5.mp3'));
-        _audioPreloaded = true;
-      } catch (e) {
-        debugPrint('Audio preload failed: $e');
-        // Fallback: generate a beep in memory so feature still works
-        _generatedBeep = _generateBeepWav();
-        try {
-          await _audioPlayer.setSource(BytesSource(_generatedBeep!));
-          _audioPreloaded = true;
-        } catch (e2) {
-          debugPrint('Beep generation also failed: $e2');
-        }
-      }
-    }();
+  // Preload audio via centralized service (fire & forget)
+  AudioService.instance.preload();
     _repo.refreshGoalRemaining();
     _actionSub = TimerActionBus.instance.stream.listen((action) {
       final bloc = context.read<TimerBloc>();
@@ -143,11 +171,15 @@ class _TimerViewState extends State<_TimerView>
 
   @override
   void dispose() {
+    // Ensure we restore DND if the view is disposed while we changed it
+    if (Platform.isAndroid && _previousDndFilter != null) {
+      Dnd.setInterruptionFilter(_previousDndFilter!);
+      _previousDndFilter = null;
+    }
     _actionSub.cancel();
     _pulseController?.dispose();
     _flashTimer?.cancel();
-    _audioPlayer.dispose();
-  _tickingPlayer.dispose();
+  // Centralized players live in AudioService; do not dispose here.
     super.dispose();
   }
 
@@ -173,65 +205,13 @@ class _TimerViewState extends State<_TimerView>
   Future<void> _playLast5Sound() async {
     if (!_soundEnabled) return;
     try {
-      if (!_audioPreloaded) {
-        try {
-          await _audioPlayer.setSource(AssetSource('sounds/last5.mp3'));
-          _audioPreloaded = true;
-        } catch (_) {
-          _generatedBeep ??= _generateBeepWav();
-          await _audioPlayer.setSource(BytesSource(_generatedBeep!));
-          _audioPreloaded = true;
-        }
-      }
-      await _audioPlayer.stop();
-      _audioPlayer.setVolume(0.8);
-      await _audioPlayer.resume();
+  await AudioService.instance.playLast5();
     } catch (e) {
       debugPrint('Play sound failed: $e');
     }
   }
 
-  // Generate a 500ms mono 44.1kHz 440Hz sine beep WAV in memory
-  Uint8List _generateBeepWav({
-    double freq = 440,
-    int sampleRate = 44100,
-    int millis = 500,
-  }) {
-    final sampleCount = (sampleRate * millis / 1000).round();
-    final bytes = BytesBuilder();
-    final data = BytesBuilder();
-    for (int i = 0; i < sampleCount; i++) {
-      final t = i / sampleRate;
-      final sample = (sin(2 * pi * freq * t) * 0.4); // amplitude 0.4
-      final s = (sample * 32767).clamp(-32768, 32767).toInt();
-      data.addByte(s & 0xFF);
-      data.addByte((s >> 8) & 0xFF);
-    }
-    final dataBytes = data.toBytes();
-    final totalDataLen = dataBytes.length + 36;
-    // RIFF header
-    final header = BytesBuilder();
-    void writeString(String s) => header.add(s.codeUnits);
-    void write32(int v) => header
-        .add([v & 0xFF, (v >> 8) & 0xFF, (v >> 16) & 0xFF, (v >> 24) & 0xFF]);
-    void write16(int v) => header.add([v & 0xFF, (v >> 8) & 0xFF]);
-    writeString('RIFF');
-    write32(totalDataLen);
-    writeString('WAVE');
-    writeString('fmt ');
-    write32(16); // PCM chunk size
-    write16(1); // PCM
-    write16(1); // channels
-    write32(sampleRate);
-    write32(sampleRate * 2); // byte rate
-    write16(2); // block align
-    write16(16); // bits per sample
-    writeString('data');
-    write32(dataBytes.length);
-    bytes.add(header.toBytes());
-    bytes.add(dataBytes);
-    return bytes.toBytes();
-  }
+  // beep generation moved to AudioService
 
   void _startFlash() {
     _flashTimer?.cancel();
@@ -276,13 +256,42 @@ class _TimerViewState extends State<_TimerView>
                 listener: (context, state) {
                   if (!mounted) return;
                   final loc = AppLocalizations.of(context);
-                  // Activar DND al iniciar trabajo
+                  // Activar DND al iniciar trabajo: capture previous filter once
                   if (state is TimerRunInProgress && state.phase == TimerPhase.work && !state.paused) {
                     if (Platform.isAndroid) {
-                      FlutterDnd.getCurrentInterruptionFilter().then((filter) {
-                        _previousDndFilter = filter;
-                        FlutterDnd.setInterruptionFilter(FlutterDnd.INTERRUPTION_FILTER_NONE);
-                      });
+                      // Only capture previous filter the first time we activate DND
+                      if (_previousDndFilter == null) {
+                        Dnd.getCurrentFilter().then((filter) async {
+                          _previousDndFilter = filter;
+                          final granted = await Dnd.isPolicyGranted();
+                          if (!granted) {
+                            // Can't change system DND without user permission: fallback
+                            NotificationService.appSilentMode = true;
+                            debugPrint('DND policy not granted -> using appSilentMode fallback');
+                            return;
+                          }
+                          // Set to silent only if not already silent
+                          if (filter != null && filter != Dnd.interruptionFilterNone) {
+                            try {
+                              await Dnd.setInterruptionFilter(Dnd.interruptionFilterNone);
+                              debugPrint('DND set to silent (previous=$filter)');
+                            } catch (e) {
+                              debugPrint('Failed to set system DND: $e');
+                              NotificationService.appSilentMode = true;
+                            }
+                          } else if (filter == null) {
+                            try {
+                              await Dnd.setInterruptionFilter(Dnd.interruptionFilterNone);
+                              debugPrint('DND set to silent (previous unknown)');
+                            } catch (e) {
+                              debugPrint('Failed to set system DND: $e');
+                              NotificationService.appSilentMode = true;
+                            }
+                          } else {
+                            debugPrint('DND already silent, nothing to do');
+                          }
+                        });
+                      }
                     } else if (Platform.isIOS) {
                       // iOS: mostrar mensaje informativo
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -293,7 +302,9 @@ class _TimerViewState extends State<_TimerView>
                   // Restaurar DND al finalizar sesión
                   if (state is TimerCompleted) {
                     if (Platform.isAndroid && _previousDndFilter != null) {
-                      FlutterDnd.setInterruptionFilter(_previousDndFilter!);
+                      Dnd.setInterruptionFilter(_previousDndFilter!).then((_) {
+                        debugPrint('DND restored to $_previousDndFilter after completion');
+                      });
                       _previousDndFilter = null;
                     }
                   }
@@ -372,7 +383,12 @@ class _TimerViewState extends State<_TimerView>
                       body: 'Completaste $totalSessions sesiones!',
                     );
                   } else if (state is TimerInitial) {
-                    // no-op
+                    // Restore DND if user reset/cancelled
+                    if (Platform.isAndroid && _previousDndFilter != null) {
+                      Dnd.setInterruptionFilter(_previousDndFilter!);
+                      debugPrint('DND restored to $_previousDndFilter on initial/reset');
+                      _previousDndFilter = null;
+                    }
                   }
                 },
                 builder: (context, state) {
@@ -561,12 +577,9 @@ class _TimerViewState extends State<_TimerView>
   }
 
   Future<void> _ensureTicking() async {
-  // Best-effort: try starting; errors ignored. No direct getState API in v6.
+    // Delegate to shared AudioService
     try {
-      await _tickingPlayer.setReleaseMode(ReleaseMode.loop);
-      await _tickingPlayer.setVolume(0.35);
-      await _tickingPlayer.setSource(AssetSource('sounds/cronometro.mp3'));
-      await _tickingPlayer.resume();
+      await AudioService.instance.startTicking();
     } catch (e) {
       debugPrint('Ticking start failed: $e');
     }
@@ -574,7 +587,7 @@ class _TimerViewState extends State<_TimerView>
 
   Future<void> _stopTicking() async {
     try {
-      await _tickingPlayer.stop();
+      await AudioService.instance.stopTicking();
     } catch (_) {}
   }
 }
