@@ -3,6 +3,7 @@ package com.grullondev.pomodoro
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import androidx.annotation.NonNull
@@ -27,6 +28,25 @@ class MainActivity: FlutterActivity() {
 					intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 					startActivity(intent)
 					result.success(null)
+				}
+				"gotoAppNotificationSettings" -> {
+					// Open the app-specific notification settings screen so the user can
+					// enable notification access or DND access for this app if available.
+					try {
+						val intent = Intent()
+						if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+							intent.action = Settings.ACTION_APP_NOTIFICATION_SETTINGS
+							intent.putExtra(Settings.EXTRA_APP_PACKAGE, this@MainActivity.packageName)
+						} else {
+							intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+							intent.data = android.net.Uri.parse("package:" + this@MainActivity.packageName)
+						}
+						intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+						startActivity(intent)
+						result.success(null)
+					} catch (e: Exception) {
+						result.error("OPEN_SETTINGS_FAILED", e.message, null)
+					}
 				}
 				"getCurrentFilter" -> {
 					val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -53,6 +73,79 @@ class MainActivity: FlutterActivity() {
 						result.error("UNSUPPORTED", "DND not supported", null)
 					}
 				}
+				"startLockTask" -> {
+					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+						try {
+							this@MainActivity.startLockTask()
+							result.success(true)
+						} catch (e: Exception) {
+							result.error("LOCK_FAILED", e.message, null)
+						}
+					} else {
+						result.error("UNSUPPORTED", "Lock task not supported on this OS", null)
+					}
+				}
+				"stopLockTask" -> {
+					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+						try {
+							this@MainActivity.stopLockTask()
+							result.success(true)
+						} catch (e: Exception) {
+							result.error("LOCK_FAILED", e.message, null)
+						}
+					} else {
+						result.error("UNSUPPORTED", "Lock task not supported on this OS", null)
+					}
+				}
+				"startForegroundService" -> {
+					try {
+						val intent = Intent(this@MainActivity, ForegroundService::class.java)
+						if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+							this@MainActivity.startForegroundService(intent)
+						} else {
+							this@MainActivity.startService(intent)
+						}
+						result.success(true)
+					} catch (e: Exception) {
+						result.error("FG_START_FAILED", e.message, null)
+					}
+				}
+				"stopForegroundService" -> {
+					try {
+						val intent = Intent(this@MainActivity, ForegroundService::class.java)
+						this@MainActivity.stopService(intent)
+						result.success(true)
+					} catch (e: Exception) {
+						result.error("FG_STOP_FAILED", e.message, null)
+					}
+				}
+					"updateForegroundNotification" -> {
+						try {
+							val args = call.arguments as? Map<String, Any>
+							if (args != null) {
+								val remaining = (args["remainingSeconds"] as? Number)?.toLong() ?: 0L
+								val paused = (args["paused"] as? Boolean) ?: false
+								val isWork = (args["isWork"] as? Boolean) ?: true
+								val title = (args["title"] as? String) ?: "Pomodoro"
+								val intent = Intent(this@MainActivity, ForegroundService::class.java)
+								intent.action = "UPDATE_NOTIFICATION"
+								intent.putExtra("remainingSeconds", remaining)
+								intent.putExtra("paused", paused)
+								intent.putExtra("isWork", isWork)
+								intent.putExtra("title", title)
+								if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+									this@MainActivity.startForegroundService(intent)
+								} else {
+									this@MainActivity.startService(intent)
+								}
+								result.success(true)
+							} else {
+								result.error("INVALID_ARGS", "Expected map arguments", null)
+							}
+						} catch (e: Exception) {
+							result.error("UPDATE_FAILED", e.message, null)
+						}
+					}
 				else -> result.notImplemented()
 			}
 		}
