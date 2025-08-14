@@ -2,8 +2,14 @@ import 'dart:convert';
 import 'dart:async';
 
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+// Firebase usage temporarily disabled. To re-enable, restore these imports
+// and ensure firebase_core is initialized in `main.dart`.
+// TODO: To re-enable Firestore/auth sync:
+// 1) Uncomment the imports for `cloud_firestore` and `firebase_auth`.
+// 2) Restore calls to `FirebaseAuth.instance.currentUser?.uid` and the Firestore upload.
+// 3) Consider making Firestore sync a best-effort background job with retries.
+// import 'package:cloud_firestore/cloud_firestore.dart';
+// import 'package:firebase_auth/firebase_auth.dart';
 
 class PomodoroSession {
   final DateTime endTime; // momento fin de la fase de trabajo
@@ -60,7 +66,10 @@ class SessionRepository {
 
   Future<List<PomodoroSession>> loadSessions() async {
     final prefs = await SharedPreferences.getInstance();
-    final uid = FirebaseAuth.instance.currentUser?.uid;
+  // Firebase disabled: treat user as unauthenticated (guest)
+  // TODO: restore uid retrieval when Firebase Auth is re-enabled:
+  // final uid = FirebaseAuth.instance.currentUser?.uid;
+  final uid = null;
     final raw = prefs.getString(_userKey(uid));
     if (raw == null || raw.isEmpty) return [];
     try {
@@ -75,22 +84,16 @@ class SessionRepository {
 
   Future<void> addSession(PomodoroSession session) async {
     final prefs = await SharedPreferences.getInstance();
-    final uid = FirebaseAuth.instance.currentUser?.uid;
+  // TODO: restore uid retrieval when Firebase Auth is re-enabled:
+  // final uid = FirebaseAuth.instance.currentUser?.uid;
+  final uid = null;
     final current = await loadSessions();
     current.add(session);
     await prefs.setString(
         _userKey(uid), jsonEncode(current.map((e) => e.toMap()).toList()));
     // Firestore sync (best effort)
-    if (uid != null) {
-      try {
-        final doc = FirebaseFirestore.instance
-            .collection('users')
-            .doc(uid)
-            .collection('sessions')
-            .doc();
-        await doc.set(session.toMap());
-      } catch (_) {}
-    }
+  // Firestore sync disabled while Firebase is not configured.
+  // TODO: restore Firestore best-effort sync here using `FirebaseFirestore.instance`
     scheduleMicrotask(() => refreshGoalRemaining());
   }
 
