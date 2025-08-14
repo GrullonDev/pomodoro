@@ -40,6 +40,18 @@ class SessionRepository {
   static const _last5SoundKey = 'last5_sound_enabled';
   static const _last5FlashKey = 'last5_flash_enabled';
   static const _tickingSoundKey = 'ticking_sound_enabled';
+  static const _tickingVolumeKey = 'ticking_sound_volume';
+  static const _vibrationEnabledKey = 'vibration_enabled';
+  static const _hapticEnabledKey = 'haptic_enabled';
+  static const _alarmSoundKey = 'alarm_sound';
+  static const _alarmDurationKey = 'alarm_duration_seconds';
+  static const _themeDarkKey = 'theme_dark_enabled';
+  static const _primaryColorKey = 'theme_primary_color';
+  static const _presetKey = 'preset_profile_key';
+  static const _widgetEnabledKey = 'home_widget_enabled';
+  static const _notificationActionsKey = 'notification_actions_enabled';
+  static const _keyboardShortcutsKey = 'keyboard_shortcuts_enabled';
+  static const _wearableSupportKey = 'wearable_support_enabled';
   static const _onboardingSeenKey = 'onboarding_seen';
   // Stream for live daily goal remaining updates
   static final SessionRepository _singleton = SessionRepository._internal();
@@ -196,6 +208,127 @@ class SessionRepository {
   Future<bool> isTickingSoundEnabled() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getBool(_tickingSoundKey) ?? true; // default enabled
+  }
+
+  Future<void> setTickingVolume(double v) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setDouble(_tickingVolumeKey, v.clamp(0.0, 1.0));
+  }
+
+  Future<double> getTickingVolume() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getDouble(_tickingVolumeKey) ?? 0.5; // default 50%
+  }
+
+  Future<void> setVibrationEnabled(bool enabled) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_vibrationEnabledKey, enabled);
+  }
+
+  Future<bool> isVibrationEnabled() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_vibrationEnabledKey) ?? true;
+  }
+
+  Future<void> setHapticEnabled(bool enabled) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_hapticEnabledKey, enabled);
+  }
+
+  Future<bool> isHapticEnabled() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_hapticEnabledKey) ?? true;
+  }
+
+  Future<void> setAlarmSound(String name) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_alarmSoundKey, name);
+  }
+
+  Future<String> getAlarmSound() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_alarmSoundKey) ?? 'default';
+  }
+
+  Future<void> setAlarmDurationSeconds(int seconds) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_alarmDurationKey, seconds);
+  }
+
+  Future<int> getAlarmDurationSeconds() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt(_alarmDurationKey) ?? 5; // default 5s
+  }
+
+  Future<void> setThemeDarkEnabled(bool enabled) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_themeDarkKey, enabled);
+  }
+
+  Future<bool> isThemeDarkEnabled() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_themeDarkKey) ?? false;
+  }
+
+  Future<void> setPrimaryColorValue(int colorValue) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_primaryColorKey, colorValue);
+  }
+
+  Future<int> getPrimaryColorValue() async {
+    final prefs = await SharedPreferences.getInstance();
+    // Default to Material Blue 500
+    return prefs.getInt(_primaryColorKey) ?? 0xFF2196F3;
+  }
+
+  Future<void> setSelectedPreset(String key) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_presetKey, key);
+  }
+
+  Future<String?> getSelectedPreset() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_presetKey);
+  }
+
+  Future<void> setHomeWidgetEnabled(bool enabled) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_widgetEnabledKey, enabled);
+  }
+
+  Future<bool> isHomeWidgetEnabled() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_widgetEnabledKey) ?? true;
+  }
+
+  Future<void> setNotificationActionsEnabled(bool enabled) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_notificationActionsKey, enabled);
+  }
+
+  Future<bool> isNotificationActionsEnabled() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_notificationActionsKey) ?? true;
+  }
+
+  Future<void> setKeyboardShortcutsEnabled(bool enabled) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_keyboardShortcutsKey, enabled);
+  }
+
+  Future<bool> isKeyboardShortcutsEnabled() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_keyboardShortcutsKey) ?? false;
+  }
+
+  Future<void> setWearableSupportEnabled(bool enabled) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_wearableSupportKey, enabled);
+  }
+
+  Future<bool> isWearableSupportEnabled() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_wearableSupportKey) ?? false;
   }
 
   Future<void> setOnboardingSeen() async {

@@ -8,6 +8,7 @@ import 'package:pomodoro/core/data/session_repository.dart';
 // timezone is configured inside NotificationService when needed
 
 import 'ticker.dart';
+import 'package:pomodoro/core/data/timer_storage.dart';
 
 part 'timer_event.dart';
 part 'timer_state.dart';
@@ -26,10 +27,32 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
     on<TimerResumed>(_onResumed);
     on<TimerReset>(_onReset);
     on<TimerPhaseCompleted>(_onPhaseCompleted);
+    // Try to restore saved timer state if present
+    _tryRestoreSavedState();
+  }
+
+  void _tryRestoreSavedState() async {
+    final saved = await TimerStorage.load();
+    if (saved == null) return;
+    // Only restore if saved within a reasonable window (e.g., 24 hours)
+    final now = DateTime.now().millisecondsSinceEpoch;
+    if (now - saved.timestamp > Duration(hours: 24).inMilliseconds) return;
+    final phase = saved.phase == 'work' ? TimerPhase.work : TimerPhase.breakPhase;
+    // Dispatch start with saved remaining and paused state
+    add(TimerStarted(
+      phase: phase,
+      duration: saved.remaining,
+      workDuration: saved.workDuration,
+      breakDuration: saved.breakDuration,
+      session: saved.session,
+      totalSessions: saved.totalSessions,
+    ));
+    if (saved.paused) add(TimerPaused());
   }
 
   final Ticker _ticker;
   StreamSubscription<int>? _tickerSub;
+  int? _lastSavedTimestamp;
   final SessionRepository _repository;
 
   Future<void> _onStarted(TimerStarted event, Emitter<TimerState> emit) async {
@@ -51,12 +74,39 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
     _tickerSub = _ticker.tick(ticks: event.duration).listen((remaining) {
       add(TimerTicked(remaining: remaining));
     });
+    // Persist initial state
+    await TimerStorage.save(SavedTimerState(
+      phase: event.phase == TimerPhase.work ? 'work' : 'break',
+      remaining: event.duration,
+      workDuration: event.workDuration,
+      breakDuration: event.breakDuration,
+      paused: false,
+      session: event.session,
+      totalSessions: event.totalSessions,
+      timestamp: DateTime.now().millisecondsSinceEpoch,
+    ));
   }
 
   void _onTicked(TimerTicked event, Emitter<TimerState> emit) {
     final current = state as TimerRunInProgress;
     if (event.remaining > 0) {
       emit(current.copyWith(remaining: event.remaining));
+      // Throttle persistent saves to every ~5 seconds to avoid IO churn
+      final lastSaved = _lastSavedTimestamp ?? 0;
+      final now = DateTime.now().millisecondsSinceEpoch;
+      if (now - lastSaved > 5000) {
+        _lastSavedTimestamp = now;
+        TimerStorage.save(SavedTimerState(
+          phase: current.phase == TimerPhase.work ? 'work' : 'break',
+          remaining: event.remaining,
+          workDuration: current.workDuration,
+          breakDuration: current.breakDuration,
+          paused: current.paused,
+          session: current.session,
+          totalSessions: current.totalSessions,
+          timestamp: now,
+        ));
+      }
     } else {
       add(TimerPhaseCompleted());
     }
@@ -76,8 +126,9 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
     }
   }
 
-  void _onReset(TimerReset event, Emitter<TimerState> emit) {
+  Future<void> _onReset(TimerReset event, Emitter<TimerState> emit) async {
     _tickerSub?.cancel();
+    await TimerStorage.clear();
     emit(TimerInitial(
         workDuration: state.workDuration, breakDuration: state.breakDuration));
   }
@@ -102,6 +153,8 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
         _repository.addSession(PomodoroSession(
             endTime: DateTime.now(), workSeconds: current.workDuration));
       }
+  // Completed overall flow - clear any persisted timer state
+  await TimerStorage.clear();
       emit(TimerCompleted(
         totalSessions: current.totalSessions,
         workDuration: current.workDuration,

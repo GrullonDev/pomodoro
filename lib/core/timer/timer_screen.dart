@@ -13,6 +13,7 @@ import 'package:pomodoro/utils/dnd.dart';
 import 'package:pomodoro/utils/notifications/notifications.dart';
 
 import 'package:pomodoro/core/data/session_repository.dart';
+import 'package:pomodoro/core/data/preset_profile.dart';
 import 'package:pomodoro/core/timer/ticker.dart';
 import 'package:pomodoro/core/timer/timer_action_bus.dart';
 import 'package:pomodoro/core/timer/timer_bloc.dart';
@@ -31,20 +32,38 @@ class TimerScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final workSeconds = workMinutes * 60;
-    final breakSeconds = breakMinutes * 60;
-    return BlocProvider(
-      create: (_) =>
-          TimerBloc(ticker: const Ticker(), repository: SessionRepository())
-            ..add(TimerStarted(
-              phase: TimerPhase.work,
-              duration: workSeconds,
-              workDuration: workSeconds,
-              breakDuration: breakSeconds,
-              session: 1,
-              totalSessions: sessions,
-            )),
-      child: const _TimerView(),
+    // Resolve selected preset asynchronously and fall back to provided values
+    return FutureBuilder<String?>(
+      future: SessionRepository().getSelectedPreset(),
+      builder: (ctx, snap) {
+        int work = workMinutes;
+        int br = breakMinutes;
+        if (snap.hasData && snap.data != null) {
+          final key = snap.data!;
+          if (key != 'custom') {
+            final p = PresetProfile.defaults().firstWhere(
+                (e) => e.key == key,
+                orElse: () => PresetProfile.custom);
+            work = p.workMinutes;
+            br = p.shortBreakMinutes;
+          }
+        }
+        final workSeconds = work * 60;
+        final breakSeconds = br * 60;
+        return BlocProvider(
+          create: (_) =>
+              TimerBloc(ticker: const Ticker(), repository: SessionRepository())
+                ..add(TimerStarted(
+                  phase: TimerPhase.work,
+                  duration: workSeconds,
+                  workDuration: workSeconds,
+                  breakDuration: breakSeconds,
+                  session: 1,
+                  totalSessions: sessions,
+                )),
+          child: const _TimerView(),
+        );
+      },
     );
   }
 }
