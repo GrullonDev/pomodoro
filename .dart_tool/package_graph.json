@@ -18,7 +18,6 @@
         "firebase_core",
         "flutter",
         "flutter_bloc",
-        "flutter_dnd",
         "flutter_local_notifications",
         "flutter_localizations",
         "get_it",
@@ -81,13 +80,6 @@
         "test_api",
         "vector_math",
         "vm_service"
-      ]
-    },
-    {
-      "name": "flutter_dnd",
-      "version": "0.1.4+1",
-      "dependencies": [
-        "flutter"
       ]
     },
     {

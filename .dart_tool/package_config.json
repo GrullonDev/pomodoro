@@ -248,12 +248,6 @@
       "languageVersion": "2.12"
     },
     {
-      "name": "flutter_dnd",
-      "rootUri": "file:///C:/Users/jgrullon/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_dnd-0.1.4+1",
-      "packageUri": "lib/",
-      "languageVersion": "2.12"
-    },
-    {
       "name": "flutter_launcher_icons",
       "rootUri": "file:///C:/Users/jgrullon/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_launcher_icons-0.14.4",
       "packageUri": "lib/",

@@ -32,7 +32,7 @@ dependencies:
   firebase_auth: ^5.1.2
   cloud_firestore: ^5.5.0
   google_sign_in: ^6.2.0
-  flutter_dnd: ^0.1.4+1
+
 
 dev_dependencies:
   flutter_test:
@@ -57,6 +57,8 @@ flutter:
   assets:
     # Short alert clip (e.g. 500ms) used for last 5-second cue.
     - assets/sounds/last5.mp3
+    - assets/sounds/last5.wav
+    - assets/sounds/cronometro.mp3
     - assets/sounds/
 
   # To add assets to your application, add an assets section, like this:
