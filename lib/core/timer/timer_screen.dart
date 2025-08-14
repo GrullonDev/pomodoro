@@ -87,8 +87,8 @@ class _TimerViewState extends State<_TimerView>
   void initState() {
     super.initState();
     _initPulse();
-  // Preload sound assets via AudioService (best-effort)
-  AudioService.instance.preload();
+    // Preload sound assets via AudioService (best-effort)
+    AudioService.instance.preload();
     // Solicitar permisos DND en Android (best-effort). If not granted, show a
     // friendly dialog offering to open settings or use an app-local silent mode.
     if (Platform.isAndroid) {
@@ -113,7 +113,9 @@ class _TimerViewState extends State<_TimerView>
                       NotificationService.appSilentMode = true;
                       Navigator.of(ctx).pop();
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Modo silencioso de la app activado')),
+                        const SnackBar(
+                            content:
+                                Text('Modo silencioso de la app activado')),
                       );
                     },
                     child: const Text('Usar modo silencioso de la app'),
@@ -152,8 +154,8 @@ class _TimerViewState extends State<_TimerView>
     _repo.isTickingSoundEnabled().then((v) {
       if (mounted) setState(() => _tickingEnabled = v);
     });
-  // Preload audio via centralized service (fire & forget)
-  AudioService.instance.preload();
+    // Preload audio via centralized service (fire & forget)
+    AudioService.instance.preload();
     _repo.refreshGoalRemaining();
     _actionSub = TimerActionBus.instance.stream.listen((action) {
       final bloc = context.read<TimerBloc>();
@@ -179,7 +181,7 @@ class _TimerViewState extends State<_TimerView>
     _actionSub.cancel();
     _pulseController?.dispose();
     _flashTimer?.cancel();
-  // Centralized players live in AudioService; do not dispose here.
+    // Centralized players live in AudioService; do not dispose here.
     super.dispose();
   }
 
@@ -205,7 +207,7 @@ class _TimerViewState extends State<_TimerView>
   Future<void> _playLast5Sound() async {
     if (!_soundEnabled) return;
     try {
-  await AudioService.instance.playLast5();
+      await AudioService.instance.playLast5();
     } catch (e) {
       debugPrint('Play sound failed: $e');
     }
@@ -231,9 +233,7 @@ class _TimerViewState extends State<_TimerView>
   @override
   Widget build(BuildContext context) {
     final background =
-    _flashing
-      ? Colors.greenAccent.withValues(alpha: 0.10)
-      : Colors.black;
+        _flashing ? Colors.greenAccent.withValues(alpha: 0.10) : Colors.black;
     return AnimatedOpacity(
         duration: const Duration(milliseconds: 220),
         opacity: _flashing ? 0.92 : 1.0,
@@ -257,7 +257,9 @@ class _TimerViewState extends State<_TimerView>
                   if (!mounted) return;
                   final loc = AppLocalizations.of(context);
                   // Activar DND al iniciar trabajo: capture previous filter once
-                  if (state is TimerRunInProgress && state.phase == TimerPhase.work && !state.paused) {
+                  if (state is TimerRunInProgress &&
+                      state.phase == TimerPhase.work &&
+                      !state.paused) {
                     if (Platform.isAndroid) {
                       // Only capture previous filter the first time we activate DND
                       if (_previousDndFilter == null) {
@@ -267,26 +269,46 @@ class _TimerViewState extends State<_TimerView>
                           if (!granted) {
                             // Can't change system DND without user permission: fallback
                             NotificationService.appSilentMode = true;
-                            debugPrint('DND policy not granted -> using appSilentMode fallback');
+                            debugPrint(
+                                'DND policy not granted -> using appSilentMode fallback');
                             return;
                           }
                           // Set to silent only if not already silent
-                          if (filter != null && filter != Dnd.interruptionFilterNone) {
+                          if (filter != null &&
+                              filter != Dnd.interruptionFilterNone) {
                             try {
-                              await Dnd.setInterruptionFilter(Dnd.interruptionFilterNone);
-                              debugPrint('DND set to silent (previous=$filter)');
+                              await Dnd.setInterruptionFilter(
+                                  Dnd.interruptionFilterNone);
+                              debugPrint(
+                                  'DND set to silent (previous=$filter)');
                             } catch (e) {
                               debugPrint('Failed to set system DND: $e');
                               NotificationService.appSilentMode = true;
                             }
+                            // Start a minimal foreground service to reduce chance of
+                            // the OS killing the app while a long timer runs.
+                            Dnd.startForegroundService().then((ok) {
+                              if (ok) debugPrint('Foreground service started');
+                            });
                           } else if (filter == null) {
                             try {
-                              await Dnd.setInterruptionFilter(Dnd.interruptionFilterNone);
-                              debugPrint('DND set to silent (previous unknown)');
+                              await Dnd.setInterruptionFilter(
+                                  Dnd.interruptionFilterNone);
+                              debugPrint(
+                                  'DND set to silent (previous unknown)');
                             } catch (e) {
                               debugPrint('Failed to set system DND: $e');
                               NotificationService.appSilentMode = true;
                             }
+                            // Try to pin the app while work session is active.
+                            Dnd.startLockTask().then((ok) {
+                              if (ok) { debugPrint('Lock task started'); }
+                              else { debugPrint('Lock task not started or unsupported'); }
+                            });
+                            // Also request a foreground service for persistence.
+                            Dnd.startForegroundService().then((ok) {
+                              if (ok) debugPrint('Foreground service started');
+                            });
                           } else {
                             debugPrint('DND already silent, nothing to do');
                           }
@@ -295,7 +317,9 @@ class _TimerViewState extends State<_TimerView>
                     } else if (Platform.isIOS) {
                       // iOS: mostrar mensaje informativo
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Modo DND no soportado automáticamente en iOS.')),
+                        const SnackBar(
+                            content: Text(
+                                'Modo DND no soportado automáticamente en iOS.')),
                       );
                     }
                   }
@@ -303,9 +327,18 @@ class _TimerViewState extends State<_TimerView>
                   if (state is TimerCompleted) {
                     if (Platform.isAndroid && _previousDndFilter != null) {
                       Dnd.setInterruptionFilter(_previousDndFilter!).then((_) {
-                        debugPrint('DND restored to $_previousDndFilter after completion');
+                        debugPrint(
+                            'DND restored to $_previousDndFilter after completion');
                       });
                       _previousDndFilter = null;
+                      // Stop lock task on completion
+                      Dnd.stopLockTask().then((ok) {
+                        if (ok) debugPrint('Lock task stopped after completion');
+                      });
+                      // Stop foreground service when finished
+                      Dnd.stopForegroundService().then((ok) {
+                        if (ok) debugPrint('Foreground service stopped');
+                      });
                     }
                   }
                   if (state is TimerRunInProgress) {
@@ -325,16 +358,18 @@ class _TimerViewState extends State<_TimerView>
                       SessionRepository()
                           .isPersistentNotificationEnabled()
                           .then((enabled) {
-                        if (enabled) {
-                          NotificationService.updateChronoRemaining(
-                            remaining: Duration(seconds: state.remaining),
-                            isWork: state.phase == TimerPhase.work,
-                            paused: state.paused,
-                            phaseTitle: state.phase == TimerPhase.work
-                                ? loc.phaseWorkTitle
-                                : loc.phaseBreakTitle,
-                          );
-                        }
+                          if (enabled) {
+                            // Send a tiny update to the native foreground service
+                            // to avoid rebuilding complex notification objects every second.
+                            Dnd.updateForegroundNotification(
+                              remainingSeconds: state.remaining,
+                              paused: state.paused,
+                              isWork: state.phase == TimerPhase.work,
+                              title: state.phase == TimerPhase.work
+                                  ? loc.phaseWorkTitle
+                                  : loc.phaseBreakTitle,
+                            );
+                          }
                       });
                     }
                     // Haptic feedback on pause/resume toggle (only when change detected)
@@ -386,8 +421,17 @@ class _TimerViewState extends State<_TimerView>
                     // Restore DND if user reset/cancelled
                     if (Platform.isAndroid && _previousDndFilter != null) {
                       Dnd.setInterruptionFilter(_previousDndFilter!);
-                      debugPrint('DND restored to $_previousDndFilter on initial/reset');
+                      debugPrint(
+                          'DND restored to $_previousDndFilter on initial/reset');
                       _previousDndFilter = null;
+                      // Stop any active lock task when user resets
+                      Dnd.stopLockTask().then((ok) {
+                        if (ok) debugPrint('Lock task stopped on reset');
+                      });
+                      // Ensure foreground service stopped on reset
+                      Dnd.stopForegroundService().then((ok) {
+                        if (ok) debugPrint('Foreground service stopped on reset');
+                      });
                     }
                   }
                 },
@@ -699,8 +743,8 @@ class _GoalProgressBar extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         Text(AppLocalizations.of(context).goalProgressLabel(done, goalMinutes),
-      style: TextStyle(
-        fontSize: 12, color: barColor.withValues(alpha: 0.9)))
+            style:
+                TextStyle(fontSize: 12, color: barColor.withValues(alpha: 0.9)))
       ],
     );
   }

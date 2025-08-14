@@ -66,10 +66,10 @@ class SessionRepository {
 
   Future<List<PomodoroSession>> loadSessions() async {
     final prefs = await SharedPreferences.getInstance();
-  // Firebase disabled: treat user as unauthenticated (guest)
-  // TODO: restore uid retrieval when Firebase Auth is re-enabled:
-  // final uid = FirebaseAuth.instance.currentUser?.uid;
-  final uid = null;
+    // Firebase disabled: treat user as unauthenticated (guest)
+    // TODO: restore uid retrieval when Firebase Auth is re-enabled:
+    // final uid = FirebaseAuth.instance.currentUser?.uid;
+    final uid = null;
     final raw = prefs.getString(_userKey(uid));
     if (raw == null || raw.isEmpty) return [];
     try {
@@ -84,16 +84,16 @@ class SessionRepository {
 
   Future<void> addSession(PomodoroSession session) async {
     final prefs = await SharedPreferences.getInstance();
-  // TODO: restore uid retrieval when Firebase Auth is re-enabled:
-  // final uid = FirebaseAuth.instance.currentUser?.uid;
-  final uid = null;
+    // TODO: restore uid retrieval when Firebase Auth is re-enabled:
+    // final uid = FirebaseAuth.instance.currentUser?.uid;
+    final uid = null;
     final current = await loadSessions();
     current.add(session);
     await prefs.setString(
         _userKey(uid), jsonEncode(current.map((e) => e.toMap()).toList()));
     // Firestore sync (best effort)
-  // Firestore sync disabled while Firebase is not configured.
-  // TODO: restore Firestore best-effort sync here using `FirebaseFirestore.instance`
+    // Firestore sync disabled while Firebase is not configured.
+    // TODO: restore Firestore best-effort sync here using `FirebaseFirestore.instance`
     scheduleMicrotask(() => refreshGoalRemaining());
   }
 

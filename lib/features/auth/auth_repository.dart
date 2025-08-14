@@ -27,21 +27,21 @@ class AuthRepository {
   dynamic get currentUser => null;
 
   Future<dynamic> signInWithEmail(String email, String password) async {
-  // Firebase sign-in disabled in this build.
-  // TODO: implement by restoring `_safeAuth` and calling `signInWithEmailAndPassword`.
-  throw StateError('Firebase disabled in this build');
+    // Firebase sign-in disabled in this build.
+    // TODO: implement by restoring `_safeAuth` and calling `signInWithEmailAndPassword`.
+    throw StateError('Firebase disabled in this build');
   }
 
   Future<dynamic> registerWithEmail(String email, String password) async {
-  // Firebase registration disabled in this build.
-  // TODO: implement by restoring `_safeAuth` and calling `createUserWithEmailAndPassword`.
-  throw StateError('Firebase disabled in this build');
+    // Firebase registration disabled in this build.
+    // TODO: implement by restoring `_safeAuth` and calling `createUserWithEmailAndPassword`.
+    throw StateError('Firebase disabled in this build');
   }
 
   Future<dynamic> signInWithGoogle() async {
-  // Firebase social sign-in disabled in this build.
-  // TODO: implement by restoring Google credential flow and `_safeAuth.signInWithCredential`.
-  throw StateError('Firebase disabled in this build');
+    // Firebase social sign-in disabled in this build.
+    // TODO: implement by restoring Google credential flow and `_safeAuth.signInWithCredential`.
+    throw StateError('Firebase disabled in this build');
   }
 
   // Placeholder phone auth start; needs real verification flow (SMS) for production.
@@ -51,9 +51,9 @@ class AuthRepository {
   }
 
   Future<void> signOut() async {
-  // No-op sign-out while Firebase is disabled.
-  // TODO: when enabling, call `_safeAuth?.signOut()` and preserve GoogleSignIn signOut.
-  debugPrint('signOut called but Firebase disabled in this build');
-  await GoogleSignIn().signOut();
+    // No-op sign-out while Firebase is disabled.
+    // TODO: when enabling, call `_safeAuth?.signOut()` and preserve GoogleSignIn signOut.
+    debugPrint('signOut called but Firebase disabled in this build');
+    await GoogleSignIn().signOut();
   }
 }
