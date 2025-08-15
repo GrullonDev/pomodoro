@@ -61,6 +61,7 @@ class TimerScreen extends StatelessWidget {
                     : () async {
                         final repo = TaskRepository();
                         if (task!.id.isNotEmpty) {
+                          // marcar completada (ya terminó todas sus sesiones)
                           await repo.markDone(task!.id);
                         }
                       },
@@ -71,7 +72,7 @@ class TimerScreen extends StatelessWidget {
                   workDuration: workSeconds,
                   breakDuration: breakSeconds,
                   session: 1,
-                  totalSessions: sessions,
+                  totalSessions: task?.sessions ?? sessions,
                 )),
           child: const _TimerView(),
         );

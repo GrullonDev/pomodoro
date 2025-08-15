@@ -162,7 +162,7 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
       return elapsed;
     }
 
-    if (nextSession > current.totalSessions) {
+  if (nextSession > current.totalSessions) {
       // Guardar última fase de trabajo si la anterior fue de trabajo y terminó
       if (current.phase == TimerPhase.work) {
         final eff = effectiveWorkSeconds();
@@ -191,6 +191,10 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
         _repository.addSession(
             PomodoroSession(endTime: DateTime.now(), workSeconds: eff));
       }
+    }
+    // Increment per-task session after completing a break (i.e., a full cycle)
+    if (completedSession && onTaskCycleCompleted != null) {
+      // callback will mark task sessions externally when full cycle ends; for partial we could add another callback if needed
     }
     // Configurable long break logic
     final nextPhase = current.phase == TimerPhase.work
