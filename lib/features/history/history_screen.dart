@@ -21,18 +21,21 @@ class HistoryScreen extends StatelessWidget {
     return entries;
   }
 
-  String _formatMinutes(int seconds) => '${(seconds / 60).round()}m';
+  String _formatMinutes(int seconds) {
+    final m = (seconds / 60).floor();
+    return '${m}m';
+  }
 
   @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context);
+    final scheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        backgroundColor: Colors.black,
-        title:
-            Text(t.history, style: const TextStyle(color: Colors.greenAccent)),
+        backgroundColor: Colors.transparent,
+        title: Text(t.history, style: TextStyle(color: scheme.primary)),
       ),
       body: FutureBuilder(
         future: _load(),
@@ -65,12 +68,11 @@ class HistoryScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                title: Text(dateStr,
-                    style: const TextStyle(color: Colors.greenAccent)),
+                title: Text(dateStr, style: TextStyle(color: scheme.primary)),
                 trailing: Hero(
                   tag: 'day_total_$dateStr',
                   child: Text(_formatMinutes(e.seconds),
-                      style: const TextStyle(color: Colors.white70)),
+                      style: TextStyle(color: scheme.onSurfaceVariant)),
                 ),
               );
             },

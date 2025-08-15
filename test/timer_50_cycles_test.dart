@@ -25,37 +25,52 @@ void main() {
   group('50 cycle simulation', () {
     test('simulate 50 cycles 25/5 and validate behavior', () async {
       // Arrange
-  final fakeTicker = _FakeTicker();
-  final repo = SessionRepository();
+      final fakeTicker = _FakeTicker();
+      final repo = SessionRepository();
 
-  // Initialize timezone data used by NotificationService
-  tz.initializeTimeZones();
-  // Provide in-memory SharedPreferences for tests
-  SharedPreferences.setMockInitialValues({});
+      // Initialize timezone data used by NotificationService
+      tz.initializeTimeZones();
+      // Provide in-memory SharedPreferences for tests
+      SharedPreferences.setMockInitialValues({});
 
       // Mock platform channels used by plugins to avoid MissingPluginException
-      const MethodChannel audioplayersChannel = MethodChannel('xyz.luan/audioplayers.global');
-      audioplayersChannel.setMockMethodCallHandler((call) async {
-        // respond to 'init' and ignore others
-        return null;
-      });
-      const MethodChannel audioplayersChannel2 = MethodChannel('xyz.luan/audioplayers');
-      audioplayersChannel2.setMockMethodCallHandler((call) async {
-        // respond to 'create' etc
-        return null;
-      });
-      const MethodChannel flnChannel = MethodChannel('dexterous.com/flutter/local_notifications');
-      flnChannel.setMockMethodCallHandler((call) async {
-        // return null for any FLN method invoked in tests
-        return null;
-      });
+      const MethodChannel audioplayersChannel =
+          MethodChannel('xyz.luan/audioplayers.global');
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(
+        audioplayersChannel,
+        (call) async {
+          // respond to 'init' and ignore others
+          return null;
+        },
+      );
+      const MethodChannel audioplayersChannel2 =
+          MethodChannel('xyz.luan/audioplayers');
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(
+        audioplayersChannel2,
+        (call) async {
+          // respond to 'create' etc
+          return null;
+        },
+      );
+      const MethodChannel flnChannel =
+          MethodChannel('dexterous.com/flutter/local_notifications');
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(
+        flnChannel,
+        (call) async {
+          // return null for any FLN method invoked in tests
+          return null;
+        },
+      );
 
-  // Replace audio/notification/dnd with no-op implementations by toggling flags
+      // Replace audio/notification/dnd with no-op implementations by toggling flags
       NotificationService.appSilentMode = true; // prevent real notifications
-  NotificationService.testMode = true;
-  // Do not initialize AudioService to avoid plugin calls during unit tests.
+      NotificationService.testMode = true;
+      // Do not initialize AudioService to avoid plugin calls during unit tests.
 
-  final bloc = TimerBloc(ticker: fakeTicker, repository: repo);
+      final bloc = TimerBloc(ticker: fakeTicker, repository: repo);
 
       // Start with a work phase of 25s and break 5s for speed (simulate seconds as seconds)
       bloc.add(TimerStarted(
@@ -66,7 +81,7 @@ void main() {
           session: 1,
           totalSessions: 50));
 
-  TimerState? lastState;
+      TimerState? lastState;
 
       final sub = bloc.stream.listen((state) async {
         lastState = state;
@@ -90,8 +105,8 @@ void main() {
         expect(completed.totalSessions, 50);
       }
 
-  await sub.cancel();
-  bloc.close();
+      await sub.cancel();
+      bloc.close();
     }, timeout: Timeout(Duration(minutes: 2)));
   });
 }

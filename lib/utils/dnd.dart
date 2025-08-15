@@ -88,7 +88,7 @@ class Dnd {
       return false;
     }
   }
-  
+
   /// Start a minimal Android foreground service (best-effort).
   static Future<bool> startForegroundService() async {
     if (!Platform.isAndroid) return false;
@@ -99,7 +99,7 @@ class Dnd {
       return false;
     }
   }
-  
+
   /// Stop the previously started foreground service.
   static Future<bool> stopForegroundService() async {
     if (!Platform.isAndroid) return false;
@@ -122,7 +122,8 @@ class Dnd {
   }) async {
     if (!Platform.isAndroid) return false;
     try {
-      final res = await _channel.invokeMethod<bool>('updateForegroundNotification', {
+      final res =
+          await _channel.invokeMethod<bool>('updateForegroundNotification', {
         'remainingSeconds': remainingSeconds,
         'paused': paused,
         'isWork': isWork,

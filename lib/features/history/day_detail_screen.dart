@@ -13,30 +13,31 @@ class DayDetailScreen extends StatelessWidget {
     final t = AppLocalizations.of(context);
     final dateStr =
         '${day.year}-${day.month.toString().padLeft(2, '0')}-${day.day.toString().padLeft(2, '0')}';
+    final scheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-          backgroundColor: Colors.black,
-          title: Text(t.dayDetailTitle,
-              style: const TextStyle(color: Colors.greenAccent))),
+          backgroundColor: Colors.transparent,
+          title:
+              Text(t.dayDetailTitle, style: TextStyle(color: scheme.primary))),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(dateStr,
-                style:
-                    const TextStyle(color: Colors.greenAccent, fontSize: 18)),
+                style: TextStyle(color: scheme.primary, fontSize: 18)),
             const SizedBox(height: 20),
             Hero(
               tag: 'day_total_$dateStr',
               child: Text(_fmt(seconds),
-                  style: const TextStyle(
-                      color: Colors.greenAccent,
+                  style: TextStyle(
+                      color: scheme.primary,
                       fontSize: 64,
                       fontWeight: FontWeight.bold)),
             ),
             const SizedBox(height: 12),
-            Text(t.totalFocus, style: const TextStyle(color: Colors.white70)),
+            Text(t.totalFocus,
+                style: TextStyle(color: scheme.onSurfaceVariant)),
           ],
         ),
       ),

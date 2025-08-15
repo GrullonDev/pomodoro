@@ -149,7 +149,7 @@ class NotificationService {
     required String title,
     required String body,
   }) async {
-  if (testMode) return;
+    if (testMode) return;
     // Usamos el sonido por defecto del sistema para evitar el crash
     // (PlatformException invalid_sound) mientras no exista el recurso
     // raw "timer_end" (android/app/src/main/res/raw/timer_end.*) y el
@@ -191,7 +191,7 @@ class NotificationService {
     required String title,
     required String body,
   }) async {
-  if (testMode) return;
+    if (testMode) return;
     final scheduled =
         tz.TZDateTime.now(tz.local).add(Duration(seconds: seconds));
     final androidDetails = AndroidNotificationDetails(

@@ -1,15 +1,9 @@
 import 'package:flutter/material.dart';
 
-// Firebase temporarily disabled to avoid startup exceptions when not configured.
-// TODO: Re-enable Firebase when ready —
-// 1) Add platform config files (android: google-services.json, iOS: GoogleService-Info.plist)
-// 2) Run `flutterfire configure` to generate `firebase_options.dart` (recommended)
-// 3) Uncomment the import below and the initialization block further down.
-// import 'package:firebase_core/firebase_core.dart';
-
 import 'package:pomodoro/core/data/session_repository.dart';
 import 'package:pomodoro/utils/app.dart';
 import 'package:pomodoro/utils/notifications/notifications.dart';
+import 'package:pomodoro/core/theme/theme_controller.dart';
 
 void main() async {
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -19,6 +13,8 @@ void main() async {
   await NotificationService.requestPermissions();
   // Migrar datos antiguos una vez
   await SessionRepository().migrateLegacyIfNeeded();
+  // Cargar preferencia de tema (oscuro por defecto si no existe)
+  await ThemeController.instance.load();
 
   // Firebase disabled for now. To re-enable, uncomment initialization above and
   // ensure platform options (google-services.json / GoogleService-Info.plist) are provided.

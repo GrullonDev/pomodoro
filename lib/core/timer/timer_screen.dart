@@ -17,6 +17,7 @@ import 'package:pomodoro/core/data/preset_profile.dart';
 import 'package:pomodoro/core/timer/ticker.dart';
 import 'package:pomodoro/core/timer/timer_action_bus.dart';
 import 'package:pomodoro/core/timer/timer_bloc.dart';
+import 'package:pomodoro/core/data/task_repository.dart';
 import 'package:pomodoro/features/summary/session_summary_screen.dart';
 import 'package:pomodoro/l10n/app_localizations.dart';
 
@@ -24,11 +25,13 @@ class TimerScreen extends StatelessWidget {
   final int workMinutes;
   final int breakMinutes;
   final int sessions;
+  final TaskItem? task; // tarea asociada (opcional)
   const TimerScreen(
       {super.key,
       required this.workMinutes,
       required this.breakMinutes,
-      required this.sessions});
+      required this.sessions,
+      this.task});
 
   @override
   Widget build(BuildContext context) {
@@ -41,8 +44,7 @@ class TimerScreen extends StatelessWidget {
         if (snap.hasData && snap.data != null) {
           final key = snap.data!;
           if (key != 'custom') {
-            final p = PresetProfile.defaults().firstWhere(
-                (e) => e.key == key,
+            final p = PresetProfile.defaults().firstWhere((e) => e.key == key,
                 orElse: () => PresetProfile.custom);
             work = p.workMinutes;
             br = p.shortBreakMinutes;
@@ -51,8 +53,18 @@ class TimerScreen extends StatelessWidget {
         final workSeconds = work * 60;
         final breakSeconds = br * 60;
         return BlocProvider(
-          create: (_) =>
-              TimerBloc(ticker: const Ticker(), repository: SessionRepository())
+          create: (_) => TimerBloc(
+                ticker: const Ticker(),
+                repository: SessionRepository(),
+                onTaskCycleCompleted: task == null
+                    ? null
+                    : () async {
+                        final repo = TaskRepository();
+                        if (task!.id.isNotEmpty) {
+                          await repo.markDone(task!.id);
+                        }
+                      },
+              )
                 ..add(TimerStarted(
                   phase: TimerPhase.work,
                   duration: workSeconds,
@@ -65,6 +77,62 @@ class TimerScreen extends StatelessWidget {
         );
       },
     );
+  }
+}
+
+/// Inicia una serie de tareas secuenciales.
+class TaskFlowStarter {
+  static Future<void> startFlow(BuildContext context,
+      {required List<TaskItem> tasks,
+      required int defaultWork,
+      required int defaultBreak,
+      required int defaultSessions}) async {
+    // Buscar primera pendiente
+    TaskItem? next;
+    try {
+      next = tasks.firstWhere((t) => !t.done);
+    } catch (_) {
+      next = null;
+    }
+    if (next == null) return;
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => TimerScreen(
+          workMinutes: defaultWork,
+          breakMinutes: defaultBreak,
+          sessions: defaultSessions,
+          task: next,
+        ),
+      ),
+    );
+    // Al regresar, preguntar por la siguiente si existe
+    final repo = TaskRepository();
+    final all = await repo.all();
+    final pending = all.where((e) => !e.done).toList();
+    if (pending.isEmpty) return; // flujo terminado
+    final proceed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Continuar con la siguiente tarea?'),
+        content: Text(pending.first.title),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('No')),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('Sí')),
+        ],
+      ),
+    );
+    if (proceed == true) {
+      await startFlow(context,
+          tasks: all,
+          defaultWork: defaultWork,
+          defaultBreak: defaultBreak,
+          defaultSessions: defaultSessions);
+    }
   }
 }
 
@@ -259,12 +327,13 @@ class _TimerViewState extends State<_TimerView>
         child: Scaffold(
           backgroundColor: background,
           appBar: AppBar(
-            backgroundColor: Colors.black,
+            backgroundColor: Colors.transparent,
             title: Text(AppLocalizations.of(context).appTitle,
-                style: const TextStyle(color: Colors.greenAccent)),
+                style: TextStyle(color: Theme.of(context).colorScheme.primary)),
             actions: [
               IconButton(
-                icon: const Icon(Icons.refresh, color: Colors.greenAccent),
+                icon: Icon(Icons.refresh,
+                    color: Theme.of(context).colorScheme.primary),
                 onPressed: () => context.read<TimerBloc>().add(TimerReset()),
               )
             ],
@@ -321,8 +390,12 @@ class _TimerViewState extends State<_TimerView>
                             }
                             // Try to pin the app while work session is active.
                             Dnd.startLockTask().then((ok) {
-                              if (ok) { debugPrint('Lock task started'); }
-                              else { debugPrint('Lock task not started or unsupported'); }
+                              if (ok) {
+                                debugPrint('Lock task started');
+                              } else {
+                                debugPrint(
+                                    'Lock task not started or unsupported');
+                              }
                             });
                             // Also request a foreground service for persistence.
                             Dnd.startForegroundService().then((ok) {
@@ -352,7 +425,9 @@ class _TimerViewState extends State<_TimerView>
                       _previousDndFilter = null;
                       // Stop lock task on completion
                       Dnd.stopLockTask().then((ok) {
-                        if (ok) debugPrint('Lock task stopped after completion');
+                        if (ok) {
+                          debugPrint('Lock task stopped after completion');
+                        }
                       });
                       // Stop foreground service when finished
                       Dnd.stopForegroundService().then((ok) {
@@ -377,18 +452,18 @@ class _TimerViewState extends State<_TimerView>
                       SessionRepository()
                           .isPersistentNotificationEnabled()
                           .then((enabled) {
-                          if (enabled) {
-                            // Send a tiny update to the native foreground service
-                            // to avoid rebuilding complex notification objects every second.
-                            Dnd.updateForegroundNotification(
-                              remainingSeconds: state.remaining,
-                              paused: state.paused,
-                              isWork: state.phase == TimerPhase.work,
-                              title: state.phase == TimerPhase.work
-                                  ? loc.phaseWorkTitle
-                                  : loc.phaseBreakTitle,
-                            );
-                          }
+                        if (enabled) {
+                          // Send a tiny update to the native foreground service
+                          // to avoid rebuilding complex notification objects every second.
+                          Dnd.updateForegroundNotification(
+                            remainingSeconds: state.remaining,
+                            paused: state.paused,
+                            isWork: state.phase == TimerPhase.work,
+                            title: state.phase == TimerPhase.work
+                                ? loc.phaseWorkTitle
+                                : loc.phaseBreakTitle,
+                          );
+                        }
                       });
                     }
                     // Haptic feedback on pause/resume toggle (only when change detected)
@@ -449,7 +524,9 @@ class _TimerViewState extends State<_TimerView>
                       });
                       // Ensure foreground service stopped on reset
                       Dnd.stopForegroundService().then((ok) {
-                        if (ok) debugPrint('Foreground service stopped on reset');
+                        if (ok) {
+                          debugPrint('Foreground service stopped on reset');
+                        }
                       });
                     }
                   }

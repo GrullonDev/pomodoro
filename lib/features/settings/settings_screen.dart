@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:pomodoro/core/data/session_repository.dart';
 import 'package:pomodoro/core/data/preset_profile.dart';
 import 'package:pomodoro/l10n/app_localizations.dart';
+import 'package:pomodoro/core/theme/theme_controller.dart';
+import 'package:pomodoro/core/timer/timer_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -39,34 +41,36 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final l5 = await _repo.isLast5AlertEnabled();
     final l5s = await _repo.isLast5SoundEnabled();
     final l5f = await _repo.isLast5FlashEnabled();
-  final preset = await _repo.getSelectedPreset();
-  final dark = await _repo.isThemeDarkEnabled();
-  final vol = await _repo.getTickingVolume();
-  final vib = await _repo.isVibrationEnabled();
-  final hap = await _repo.isHapticEnabled();
-  final alarm = await _repo.getAlarmSound();
-  final ad = await _repo.getAlarmDurationSeconds();
-  final widget = await _repo.isHomeWidgetEnabled();
-  final notifActions = await _repo.isNotificationActionsEnabled();
-  final kb = await _repo.isKeyboardShortcutsEnabled();
-  final wear = await _repo.isWearableSupportEnabled();
+    var preset = await _repo.getSelectedPreset();
+    // Si aún no hay un preset seleccionado, usar por defecto 'work'
+    preset ??= PresetProfile.work.key;
+    final dark = await _repo.isThemeDarkEnabled();
+    final vol = await _repo.getTickingVolume();
+    final vib = await _repo.isVibrationEnabled();
+    final hap = await _repo.isHapticEnabled();
+    final alarm = await _repo.getAlarmSound();
+    final ad = await _repo.getAlarmDurationSeconds();
+    final widget = await _repo.isHomeWidgetEnabled();
+    final notifActions = await _repo.isNotificationActionsEnabled();
+    final kb = await _repo.isKeyboardShortcutsEnabled();
+    final wear = await _repo.isWearableSupportEnabled();
     if (mounted) {
       setState(() {
         _persistent = v;
         _last5 = l5;
         _last5Sound = l5s;
         _last5Flash = l5f;
-    _presetKey = preset;
-    _dark = dark;
-    _tickVol = vol;
-    _vibration = vib;
-    _haptic = hap;
-    _alarm = alarm;
-    _alarmDur = ad;
-    _widgetEnabled = widget;
-    _notifActions = notifActions;
-    _kbShortcuts = kb;
-    _wearable = wear;
+        _presetKey = preset;
+        _dark = dark;
+        _tickVol = vol;
+        _vibration = vib;
+        _haptic = hap;
+        _alarm = alarm;
+        _alarmDur = ad;
+        _widgetEnabled = widget;
+        _notifActions = notifActions;
+        _kbShortcuts = kb;
+        _wearable = wear;
       });
     }
   }
@@ -74,40 +78,78 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context);
+    final scheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
           automaticallyImplyLeading: false,
-          backgroundColor: Colors.black,
-          title: Text(t.settings,
-              style: const TextStyle(color: Colors.greenAccent))),
+          backgroundColor: Colors.transparent,
+          title: Text(t.settings, style: TextStyle(color: scheme.primary))),
       body: _persistent == null || _presetKey == null || _dark == null
           ? const Center(child: CircularProgressIndicator())
           : ListView(
               children: [
-                ListTile(title: const Text('Preset Profiles')),
+                ListTile(
+                    title: Text('Preset Profiles',
+                        style: TextStyle(color: scheme.primary))),
                 ...PresetProfile.defaults().map((p) {
+                  final isSelected = _presetKey == p.key;
+                  final baseColor =
+                      Theme.of(context).textTheme.bodyMedium?.color ??
+                          Colors.black;
                   return RadioListTile<String>(
                     value: p.key,
                     groupValue: _presetKey,
+                    activeColor: scheme.primary,
                     title: Text(p.name,
-                        style: const TextStyle(color: Colors.white)),
-                    subtitle: Text('${p.workMinutes}m / ${p.shortBreakMinutes}m',
-                        style: const TextStyle(color: Colors.white54)),
+                        style: TextStyle(
+                          color: baseColor.withValues(
+                              alpha: isSelected ? 0.95 : 0.78),
+                          fontWeight:
+                              isSelected ? FontWeight.w600 : FontWeight.normal,
+                        )),
+                    subtitle: Text(
+                        '${p.workMinutes}m / ${p.shortBreakMinutes}m',
+                        style: TextStyle(
+                            color: baseColor.withValues(alpha: 0.55))),
                     onChanged: (v) async {
                       if (v == null) return;
                       await _repo.setSelectedPreset(v);
-                      // If not custom, apply preset long break duration as preference
+                      PresetProfile selected = PresetProfile.custom;
                       if (v != PresetProfile.custom.key) {
-                        final p = PresetProfile.defaults().firstWhere(
-                            (e) => e.key == v,
-                            orElse: () => PresetProfile.custom);
-                        await _repo.setLongBreakDurationMinutes(p.longBreakMinutes);
+                        selected = PresetProfile.defaults().firstWhere(
+                          (e) => e.key == v,
+                          orElse: () => PresetProfile.custom,
+                        );
+                        await _repo.setLongBreakDurationMinutes(
+                            selected.longBreakMinutes);
                       }
                       setState(() => _presetKey = v);
+
+                      // Navegar automáticamente al cronómetro iniciando la sesión.
+                      // Suponemos 4 sesiones por defecto (ajusta si quieres hacerlo configurable).
+                      if (mounted) {
+                        Navigator.push(
+                          context,
+                          PageRouteBuilder(
+                            transitionDuration:
+                                const Duration(milliseconds: 600),
+                            pageBuilder: (context, animation, secondary) {
+                              return FadeTransition(
+                                opacity: animation,
+                                child: TimerScreen(
+                                  workMinutes: selected.workMinutes,
+                                  breakMinutes: selected.shortBreakMinutes,
+                                  sessions: 4,
+                                ),
+                              );
+                            },
+                          ),
+                        );
+                      }
                     },
                   );
-                }).toList(),
+                }),
                 const Divider(),
                 // Preserve existing persistent notification toggle
                 SwitchListTile(
@@ -117,10 +159,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     setState(() => _persistent = v);
                   },
                   title: Text(t.settingsPersistentNotif,
-                      style: const TextStyle(color: Colors.white)),
+                      style: TextStyle(
+                          color:
+                              Theme.of(context).textTheme.bodyMedium?.color)),
                   subtitle: Text(t.settingsPersistentNotifDesc,
-                      style: const TextStyle(color: Colors.white54)),
-                  activeColor: Colors.greenAccent,
+                      style: TextStyle(
+                          color: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.color
+                              ?.withValues(alpha: 0.55))),
+                  activeColor: scheme.primary,
                 ),
                 const Divider(),
                 if (_last5 != null)
@@ -131,10 +180,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       setState(() => _last5 = v);
                     },
                     title: Text(t.last5AlertTitle,
-                        style: const TextStyle(color: Colors.white)),
+                        style: TextStyle(
+                            color:
+                                Theme.of(context).textTheme.bodyMedium?.color)),
                     subtitle: Text(t.last5AlertDesc,
-                        style: const TextStyle(color: Colors.white54)),
-                    activeColor: Colors.greenAccent,
+                        style: TextStyle(
+                            color: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.color
+                                ?.withValues(alpha: 0.55))),
+                    activeColor: scheme.primary,
                   ),
                 if (_last5Sound != null)
                   SwitchListTile(
@@ -144,10 +200,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       setState(() => _last5Sound = v);
                     },
                     title: Text(t.last5SoundTitle,
-                        style: const TextStyle(color: Colors.white)),
+                        style: TextStyle(
+                            color:
+                                Theme.of(context).textTheme.bodyMedium?.color)),
                     subtitle: Text(t.last5SoundDesc,
-                        style: const TextStyle(color: Colors.white54)),
-                    activeColor: Colors.greenAccent,
+                        style: TextStyle(
+                            color: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.color
+                                ?.withValues(alpha: 0.55))),
+                    activeColor: scheme.primary,
                   ),
                 if (_last5Flash != null)
                   SwitchListTile(
@@ -157,20 +220,29 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       setState(() => _last5Flash = v);
                     },
                     title: Text(t.last5FlashTitle,
-                        style: const TextStyle(color: Colors.white)),
+                        style: TextStyle(
+                            color:
+                                Theme.of(context).textTheme.bodyMedium?.color)),
                     subtitle: Text(t.last5FlashDesc,
-                        style: const TextStyle(color: Colors.white54)),
-                    activeColor: Colors.greenAccent,
+                        style: TextStyle(
+                            color: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.color
+                                ?.withValues(alpha: 0.55))),
+                    activeColor: scheme.primary,
                   ),
 
                 const Divider(),
                 SwitchListTile(
-                  title: const Text('Dark Theme'),
+                  title: Text('Modo oscuro',
+                      style: TextStyle(color: scheme.primary)),
                   value: _dark!,
                   onChanged: (v) async {
-                    await _repo.setThemeDarkEnabled(v);
+                    await ThemeController.instance.setDark(v);
                     setState(() => _dark = v);
                   },
+                  activeColor: scheme.primary,
                 ),
                 ListTile(
                   title: const Text('Primary Color'),
@@ -179,7 +251,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 const Divider(),
                 SwitchListTile(
-                  title: const Text('Ticking Sound'),
+                  title: Text('Ticking Sound',
+                      style: TextStyle(
+                          color:
+                              Theme.of(context).textTheme.bodyMedium?.color)),
                   value: (_tickVol ?? 0) > 0,
                   onChanged: (v) async {
                     await _repo.setTickingSoundEnabled(v);
@@ -187,7 +262,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   },
                 ),
                 ListTile(
-                  title: const Text('Tick volume'),
+                  title: Text('Tick volume',
+                      style: TextStyle(
+                          color:
+                              Theme.of(context).textTheme.bodyMedium?.color)),
                   subtitle: Slider(
                     value: _tickVol ?? 0.5,
                     min: 0,
@@ -199,7 +277,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                 ),
                 SwitchListTile(
-                  title: const Text('Vibration'),
+                  title: Text('Vibration',
+                      style: TextStyle(
+                          color:
+                              Theme.of(context).textTheme.bodyMedium?.color)),
                   value: _vibration!,
                   onChanged: (v) async {
                     await _repo.setVibrationEnabled(v);
@@ -207,7 +288,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   },
                 ),
                 SwitchListTile(
-                  title: const Text('Haptic Feedback'),
+                  title: Text('Haptic Feedback',
+                      style: TextStyle(
+                          color:
+                              Theme.of(context).textTheme.bodyMedium?.color)),
                   value: _haptic!,
                   onChanged: (v) async {
                     await _repo.setHapticEnabled(v);
@@ -216,13 +300,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 const Divider(),
                 ListTile(
-                  title: const Text('Alarm Sound'),
-                  subtitle: Text(_alarm ?? 'default'),
+                  title: Text('Alarm Sound',
+                      style: TextStyle(
+                          color:
+                              Theme.of(context).textTheme.bodyMedium?.color)),
+                  subtitle: Text(_alarm ?? 'default',
+                      style: TextStyle(
+                          color: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.color
+                              ?.withValues(alpha: 0.65))),
                   onTap: () {},
                 ),
                 ListTile(
-                  title: const Text('Alarm Duration (s)'),
-                  subtitle: Text('${_alarmDur ?? 5} s'),
+                  title: Text('Alarm Duration (s)',
+                      style: TextStyle(
+                          color:
+                              Theme.of(context).textTheme.bodyMedium?.color)),
+                  subtitle: Text('${_alarmDur ?? 5} s',
+                      style: TextStyle(
+                          color: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.color
+                              ?.withValues(alpha: 0.65))),
                   onTap: () async {
                     final next = ((_alarmDur ?? 5) % 10) + 1;
                     await _repo.setAlarmDurationSeconds(next);
@@ -231,7 +333,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 const Divider(),
                 SwitchListTile(
-                  title: const Text('Home Widget Enabled'),
+                  title: Text('Home Widget Enabled',
+                      style: TextStyle(
+                          color:
+                              Theme.of(context).textTheme.bodyMedium?.color)),
                   value: _widgetEnabled ?? true,
                   onChanged: (v) async {
                     await _repo.setHomeWidgetEnabled(v);
@@ -239,7 +344,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   },
                 ),
                 SwitchListTile(
-                  title: const Text('Notification Actions'),
+                  title: Text('Notification Actions',
+                      style: TextStyle(
+                          color:
+                              Theme.of(context).textTheme.bodyMedium?.color)),
                   value: _notifActions ?? true,
                   onChanged: (v) async {
                     await _repo.setNotificationActionsEnabled(v);
@@ -247,7 +355,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   },
                 ),
                 SwitchListTile(
-                  title: const Text('Keyboard Shortcuts'),
+                  title: Text('Keyboard Shortcuts',
+                      style: TextStyle(
+                          color:
+                              Theme.of(context).textTheme.bodyMedium?.color)),
                   value: _kbShortcuts ?? false,
                   onChanged: (v) async {
                     await _repo.setKeyboardShortcutsEnabled(v);
@@ -255,7 +366,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   },
                 ),
                 SwitchListTile(
-                  title: const Text('Wearable Support'),
+                  title: Text('Wearable Support',
+                      style: TextStyle(
+                          color:
+                              Theme.of(context).textTheme.bodyMedium?.color)),
                   value: _wearable ?? false,
                   onChanged: (v) async {
                     await _repo.setWearableSupportEnabled(v);

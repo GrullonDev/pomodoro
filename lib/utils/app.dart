@@ -5,6 +5,7 @@ import 'package:pomodoro/l10n/app_localizations.dart';
 import 'package:pomodoro/utils/home_page.dart';
 import 'package:pomodoro/core/data/session_repository.dart';
 import 'package:pomodoro/features/auth/screens/onboarding_screen.dart';
+import 'package:pomodoro/core/theme/theme_controller.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key, required this.navigatorKey});
@@ -13,78 +14,108 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final base = ThemeData.dark(useMaterial3: true);
-    final theme = base.copyWith(
-      colorScheme: base.colorScheme.copyWith(
-        primary: Colors.greenAccent,
-        secondary: Colors.greenAccent,
-      ),
-      scaffoldBackgroundColor: Colors.black,
-      textTheme: base.textTheme.apply(
-          fontFamily: 'Arial',
-          bodyColor: Colors.greenAccent,
-          displayColor: Colors.greenAccent),
-      appBarTheme:
-          const AppBarTheme(backgroundColor: Colors.transparent, elevation: 0),
-      elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.greenAccent,
-          foregroundColor: Colors.black,
-          textStyle: const TextStyle(fontWeight: FontWeight.bold),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+    ThemeData buildDark() {
+      final base = ThemeData.dark(useMaterial3: true);
+      final scheme = base.colorScheme.copyWith(
+        primary: Colors.greenAccent.shade400,
+        secondary: Colors.greenAccent.shade400,
+      );
+      return base.copyWith(
+        colorScheme: scheme,
+        scaffoldBackgroundColor: const Color(0xFF0D0F11),
+        textTheme: base.textTheme.apply(fontFamily: 'Arial'),
+        appBarTheme: const AppBarTheme(
+            backgroundColor: Colors.transparent, elevation: 0),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: scheme.primary,
+            foregroundColor: Colors.black,
+            textStyle: const TextStyle(fontWeight: FontWeight.bold),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          ),
         ),
-      ),
-    );
-    return MaterialApp(
-      navigatorKey: navigatorKey,
-      debugShowCheckedModeBanner: false,
-      theme: theme,
-      localizationsDelegates: const [
-        AppLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-      ],
-      supportedLocales: const [Locale('en'), Locale('es')],
-      home: FutureBuilder<bool>(
-        future: SessionRepository().isOnboardingSeen(),
-        builder: (context, snap) {
-          if (!snap.hasData) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          final seen = snap.data ?? false;
-          if (seen) {
-            return const AnimatedGradientShell(child: HomePage());
-          }
-          return AnimatedGradientShell(
-            child: OnboardingScreen(
-              onGetStarted: () async {
-                await SessionRepository().setOnboardingSeen();
-                if (navigatorKey.currentState?.mounted ?? false) {
-                  navigatorKey.currentState!.pushReplacement(
-                    MaterialPageRoute(
-                        builder: (_) => const AnimatedGradientShell(
-                              child: HomePage(),
-                            )),
-                  );
-                }
-              },
-              onSkip: () async {
-                await SessionRepository().setOnboardingSeen();
-                if (navigatorKey.currentState?.mounted ?? false) {
-                  navigatorKey.currentState!.pushReplacement(
-                    MaterialPageRoute(
-                        builder: (_) => const AnimatedGradientShell(
-                              child: HomePage(),
-                            )),
-                  );
-                }
-              },
-            ),
-          );
-        },
-      ),
+      );
+    }
+
+    ThemeData buildLight() {
+      final base = ThemeData.light(useMaterial3: true);
+      final scheme = base.colorScheme.copyWith(
+        primary: const Color(0xFF00B86B),
+        secondary: const Color(0xFF00B86B),
+      );
+      return base.copyWith(
+        colorScheme: scheme,
+        scaffoldBackgroundColor: const Color(0xFFF8F6FB),
+        textTheme: base.textTheme.apply(fontFamily: 'Arial'),
+        appBarTheme: const AppBarTheme(
+            backgroundColor: Colors.transparent, elevation: 0),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: scheme.primary,
+            foregroundColor: Colors.white,
+            textStyle: const TextStyle(fontWeight: FontWeight.bold),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          ),
+        ),
+      );
+    }
+
+    return ValueListenableBuilder<bool>(
+      valueListenable: ThemeController.instance.isDark,
+      builder: (_, isDark, __) {
+        return MaterialApp(
+          navigatorKey: navigatorKey,
+          debugShowCheckedModeBanner: false,
+          theme: isDark ? buildDark() : buildLight(),
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+          supportedLocales: const [Locale('en'), Locale('es')],
+          home: FutureBuilder<bool>(
+            future: SessionRepository().isOnboardingSeen(),
+            builder: (context, snap) {
+              if (!snap.hasData) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              final seen = snap.data ?? false;
+              if (seen) {
+                return const AnimatedGradientShell(child: HomePage());
+              }
+              return AnimatedGradientShell(
+                child: OnboardingScreen(
+                  onGetStarted: () async {
+                    await SessionRepository().setOnboardingSeen();
+                    if (navigatorKey.currentState?.mounted ?? false) {
+                      navigatorKey.currentState!.pushReplacement(
+                        MaterialPageRoute(
+                            builder: (_) => const AnimatedGradientShell(
+                                  child: HomePage(),
+                                )),
+                      );
+                    }
+                  },
+                  onSkip: () async {
+                    await SessionRepository().setOnboardingSeen();
+                    if (navigatorKey.currentState?.mounted ?? false) {
+                      navigatorKey.currentState!.pushReplacement(
+                        MaterialPageRoute(
+                            builder: (_) => const AnimatedGradientShell(
+                                  child: HomePage(),
+                                )),
+                      );
+                    }
+                  },
+                ),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 }
@@ -106,11 +137,18 @@ class _AnimatedGradientShellState extends State<AnimatedGradientShell>
     return AnimatedBuilder(
       animation: _c,
       builder: (context, _) {
-        final colors = [
-          const Color(0xFF0F2027),
-          const Color(0xFF203A43),
-          const Color(0xFF2C5364),
-        ];
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        final colors = isDark
+            ? [
+                const Color(0xFF0F2027),
+                const Color(0xFF203A43),
+                const Color(0xFF2C5364),
+              ]
+            : [
+                const Color(0xFFE9FDF5),
+                const Color(0xFFE3F5FF),
+                const Color(0xFFF0F3FF),
+              ];
         return Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(

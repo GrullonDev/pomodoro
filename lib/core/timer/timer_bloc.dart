@@ -12,12 +12,15 @@ import 'package:pomodoro/core/data/timer_storage.dart';
 
 part 'timer_event.dart';
 part 'timer_state.dart';
+// Task automation support
+typedef TaskCycleCompletedCallback = Future<void> Function();
 
 enum TimerPhase { work, breakPhase }
 
 /// Estados: work, breakPhase, completed
 class TimerBloc extends Bloc<TimerEvent, TimerState> {
-  TimerBloc({required Ticker ticker, SessionRepository? repository})
+  final TaskCycleCompletedCallback? onTaskCycleCompleted;
+  TimerBloc({required Ticker ticker, SessionRepository? repository, this.onTaskCycleCompleted})
       : _ticker = ticker,
         _repository = repository ?? SessionRepository(),
         super(const TimerInitial(workDuration: 1500, breakDuration: 300)) {
@@ -37,7 +40,8 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
     // Only restore if saved within a reasonable window (e.g., 24 hours)
     final now = DateTime.now().millisecondsSinceEpoch;
     if (now - saved.timestamp > Duration(hours: 24).inMilliseconds) return;
-    final phase = saved.phase == 'work' ? TimerPhase.work : TimerPhase.breakPhase;
+    final phase =
+        saved.phase == 'work' ? TimerPhase.work : TimerPhase.breakPhase;
     // Dispatch start with saved remaining and paused state
     add(TimerStarted(
       phase: phase,
@@ -147,25 +151,46 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
     final completedSession = current.phase == TimerPhase.breakPhase;
     final nextSession =
         completedSession ? current.session + 1 : current.session;
+    // Calcular el tiempo efectivo de trabajo de la fase que termina (solo si era trabajo)
+    // Si el usuario saltó antes de terminar, remaining > 0 y se descuenta.
+    // Clamp para evitar valores fuera de rango.
+    int effectiveWorkSeconds() {
+      if (current.phase != TimerPhase.work) return 0;
+      final elapsed = current.workDuration - current.remaining;
+      if (elapsed <= 0) return 0; // muy corto / no iniciado
+      if (elapsed > current.workDuration) return current.workDuration;
+      return elapsed;
+    }
+
     if (nextSession > current.totalSessions) {
       // Guardar última fase de trabajo si la anterior fue de trabajo y terminó
       if (current.phase == TimerPhase.work) {
-        _repository.addSession(PomodoroSession(
-            endTime: DateTime.now(), workSeconds: current.workDuration));
+        final eff = effectiveWorkSeconds();
+        if (eff > 0) {
+          _repository.addSession(
+              PomodoroSession(endTime: DateTime.now(), workSeconds: eff));
+        }
       }
-  // Completed overall flow - clear any persisted timer state
-  await TimerStorage.clear();
+      // Completed overall flow - clear any persisted timer state
+      await TimerStorage.clear();
       emit(TimerCompleted(
         totalSessions: current.totalSessions,
         workDuration: current.workDuration,
         breakDuration: current.breakDuration,
       ));
+      // Notificar que terminó un ciclo completo (trabajo+descansos de las sesiones)
+      if (onTaskCycleCompleted != null) {
+        await onTaskCycleCompleted!();
+      }
       return;
     }
     // Si finalizó fase de trabajo, persistir
     if (current.phase == TimerPhase.work) {
-      _repository.addSession(PomodoroSession(
-          endTime: DateTime.now(), workSeconds: current.workDuration));
+      final eff = effectiveWorkSeconds();
+      if (eff > 0) {
+        _repository.addSession(
+            PomodoroSession(endTime: DateTime.now(), workSeconds: eff));
+      }
     }
     // Configurable long break logic
     final nextPhase = current.phase == TimerPhase.work
