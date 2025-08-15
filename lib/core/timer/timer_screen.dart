@@ -13,6 +13,7 @@ import 'package:pomodoro/utils/dnd.dart';
 import 'package:pomodoro/utils/notifications/notifications.dart';
 
 import 'package:pomodoro/core/data/session_repository.dart';
+import 'package:pomodoro/core/di/service_locator.dart';
 import 'package:pomodoro/core/data/preset_profile.dart';
 import 'package:pomodoro/core/timer/ticker.dart';
 import 'package:pomodoro/core/timer/timer_action_bus.dart';
@@ -38,7 +39,7 @@ class TimerScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     // Resolve selected preset asynchronously and fall back to provided values
     return FutureBuilder<String?>(
-      future: SessionRepository().getSelectedPreset(),
+      future: ServiceLocator.I.settingsRepository.getSelectedPreset(),
       builder: (ctx, snap) {
         int work = workMinutes;
         int br = breakMinutes;

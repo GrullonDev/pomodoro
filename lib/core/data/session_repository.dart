@@ -30,9 +30,7 @@ class SessionRepository implements ISessionRepository {
   static const _hapticEnabledKey = 'haptic_enabled';
   static const _alarmSoundKey = 'alarm_sound';
   static const _alarmDurationKey = 'alarm_duration_seconds';
-  static const _themeDarkKey = 'theme_dark_enabled';
-  static const _primaryColorKey = 'theme_primary_color';
-  static const _presetKey = 'preset_profile_key';
+  // Theme & preset keys moved to SettingsRepository
   static const _widgetEnabledKey = 'home_widget_enabled';
   static const _notificationActionsKey = 'notification_actions_enabled';
   static const _keyboardShortcutsKey = 'keyboard_shortcuts_enabled';
@@ -251,36 +249,7 @@ class SessionRepository implements ISessionRepository {
     return prefs.getInt(_alarmDurationKey) ?? 5; // default 5s
   }
 
-  Future<void> setThemeDarkEnabled(bool enabled) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_themeDarkKey, enabled);
-  }
-
-  Future<bool> isThemeDarkEnabled() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(_themeDarkKey) ?? false;
-  }
-
-  Future<void> setPrimaryColorValue(int colorValue) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(_primaryColorKey, colorValue);
-  }
-
-  Future<int> getPrimaryColorValue() async {
-    final prefs = await SharedPreferences.getInstance();
-    // Default to Material Blue 500
-    return prefs.getInt(_primaryColorKey) ?? 0xFF2196F3;
-  }
-
-  Future<void> setSelectedPreset(String key) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_presetKey, key);
-  }
-
-  Future<String?> getSelectedPreset() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_presetKey);
-  }
+  // Removed theme & preset methods (handled by SettingsRepository now)
 
   Future<void> setHomeWidgetEnabled(bool enabled) async {
     final prefs = await SharedPreferences.getInstance();

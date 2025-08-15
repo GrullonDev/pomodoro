@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:pomodoro/core/data/session_repository.dart';
+import 'package:pomodoro/core/data/session_repository.dart'; // retains other timer related settings
+import 'package:pomodoro/core/di/service_locator.dart';
 import 'package:pomodoro/core/data/preset_profile.dart';
 import 'package:pomodoro/l10n/app_localizations.dart';
 import 'package:pomodoro/core/theme/theme_controller.dart';
@@ -42,10 +43,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final l5 = await _repo.isLast5AlertEnabled();
     final l5s = await _repo.isLast5SoundEnabled();
     final l5f = await _repo.isLast5FlashEnabled();
-    var preset = await _repo.getSelectedPreset();
+  var preset = await ServiceLocator.I.settingsRepository.getSelectedPreset();
     // Si aún no hay un preset seleccionado, usar por defecto 'work'
     preset ??= PresetProfile.work.key;
-    final dark = await _repo.isThemeDarkEnabled();
+  final dark = await ServiceLocator.I.settingsRepository.isThemeDarkEnabled();
     final vol = await _repo.getTickingVolume();
     final vib = await _repo.isVibrationEnabled();
     final hap = await _repo.isHapticEnabled();
@@ -115,7 +116,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             color: baseColor.withValues(alpha: 0.55))),
                     onChanged: (v) async {
                       if (v == null) return;
-                      await _repo.setSelectedPreset(v);
+                      await ServiceLocator.I.settingsRepository.setSelectedPreset(v);
                       PresetProfile selected = PresetProfile.custom;
                       if (v != PresetProfile.custom.key) {
                         selected = PresetProfile.defaults().firstWhere(
