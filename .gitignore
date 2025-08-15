@@ -11,6 +11,16 @@
 build/
 untranslated_messages.txt
 coverage/
+# Archivos específicos dentro de .dart_tool (ya cubiertos arriba, listados por claridad)
+.dart_tool/flutter_build/dart_plugin_registrant.dart
+.dart_tool/package_config.json
+.dart_tool/package_config_subset
+.dart_tool/package_graph.json
+.dart_tool/version
+
+# Registrants generados (web / desktop)
+lib/generated_plugin_registrant.dart
+**/GeneratedPluginRegistrant.*
 
 # Bloqueo de dependencias (para apps normalmente se versiona, aquí se ignora por tu preferencia)
 pubspec.lock
@@ -37,6 +47,16 @@ ios/Flutter/Flutter.podspec
 ios/Flutter/Generated.xcconfig
 ios/Flutter/Debug.xcconfig
 ios/Flutter/Release.xcconfig
+ios/Flutter/ephemeral/
+ios/Flutter/flutter_export_environment.sh
+# Proyecto Xcode (normalmente se versiona, ignorado aquí por preferencia explícita)
+ios/Runner.xcodeproj/project.pbxproj
+ios/Runner.xcodeproj/xcuserdata/
+ios/Runner.xcodeproj/project.xcworkspace/
+ios/Runner.xcodeproj/xcshareddata/
+ios/Runner.xcodeproj/xcshareddata/**
+ios/Runner.xcodeproj/xcuserdata/**
+ios/Runner/GoogleService-Info.plist
 
 ################
 # Android (regenerable)
@@ -52,6 +72,10 @@ android/local.properties
 *.pyd
 .gradle/
 .idea/
+android/app/google-services.json
+android/app/*.keystore
+android/app/*.jks
+android/key.properties
 
 ################
 # SO / Editor
@@ -79,3 +103,35 @@ android/local.properties
 key.properties
 **/*.keystore
 **/*.jks
+
+################
+# Artefactos de build finales
+################
+*.apk
+*.aab
+*.ipa
+*.dSYM
+*.dSYM.zip
+*.symbols
+
+################
+# Archivos de configuración / entorno (añade si se crean)
+################
+.env
+.env.*
+firebase_app_id_file.json
+
+################
+# Parches / merges y logs auxiliares
+################
+*.orig
+*.rej
+*.log
+
+################
+# Fastlane / CI reports (si se introduce fastlane)
+################
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
