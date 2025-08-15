@@ -3,6 +3,7 @@ import 'package:pomodoro/core/data/session_repository.dart';
 import 'package:pomodoro/core/data/preset_profile.dart';
 import 'package:pomodoro/l10n/app_localizations.dart';
 import 'package:pomodoro/core/theme/theme_controller.dart';
+import 'package:pomodoro/core/theme/locale_controller.dart';
 import 'package:pomodoro/core/timer/timer_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -296,6 +297,58 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   onChanged: (v) async {
                     await _repo.setHapticEnabled(v);
                     setState(() => _haptic = v);
+                  },
+                ),
+                const Divider(),
+                ListTile(
+                  title: Text('Language',
+                      style: TextStyle(
+                          color:
+                              Theme.of(context).textTheme.bodyMedium?.color)),
+                  subtitle: ValueListenableBuilder<Locale?>(
+                      valueListenable: LocaleController.instance.locale,
+                      builder: (_, loc, __) => Text(
+                          loc?.languageCode == null
+                              ? 'System'
+                              : (loc!.languageCode == 'es'
+                                  ? 'Español'
+                                  : 'English'),
+                          style: TextStyle(
+                              color: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.color
+                                  ?.withValues(alpha: 0.65)))),
+                  onTap: () async {
+                    final selected = await showModalBottomSheet<String>(
+                        context: context,
+                        builder: (ctx) => SafeArea(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  ListTile(
+                                    title: const Text('System'),
+                                    onTap: () => Navigator.pop(ctx, 'system'),
+                                  ),
+                                  ListTile(
+                                    title: const Text('English'),
+                                    onTap: () => Navigator.pop(ctx, 'en'),
+                                  ),
+                                  ListTile(
+                                    title: const Text('Español'),
+                                    onTap: () => Navigator.pop(ctx, 'es'),
+                                  ),
+                                ],
+                              ),
+                            ));
+                    if (selected == null) return;
+                    if (selected == 'system') {
+                      await LocaleController.instance.setLocale(null);
+                    } else {
+                      await LocaleController.instance
+                          .setLocale(Locale(selected));
+                    }
+                    if (mounted) setState(() {});
                   },
                 ),
                 const Divider(),

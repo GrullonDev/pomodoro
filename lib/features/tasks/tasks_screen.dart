@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pomodoro/core/data/task_repository.dart';
 import 'package:pomodoro/core/timer/timer_screen.dart';
+import 'package:pomodoro/l10n/app_localizations.dart';
 import 'package:pomodoro/core/data/preset_profile.dart';
 import 'package:pomodoro/core/data/session_repository.dart';
 
@@ -64,14 +65,15 @@ class _TasksScreenState extends State<TasksScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
+  final scheme = Theme.of(context).colorScheme;
+  final t = AppLocalizations.of(context);
     final total = _tasks.length;
     final done = _tasks.where((e) => e.done).length;
     final pending = total - done;
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
-        title: const Text('Tasks'), // TODO: localize
+  title: Text(t.tasksTitle),
         backgroundColor: Colors.transparent,
       ),
       body: _loading
@@ -80,7 +82,7 @@ class _TasksScreenState extends State<TasksScreen> {
               children: [
                 Padding(
                   padding: const EdgeInsets.only(top: 12.0),
-                  child: Text('$done/$total completed | $pending pending', // TODO localize
+                  child: Text(t.taskProgressSummary(done.toString(), pending.toString(), total.toString()),
                       style: TextStyle(color: scheme.primary)),
                 ),
                 Padding(
@@ -90,14 +92,14 @@ class _TasksScreenState extends State<TasksScreen> {
                       Expanded(
                         child: TextField(
                           controller: _controller,
-                          decoration: const InputDecoration(labelText: 'Task title'), // TODO localize
+                          decoration: InputDecoration(labelText: t.taskNewLabel),
                           onSubmitted: (_) => _add(),
                         ),
                       ),
                       const SizedBox(width: 8),
                       ElevatedButton(
                         onPressed: _add,
-                        child: const Text('Add'), // TODO localize
+                        child: Text(t.taskAdd),
                       ),
                     ],
                   ),
@@ -110,7 +112,7 @@ class _TasksScreenState extends State<TasksScreen> {
                       Flexible(
                         child: TextField(
                           controller: _workCtrl,
-                          decoration: const InputDecoration(labelText: 'Work'), // TODO
+                          decoration: InputDecoration(labelText: t.taskWorkLabel),
                           keyboardType: TextInputType.number,
                         ),
                       ),
@@ -118,7 +120,7 @@ class _TasksScreenState extends State<TasksScreen> {
                       Flexible(
                         child: TextField(
                           controller: _breakCtrl,
-                          decoration: const InputDecoration(labelText: 'Break'),
+                          decoration: InputDecoration(labelText: t.taskBreakLabel),
                           keyboardType: TextInputType.number,
                         ),
                       ),
@@ -126,14 +128,14 @@ class _TasksScreenState extends State<TasksScreen> {
                       Flexible(
                         child: TextField(
                           controller: _sessionsCtrl,
-                          decoration: const InputDecoration(labelText: 'Sess'),
+                          decoration: InputDecoration(labelText: t.taskSessionsShort),
                           keyboardType: TextInputType.number,
                         ),
                       ),
                       IconButton(
                         onPressed: _syncDefaultsFromPreset,
                         icon: const Icon(Icons.sync),
-                        tooltip: 'Sync preset', // TODO
+                        tooltip: t.languageSyncPreset,
                       )
                     ],
                   ),
@@ -205,7 +207,7 @@ class _TasksScreenState extends State<TasksScreen> {
                                       ? TextDecoration.lineThrough
                                       : TextDecoration.none)),
                           subtitle: Text(
-                              '${t.sessionsCompleted}/${t.sessions} sessions'), // TODO localize
+                              AppLocalizations.of(context).taskSessionProgress(t.sessionsCompleted.toString(), t.sessions.toString())),
                           trailing: IconButton(
                             icon: const Icon(Icons.play_circle_fill),
                             onPressed: t.done
@@ -236,7 +238,7 @@ class _TasksScreenState extends State<TasksScreen> {
                     child: ElevatedButton.icon(
                       onPressed: _startFlow,
                       icon: const Icon(Icons.play_arrow),
-                      label: const Text('Start flow'), // TODO localize
+                      label: Text(AppLocalizations.of(context).taskStartFlow),
                     ),
                   ),
               ],

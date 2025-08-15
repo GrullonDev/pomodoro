@@ -213,4 +213,50 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get last5FlashDesc => 'Flash visual durante los últimos 5 segundos';
+
+  @override
+  String get tasksTitle => 'Tareas';
+
+  @override
+  String get taskNewLabel => 'Nueva tarea';
+
+  @override
+  String get taskAdd => 'Agregar';
+
+  @override
+  String get taskWorkLabel => 'Trabajo';
+
+  @override
+  String get taskBreakLabel => 'Descanso';
+
+  @override
+  String get taskSessionsShort => 'Ses';
+
+  @override
+  String get taskStartFlow => 'Iniciar flujo';
+
+  @override
+  String taskProgressSummary(Object done, Object pending, Object total) {
+    return 'Tareas: $done/$total • $pending pendientes';
+  }
+
+  @override
+  String taskSessionProgress(Object completed, Object total) {
+    return '$completed/$total sesiones';
+  }
+
+  @override
+  String get languageSetting => 'Idioma';
+
+  @override
+  String get languageSystem => 'Sistema';
+
+  @override
+  String get languageEnglish => 'Inglés';
+
+  @override
+  String get languageSpanish => 'Español';
+
+  @override
+  String get languageSyncPreset => 'Sincronizar preset';
 }

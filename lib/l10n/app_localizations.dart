@@ -481,6 +481,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Visual flash during final 5 seconds'**
   String get last5FlashDesc;
+
+  /// No description provided for @tasksTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tasks'**
+  String get tasksTitle;
+
+  /// No description provided for @taskNewLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'New task'**
+  String get taskNewLabel;
+
+  /// No description provided for @taskAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get taskAdd;
+
+  /// No description provided for @taskWorkLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Work'**
+  String get taskWorkLabel;
+
+  /// No description provided for @taskBreakLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Break'**
+  String get taskBreakLabel;
+
+  /// No description provided for @taskSessionsShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Sess'**
+  String get taskSessionsShort;
+
+  /// No description provided for @taskStartFlow.
+  ///
+  /// In en, this message translates to:
+  /// **'Start flow'**
+  String get taskStartFlow;
+
+  /// No description provided for @taskProgressSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Tasks: {done}/{total} • {pending} pending'**
+  String taskProgressSummary(Object done, Object pending, Object total);
+
+  /// No description provided for @taskSessionProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{completed}/{total} sessions'**
+  String taskSessionProgress(Object completed, Object total);
+
+  /// No description provided for @languageSetting.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get languageSetting;
+
+  /// No description provided for @languageSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get languageSystem;
+
+  /// No description provided for @languageEnglish.
+  ///
+  /// In en, this message translates to:
+  /// **'English'**
+  String get languageEnglish;
+
+  /// No description provided for @languageSpanish.
+  ///
+  /// In en, this message translates to:
+  /// **'Spanish'**
+  String get languageSpanish;
+
+  /// No description provided for @languageSyncPreset.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync preset'**
+  String get languageSyncPreset;
 }
 
 class _AppLocalizationsDelegate

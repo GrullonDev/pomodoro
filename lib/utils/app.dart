@@ -6,6 +6,7 @@ import 'package:pomodoro/utils/home_page.dart';
 import 'package:pomodoro/core/data/session_repository.dart';
 import 'package:pomodoro/features/auth/screens/onboarding_screen.dart';
 import 'package:pomodoro/core/theme/theme_controller.dart';
+import 'package:pomodoro/core/theme/locale_controller.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key, required this.navigatorKey});
@@ -14,6 +15,8 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+  // Cargar locale guardado (solo se dispara una vez; si ya está cargado no hace nada)
+  LocaleController.instance.load();
     ThemeData buildDark() {
       final base = ThemeData.dark(useMaterial3: true);
       final scheme = base.colorScheme.copyWith(
@@ -65,7 +68,9 @@ class MyApp extends StatelessWidget {
     return ValueListenableBuilder<bool>(
       valueListenable: ThemeController.instance.isDark,
       builder: (_, isDark, __) {
-        return MaterialApp(
+        return ValueListenableBuilder<Locale?>(
+          valueListenable: LocaleController.instance.locale,
+          builder: (_, loc, ___) => MaterialApp(
           navigatorKey: navigatorKey,
           debugShowCheckedModeBanner: false,
           theme: isDark ? buildDark() : buildLight(),
@@ -76,6 +81,7 @@ class MyApp extends StatelessWidget {
             GlobalWidgetsLocalizations.delegate,
           ],
           supportedLocales: const [Locale('en'), Locale('es')],
+          locale: loc,
           home: FutureBuilder<bool>(
             future: SessionRepository().isOnboardingSeen(),
             builder: (context, snap) {
@@ -114,6 +120,7 @@ class MyApp extends StatelessWidget {
               );
             },
           ),
+        ),
         );
       },
     );
