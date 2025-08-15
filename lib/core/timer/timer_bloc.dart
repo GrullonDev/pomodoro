@@ -5,6 +5,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:pomodoro/utils/notifications/notifications.dart';
 import 'package:pomodoro/core/data/session_repository.dart';
+import 'package:pomodoro/core/domain/repositories/session_repository.dart';
+import 'package:pomodoro/core/domain/entities/pomodoro_session.dart';
 // timezone is configured inside NotificationService when needed
 
 import 'ticker.dart';
@@ -20,7 +22,7 @@ enum TimerPhase { work, breakPhase }
 /// Estados: work, breakPhase, completed
 class TimerBloc extends Bloc<TimerEvent, TimerState> {
   final TaskCycleCompletedCallback? onTaskCycleCompleted;
-  TimerBloc({required Ticker ticker, SessionRepository? repository, this.onTaskCycleCompleted})
+  TimerBloc({required Ticker ticker, ISessionRepository? repository, this.onTaskCycleCompleted})
       : _ticker = ticker,
         _repository = repository ?? SessionRepository(),
         super(const TimerInitial(workDuration: 1500, breakDuration: 300)) {
@@ -57,7 +59,7 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
   final Ticker _ticker;
   StreamSubscription<int>? _tickerSub;
   int? _lastSavedTimestamp;
-  final SessionRepository _repository;
+  final ISessionRepository _repository;
 
   Future<void> _onStarted(TimerStarted event, Emitter<TimerState> emit) async {
     // Programar notificación de finalización

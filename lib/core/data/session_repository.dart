@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:async';
 
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:pomodoro/core/domain/entities/pomodoro_session.dart';
+import 'package:pomodoro/core/domain/repositories/session_repository.dart';
 // Firebase usage temporarily disabled. To re-enable, restore these imports
 // and ensure firebase_core is initialized in `main.dart`.
 // TODO: To re-enable Firestore/auth sync:
@@ -11,24 +13,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 // import 'package:cloud_firestore/cloud_firestore.dart';
 // import 'package:firebase_auth/firebase_auth.dart';
 
-class PomodoroSession {
-  final DateTime endTime; // momento fin de la fase de trabajo
-  final int workSeconds; // duración de trabajo efectiva
-
-  PomodoroSession({required this.endTime, required this.workSeconds});
-
-  Map<String, dynamic> toMap() => {
-        'endTime': endTime.toIso8601String(),
-        'workSeconds': workSeconds,
-      };
-
-  factory PomodoroSession.fromMap(Map<String, dynamic> map) => PomodoroSession(
-        endTime: DateTime.parse(map['endTime'] as String),
-        workSeconds: map['workSeconds'] as int,
-      );
-}
-
-class SessionRepository {
+class SessionRepository implements ISessionRepository {
   static const _key = 'sessions_json'; // legacy (guest / pre-auth)
   // Per-user key prefix when storing locally; final key: sessions_json_<uid>
   static String _userKey(String? uid) => uid == null ? _key : '${_key}_$uid';
@@ -94,6 +79,8 @@ class SessionRepository {
     }
   }
 
+  @override
+  @override
   Future<void> addSession(PomodoroSession session) async {
     final prefs = await SharedPreferences.getInstance();
     // TODO: restore uid retrieval when Firebase Auth is re-enabled:
@@ -145,6 +132,8 @@ class SessionRepository {
     await prefs.setInt(_longBreakIntervalKey, interval);
   }
 
+  @override
+  @override
   Future<int> getLongBreakInterval() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getInt(_longBreakIntervalKey) ?? 4; // default every 4
@@ -155,6 +144,8 @@ class SessionRepository {
     await prefs.setInt(_longBreakDurationKey, minutes);
   }
 
+  @override
+  @override
   Future<int> getLongBreakDurationMinutes() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getInt(_longBreakDurationKey) ?? 10; // default 10 min
@@ -341,6 +332,8 @@ class SessionRepository {
     return prefs.getBool(_onboardingSeenKey) ?? false;
   }
 
+  @override
+  @override
   Future<double> todayProgress() async {
     final goal = await getDailyGoalMinutes();
     final todaySec = await todayWorkSeconds();

@@ -18,6 +18,7 @@ import 'package:pomodoro/core/timer/ticker.dart';
 import 'package:pomodoro/core/timer/timer_action_bus.dart';
 import 'package:pomodoro/core/timer/timer_bloc.dart';
 import 'package:pomodoro/core/data/task_repository.dart';
+import 'package:pomodoro/core/domain/entities/task.dart';
 import 'package:pomodoro/features/summary/session_summary_screen.dart';
 import 'package:pomodoro/l10n/app_localizations.dart';
 

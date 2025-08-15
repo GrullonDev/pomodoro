@@ -1,66 +1,10 @@
 import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:pomodoro/core/domain/entities/task.dart';
+import 'package:pomodoro/core/domain/repositories/task_repository.dart';
 
-class TaskItem {
-  final String id;
-  final String title;
-  final bool done;
-  final int workMinutes; // duración work por sesión
-  final int breakMinutes; // duración break por sesión
-  final int sessions; // sesiones para completarla
-  final int sessionsCompleted; // sesiones completadas hasta ahora
-
-  TaskItem({
-    required this.id,
-    required this.title,
-    required this.done,
-    required this.workMinutes,
-    required this.breakMinutes,
-    required this.sessions,
-    required this.sessionsCompleted,
-  });
-
-  TaskItem copyWith({
-    String? id,
-    String? title,
-    bool? done,
-    int? workMinutes,
-    int? breakMinutes,
-    int? sessions,
-    int? sessionsCompleted,
-  }) => TaskItem(
-        id: id ?? this.id,
-        title: title ?? this.title,
-        done: done ?? this.done,
-        workMinutes: workMinutes ?? this.workMinutes,
-        breakMinutes: breakMinutes ?? this.breakMinutes,
-        sessions: sessions ?? this.sessions,
-        sessionsCompleted: sessionsCompleted ?? this.sessionsCompleted,
-      );
-
-  Map<String, dynamic> toMap() => {
-        'id': id,
-        'title': title,
-        'done': done,
-        'workMinutes': workMinutes,
-        'breakMinutes': breakMinutes,
-        'sessions': sessions,
-        'sessionsCompleted': sessionsCompleted,
-      };
-
-  static TaskItem fromMap(Map<String, dynamic> map) => TaskItem(
-        id: map['id'] as String,
-        title: map['title'] as String,
-        done: map['done'] as bool? ?? false,
-        workMinutes: map['workMinutes'] as int? ?? 25,
-        breakMinutes: map['breakMinutes'] as int? ?? 5,
-        sessions: map['sessions'] as int? ?? 4,
-        sessionsCompleted: map['sessionsCompleted'] as int? ?? 0,
-      );
-}
-
-class TaskRepository {
+class TaskRepository implements ITaskRepository {
   static const _key = 'tasks_v1';
 
   Future<List<TaskItem>> load() async {
@@ -80,6 +24,7 @@ class TaskRepository {
     await prefs.setString(_key, jsonStr);
   }
 
+  @override
   Future<TaskItem> add(String title,{int work=25,int brk=5,int sessions=4}) async {
     final tasks = await load();
     final t = TaskItem(
@@ -96,6 +41,7 @@ class TaskRepository {
     return t;
   }
 
+  @override
   Future<void> markDone(String id) async {
     final tasks = await load();
     final idx = tasks.indexWhere((e) => e.id == id);
@@ -104,6 +50,7 @@ class TaskRepository {
     await _save(tasks);
   }
 
+  @override
   Future<void> incrementSession(String id) async {
     final tasks = await load();
     final idx = tasks.indexWhere((e) => e.id == id);
@@ -116,6 +63,7 @@ class TaskRepository {
     await _save(tasks);
   }
 
+  @override
   Future<TaskItem?> nextPending() async {
     final tasks = await load();
     try {
@@ -125,5 +73,6 @@ class TaskRepository {
     }
   }
 
+  @override
   Future<List<TaskItem>> all() => load();
 }
