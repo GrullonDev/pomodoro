@@ -237,7 +237,7 @@
     },
     {
       "name": "flutter",
-      "rootUri": "file:///Users/jorgegrullon/fvm/versions/3.32.4/packages/flutter",
+      "rootUri": "file:///Users/jorgegrullon/fvm/versions/3.32.5/packages/flutter",
       "packageUri": "lib/",
       "languageVersion": "3.7"
     },
@@ -255,9 +255,9 @@
     },
     {
       "name": "flutter_lints",
-      "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/flutter_lints-3.0.2",
+      "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/flutter_lints-6.0.0",
       "packageUri": "lib/",
-      "languageVersion": "3.1"
+      "languageVersion": "3.8"
     },
     {
       "name": "flutter_local_notifications",
@@ -279,19 +279,19 @@
     },
     {
       "name": "flutter_localizations",
-      "rootUri": "file:///Users/jorgegrullon/fvm/versions/3.32.4/packages/flutter_localizations",
+      "rootUri": "file:///Users/jorgegrullon/fvm/versions/3.32.5/packages/flutter_localizations",
       "packageUri": "lib/",
       "languageVersion": "3.7"
     },
     {
       "name": "flutter_test",
-      "rootUri": "file:///Users/jorgegrullon/fvm/versions/3.32.4/packages/flutter_test",
+      "rootUri": "file:///Users/jorgegrullon/fvm/versions/3.32.5/packages/flutter_test",
       "packageUri": "lib/",
       "languageVersion": "3.7"
     },
     {
       "name": "flutter_web_plugins",
-      "rootUri": "file:///Users/jorgegrullon/fvm/versions/3.32.4/packages/flutter_web_plugins",
+      "rootUri": "file:///Users/jorgegrullon/fvm/versions/3.32.5/packages/flutter_web_plugins",
       "packageUri": "lib/",
       "languageVersion": "3.7"
     },
@@ -387,9 +387,9 @@
     },
     {
       "name": "lints",
-      "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/lints-3.0.0",
+      "rootUri": "file:///Users/jorgegrullon/.pub-cache/hosted/pub.dev/lints-6.0.0",
       "packageUri": "lib/",
-      "languageVersion": "3.0"
+      "languageVersion": "3.8"
     },
     {
       "name": "matcher",
@@ -549,7 +549,7 @@
     },
     {
       "name": "sky_engine",
-      "rootUri": "file:///Users/jorgegrullon/fvm/versions/3.32.4/bin/cache/pkg/sky_engine",
+      "rootUri": "file:///Users/jorgegrullon/fvm/versions/3.32.5/bin/cache/pkg/sky_engine",
       "packageUri": "lib/",
       "languageVersion": "3.7"
     },
@@ -694,7 +694,7 @@
   ],
   "generator": "pub",
   "generatorVersion": "3.8.1",
-  "flutterRoot": "file:///Users/jorgegrullon/fvm/versions/3.32.4",
-  "flutterVersion": "3.32.4",
+  "flutterRoot": "file:///Users/jorgegrullon/fvm/versions/3.32.5",
+  "flutterVersion": "3.32.5",
   "pubCache": "file:///Users/jorgegrullon/.pub-cache"
 }

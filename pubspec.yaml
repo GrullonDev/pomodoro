@@ -33,11 +33,12 @@ dependencies:
   cloud_firestore: ^5.5.0
   google_sign_in: ^6.2.0
 
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
-  flutter_lints: ^3.0.0
+  flutter_lints: ^6.0.0
   flutter_launcher_icons: ^0.14.1
 
 # Launcher icon generation config
@@ -56,6 +57,8 @@ flutter:
   assets:
     # Short alert clip (e.g. 500ms) used for last 5-second cue.
     - assets/sounds/last5.mp3
+    - assets/sounds/last5.wav
+    - assets/sounds/cronometro.mp3
     - assets/sounds/
 
   # To add assets to your application, add an assets section, like this:

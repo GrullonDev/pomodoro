@@ -23,9 +23,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           icon: Icons.timer,
         ),
         _OnbPage(
-          title: t.localeName.startsWith('es')
-              ? 'Cómo funciona'
-              : 'How it works',
+          title:
+              t.localeName.startsWith('es') ? 'Cómo funciona' : 'How it works',
           body: t.localeName.startsWith('es')
               ? '25 minutos de enfoque + 5 minutos de descanso. Repite y cada 4 ciclos toma un descanso largo.'
               : '25 minutes focus + 5 minutes break. Repeat and every 4 cycles take a longer rest.',
@@ -115,13 +114,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 pages.length,
                 (i) => AnimatedContainer(
                   duration: const Duration(milliseconds: 250),
-                  margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
                   height: 8,
                   width: _index == i ? 32 : 10,
                   decoration: BoxDecoration(
-                    color: _index == i
-                        ? Colors.black87
-                        : Colors.black26,
+                    color: _index == i ? Colors.black87 : Colors.black26,
                     borderRadius: BorderRadius.circular(40),
                   ),
                 ),

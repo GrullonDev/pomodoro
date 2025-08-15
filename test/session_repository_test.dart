@@ -1,6 +1,9 @@
-import 'package:flutter_test/flutter_test.dart';
-import 'package:pomodoro/core/data/session_repository.dart';
 import 'dart:async';
+
+import 'package:flutter_test/flutter_test.dart';
+
+import 'package:pomodoro/core/data/session_repository.dart';
+import 'package:pomodoro/core/domain/entities/pomodoro_session.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

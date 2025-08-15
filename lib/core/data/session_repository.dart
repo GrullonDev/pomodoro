@@ -2,27 +2,18 @@ import 'dart:convert';
 import 'dart:async';
 
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:pomodoro/core/domain/entities/pomodoro_session.dart';
+import 'package:pomodoro/core/domain/repositories/session_repository.dart';
+// Firebase usage temporarily disabled. To re-enable, restore these imports
+// and ensure firebase_core is initialized in `main.dart`.
+// TODO: To re-enable Firestore/auth sync:
+// 1) Uncomment the imports for `cloud_firestore` and `firebase_auth`.
+// 2) Restore calls to `FirebaseAuth.instance.currentUser?.uid` and the Firestore upload.
+// 3) Consider making Firestore sync a best-effort background job with retries.
+// import 'package:cloud_firestore/cloud_firestore.dart';
+// import 'package:firebase_auth/firebase_auth.dart';
 
-class PomodoroSession {
-  final DateTime endTime; // momento fin de la fase de trabajo
-  final int workSeconds; // duración de trabajo efectiva
-
-  PomodoroSession({required this.endTime, required this.workSeconds});
-
-  Map<String, dynamic> toMap() => {
-        'endTime': endTime.toIso8601String(),
-        'workSeconds': workSeconds,
-      };
-
-  factory PomodoroSession.fromMap(Map<String, dynamic> map) => PomodoroSession(
-        endTime: DateTime.parse(map['endTime'] as String),
-        workSeconds: map['workSeconds'] as int,
-      );
-}
-
-class SessionRepository {
+class SessionRepository implements ISessionRepository {
   static const _key = 'sessions_json'; // legacy (guest / pre-auth)
   // Per-user key prefix when storing locally; final key: sessions_json_<uid>
   static String _userKey(String? uid) => uid == null ? _key : '${_key}_$uid';
@@ -34,6 +25,16 @@ class SessionRepository {
   static const _last5SoundKey = 'last5_sound_enabled';
   static const _last5FlashKey = 'last5_flash_enabled';
   static const _tickingSoundKey = 'ticking_sound_enabled';
+  static const _tickingVolumeKey = 'ticking_sound_volume';
+  static const _vibrationEnabledKey = 'vibration_enabled';
+  static const _hapticEnabledKey = 'haptic_enabled';
+  static const _alarmSoundKey = 'alarm_sound';
+  static const _alarmDurationKey = 'alarm_duration_seconds';
+  // Theme & preset keys moved to SettingsRepository
+  static const _widgetEnabledKey = 'home_widget_enabled';
+  static const _notificationActionsKey = 'notification_actions_enabled';
+  static const _keyboardShortcutsKey = 'keyboard_shortcuts_enabled';
+  static const _wearableSupportKey = 'wearable_support_enabled';
   static const _onboardingSeenKey = 'onboarding_seen';
   // Stream for live daily goal remaining updates
   static final SessionRepository _singleton = SessionRepository._internal();
@@ -60,7 +61,10 @@ class SessionRepository {
 
   Future<List<PomodoroSession>> loadSessions() async {
     final prefs = await SharedPreferences.getInstance();
-    final uid = FirebaseAuth.instance.currentUser?.uid;
+    // Firebase disabled: treat user as unauthenticated (guest)
+    // TODO: restore uid retrieval when Firebase Auth is re-enabled:
+    // final uid = FirebaseAuth.instance.currentUser?.uid;
+    final uid = null;
     final raw = prefs.getString(_userKey(uid));
     if (raw == null || raw.isEmpty) return [];
     try {
@@ -73,24 +77,20 @@ class SessionRepository {
     }
   }
 
+  @override
+  @override
   Future<void> addSession(PomodoroSession session) async {
     final prefs = await SharedPreferences.getInstance();
-    final uid = FirebaseAuth.instance.currentUser?.uid;
+    // TODO: restore uid retrieval when Firebase Auth is re-enabled:
+    // final uid = FirebaseAuth.instance.currentUser?.uid;
+    final uid = null;
     final current = await loadSessions();
     current.add(session);
     await prefs.setString(
         _userKey(uid), jsonEncode(current.map((e) => e.toMap()).toList()));
     // Firestore sync (best effort)
-    if (uid != null) {
-      try {
-        final doc = FirebaseFirestore.instance
-            .collection('users')
-            .doc(uid)
-            .collection('sessions')
-            .doc();
-        await doc.set(session.toMap());
-      } catch (_) {}
-    }
+    // Firestore sync disabled while Firebase is not configured.
+    // TODO: restore Firestore best-effort sync here using `FirebaseFirestore.instance`
     scheduleMicrotask(() => refreshGoalRemaining());
   }
 
@@ -130,6 +130,8 @@ class SessionRepository {
     await prefs.setInt(_longBreakIntervalKey, interval);
   }
 
+  @override
+  @override
   Future<int> getLongBreakInterval() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getInt(_longBreakIntervalKey) ?? 4; // default every 4
@@ -140,6 +142,8 @@ class SessionRepository {
     await prefs.setInt(_longBreakDurationKey, minutes);
   }
 
+  @override
+  @override
   Future<int> getLongBreakDurationMinutes() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getInt(_longBreakDurationKey) ?? 10; // default 10 min
@@ -195,6 +199,98 @@ class SessionRepository {
     return prefs.getBool(_tickingSoundKey) ?? true; // default enabled
   }
 
+  Future<void> setTickingVolume(double v) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setDouble(_tickingVolumeKey, v.clamp(0.0, 1.0));
+  }
+
+  Future<double> getTickingVolume() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getDouble(_tickingVolumeKey) ?? 0.5; // default 50%
+  }
+
+  Future<void> setVibrationEnabled(bool enabled) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_vibrationEnabledKey, enabled);
+  }
+
+  Future<bool> isVibrationEnabled() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_vibrationEnabledKey) ?? true;
+  }
+
+  Future<void> setHapticEnabled(bool enabled) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_hapticEnabledKey, enabled);
+  }
+
+  Future<bool> isHapticEnabled() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_hapticEnabledKey) ?? true;
+  }
+
+  Future<void> setAlarmSound(String name) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_alarmSoundKey, name);
+  }
+
+  Future<String> getAlarmSound() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_alarmSoundKey) ?? 'default';
+  }
+
+  Future<void> setAlarmDurationSeconds(int seconds) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_alarmDurationKey, seconds);
+  }
+
+  Future<int> getAlarmDurationSeconds() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt(_alarmDurationKey) ?? 5; // default 5s
+  }
+
+  // Removed theme & preset methods (handled by SettingsRepository now)
+
+  Future<void> setHomeWidgetEnabled(bool enabled) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_widgetEnabledKey, enabled);
+  }
+
+  Future<bool> isHomeWidgetEnabled() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_widgetEnabledKey) ?? true;
+  }
+
+  Future<void> setNotificationActionsEnabled(bool enabled) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_notificationActionsKey, enabled);
+  }
+
+  Future<bool> isNotificationActionsEnabled() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_notificationActionsKey) ?? true;
+  }
+
+  Future<void> setKeyboardShortcutsEnabled(bool enabled) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_keyboardShortcutsKey, enabled);
+  }
+
+  Future<bool> isKeyboardShortcutsEnabled() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_keyboardShortcutsKey) ?? false;
+  }
+
+  Future<void> setWearableSupportEnabled(bool enabled) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_wearableSupportKey, enabled);
+  }
+
+  Future<bool> isWearableSupportEnabled() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_wearableSupportKey) ?? false;
+  }
+
   Future<void> setOnboardingSeen() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_onboardingSeenKey, true);
@@ -205,6 +301,8 @@ class SessionRepository {
     return prefs.getBool(_onboardingSeenKey) ?? false;
   }
 
+  @override
+  @override
   Future<double> todayProgress() async {
     final goal = await getDailyGoalMinutes();
     final todaySec = await todayWorkSeconds();

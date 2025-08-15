@@ -56,6 +56,8 @@ class _HabitState extends State<Habit> {
     final double bottomSpacing = isMobile ? 40 : 80;
 
     final t = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     return GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       child: Scaffold(
@@ -64,17 +66,20 @@ class _HabitState extends State<Habit> {
         appBar: AppBar(
             automaticallyImplyLeading: false,
             centerTitle: false,
-            backgroundColor: Colors.black,
+            backgroundColor: Colors.transparent,
             title: Text(t.habitTitle,
                 style: TextStyle(
                   fontSize: titleFontSize,
-                  color: Colors.greenAccent,
+                  color: scheme.primary,
                   fontFamily: 'Arial',
                 ))),
         body: SingleChildScrollView(
           child: Container(
             width: double.infinity,
-            color: Colors.black38,
+            decoration: BoxDecoration(
+              color: scheme.surface.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(4),
+            ),
             margin: EdgeInsets.all(horizontalMargin),
             padding: EdgeInsets.all(containerPadding),
             child: Column(
@@ -83,7 +88,8 @@ class _HabitState extends State<Habit> {
                   t.workDurationLabel,
                   style: TextStyle(
                     fontSize: labelFontSize,
-                    color: Colors.white70,
+                    color: theme.textTheme.bodyMedium?.color
+                        ?.withValues(alpha: 0.7),
                     fontFamily: 'Arial',
                   ),
                 ),
@@ -93,32 +99,24 @@ class _HabitState extends State<Habit> {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: inputFontSize,
-                    color: Colors.white70,
+                    color: theme.textTheme.bodyMedium?.color
+                        ?.withValues(alpha: 0.7),
                     fontFamily: 'Arial',
                   ),
                   keyboardType: TextInputType.number,
-                  keyboardAppearance: Brightness.dark,
+                  keyboardAppearance: theme.brightness,
                   inputFormatters: [
                     FilteringTextInputFormatter.allow(RegExp(r'^[1-9][0-9]?$')),
                   ],
-                  decoration: InputDecoration(
-                    fillColor: Colors.black12,
-                    labelText: t.minutesHint,
-                    labelStyle: const TextStyle(color: Colors.white70),
-                    enabledBorder: const OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(4.0)),
-                        borderSide: BorderSide(color: Colors.white10)),
-                    focusedBorder: const OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(4.0)),
-                        borderSide: BorderSide(color: Colors.white10)),
-                  ),
+                  decoration: _inputDecoration(theme, t.minutesHint),
                 ),
                 SizedBox(height: fieldSpacing),
                 Text(
                   t.breakDurationLabel,
                   style: TextStyle(
                     fontSize: labelFontSize,
-                    color: Colors.white70,
+                    color: theme.textTheme.bodyMedium?.color
+                        ?.withValues(alpha: 0.7),
                     fontFamily: 'Arial',
                   ),
                 ),
@@ -128,33 +126,24 @@ class _HabitState extends State<Habit> {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: inputFontSize,
-                    color: Colors.white70,
+                    color: theme.textTheme.bodyMedium?.color
+                        ?.withValues(alpha: 0.7),
                     fontFamily: 'Arial',
                   ),
                   keyboardType: TextInputType.number,
-                  keyboardAppearance: Brightness.dark,
+                  keyboardAppearance: theme.brightness,
                   inputFormatters: [
                     FilteringTextInputFormatter.allow(RegExp(r'^[1-9][0-9]?$')),
                   ],
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.black12,
-                    labelText: t.minutesHint,
-                    labelStyle: const TextStyle(color: Colors.white70),
-                    enabledBorder: const OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(4.0)),
-                        borderSide: BorderSide(color: Colors.white10)),
-                    focusedBorder: const OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(4.0)),
-                        borderSide: BorderSide(color: Colors.white10)),
-                  ),
+                  decoration: _inputDecoration(theme, t.minutesHint),
                 ),
                 SizedBox(height: fieldSpacing),
                 Text(
                   t.sessionsLabel,
                   style: TextStyle(
                     fontSize: labelFontSize,
-                    color: Colors.white70,
+                    color: theme.textTheme.bodyMedium?.color
+                        ?.withValues(alpha: 0.7),
                     fontFamily: 'Arial',
                   ),
                 ),
@@ -164,27 +153,16 @@ class _HabitState extends State<Habit> {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: inputFontSize,
-                    color: Colors.white70,
+                    color: theme.textTheme.bodyMedium?.color
+                        ?.withValues(alpha: 0.7),
                     fontFamily: 'Arial',
                   ),
                   keyboardType: TextInputType.number,
-                  keyboardAppearance: Brightness.dark,
+                  keyboardAppearance: theme.brightness,
                   inputFormatters: [
                     FilteringTextInputFormatter.allow(RegExp(r'^[1-9][0-9]?$')),
                   ],
-                  decoration: InputDecoration(
-                    fillColor: Colors.black12,
-                    labelText: t.sessionsHint,
-                    labelStyle: const TextStyle(
-                      color: Colors.white70,
-                    ),
-                    enabledBorder: const OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(4.0)),
-                        borderSide: BorderSide(color: Colors.white10)),
-                    focusedBorder: const OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(4.0)),
-                        borderSide: BorderSide(color: Colors.white10)),
-                  ),
+                  decoration: _inputDecoration(theme, t.sessionsHint),
                 ),
                 SizedBox(height: fieldSpacing),
                 Wrap(
@@ -208,7 +186,8 @@ class _HabitState extends State<Habit> {
                   t.dailyGoalLabel,
                   style: TextStyle(
                     fontSize: labelFontSize,
-                    color: Colors.white70,
+                    color: theme.textTheme.bodyMedium?.color
+                        ?.withValues(alpha: 0.7),
                     fontFamily: 'Arial',
                   ),
                 ),
@@ -218,23 +197,14 @@ class _HabitState extends State<Habit> {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: inputFontSize,
-                    color: Colors.white70,
+                    color: theme.textTheme.bodyMedium?.color
+                        ?.withValues(alpha: 0.7),
                     fontFamily: 'Arial',
                   ),
                   keyboardType: TextInputType.number,
-                  keyboardAppearance: Brightness.dark,
+                  keyboardAppearance: theme.brightness,
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  decoration: InputDecoration(
-                    fillColor: Colors.black12,
-                    labelText: t.dailyGoalHint,
-                    labelStyle: const TextStyle(color: Colors.white70),
-                    enabledBorder: const OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(4.0)),
-                        borderSide: BorderSide(color: Colors.white10)),
-                    focusedBorder: const OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(4.0)),
-                        borderSide: BorderSide(color: Colors.white10)),
-                  ),
+                  decoration: _inputDecoration(theme, t.dailyGoalHint),
                   onChanged: (v) {
                     final m = int.tryParse(v);
                     if (m != null) repo.setDailyGoalMinutes(m);
@@ -246,7 +216,8 @@ class _HabitState extends State<Habit> {
                   t.longBreakConfigTitle,
                   style: TextStyle(
                     fontSize: labelFontSize,
-                    color: Colors.white70,
+                    color: theme.textTheme.bodyMedium?.color
+                        ?.withValues(alpha: 0.7),
                     fontFamily: 'Arial',
                   ),
                 ),
@@ -269,8 +240,11 @@ class _HabitState extends State<Habit> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(t.longBreakIntervalLabel,
-                                      style: const TextStyle(
-                                          color: Colors.white54, fontSize: 12)),
+                                      style: TextStyle(
+                                          color: theme
+                                              .textTheme.bodyMedium?.color
+                                              ?.withValues(alpha: 0.55),
+                                          fontSize: 12)),
                                   Slider(
                                     value: interval.toDouble(),
                                     min: 2,
@@ -292,8 +266,11 @@ class _HabitState extends State<Habit> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(t.longBreakDurationLabel,
-                                      style: const TextStyle(
-                                          color: Colors.white54, fontSize: 12)),
+                                      style: TextStyle(
+                                          color: theme
+                                              .textTheme.bodyMedium?.color
+                                              ?.withValues(alpha: 0.55),
+                                          fontSize: 12)),
                                   Slider(
                                     value: duration.toDouble(),
                                     min: 5,
@@ -335,7 +312,7 @@ class _HabitState extends State<Habit> {
                     ),
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.greenAccent,
+                    backgroundColor: scheme.primary,
                     padding: EdgeInsets.zero,
                     minimumSize: Size(buttonWidth, buttonHeight),
                     fixedSize: Size(buttonWidth, buttonHeight),
@@ -352,7 +329,7 @@ class _HabitState extends State<Habit> {
                         t.start,
                         style: TextStyle(
                           fontSize: buttonFontSize,
-                          color: Colors.black,
+                          color: scheme.onPrimary,
                           fontWeight: FontWeight.bold,
                           fontFamily: 'Arial',
                         ),
@@ -365,6 +342,24 @@ class _HabitState extends State<Habit> {
       ),
     );
   }
+
+  InputDecoration _inputDecoration(ThemeData theme, String label) {
+    final baseColor = theme.textTheme.bodyMedium?.color ??
+        (theme.brightness == Brightness.dark ? Colors.white : Colors.black);
+    final border = OutlineInputBorder(
+        borderRadius: const BorderRadius.all(Radius.circular(4.0)),
+        borderSide: BorderSide(color: baseColor.withValues(alpha: 0.12)));
+    return InputDecoration(
+      filled: true,
+      fillColor: baseColor.withValues(alpha: 0.04),
+      labelText: label,
+      labelStyle: TextStyle(color: baseColor.withValues(alpha: 0.55)),
+      enabledBorder: border,
+      focusedBorder: border.copyWith(
+        borderSide: BorderSide(color: baseColor.withValues(alpha: 0.30)),
+      ),
+    );
+  }
 }
 
 class _PresetChip extends StatelessWidget {
@@ -373,19 +368,19 @@ class _PresetChip extends StatelessWidget {
   const _PresetChip({required this.label, required this.onTap});
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          // withOpacity deprecated; using withValues
-          color: Colors.greenAccent.withValues(alpha: 0.15),
+          color: scheme.primary.withValues(alpha: 0.12),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.greenAccent, width: 1),
+          border: Border.all(color: scheme.primary, width: 1),
         ),
         child: Text(
           label,
-          style: const TextStyle(color: Colors.greenAccent, fontSize: 12),
+          style: TextStyle(color: scheme.primary, fontSize: 12),
         ),
       ),
     );

@@ -1,7 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <!-- Removed FOREGROUND_SERVICE permissions because background service was eliminated -->
+    <!-- Allow querying/changing Do Not Disturb (notification policy) when the user grants access -->
+    <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <!-- Foreground service permission used to keep the app alive during long timers -->
     <!-- Optional: exact alarm (Android 14+) only if really needed -->
     <!-- Removed USE_EXACT_ALARM to avoid permission denial crash; using inexact scheduling fallback -->
     <application
@@ -36,7 +39,15 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
-    <!-- Removed obsolete flutter_background_service declaration to prevent system from trying to start it -->
+        <!-- Lightweight foreground service used to keep the app in foreground
+             while a long-running timer is active. This service is started/stopped
+             on demand from Dart via MethodChannel. -->
+       <!-- Declare foregroundServiceType to satisfy Android's requirement for apps targeting API 31+.
+           Choose 'mediaPlayback' because the app may play audio while the timer runs. Adjust if needed. -->
+       <service
+          android:name=".ForegroundService"
+          android:exported="false"
+          android:foregroundServiceType="mediaPlayback" />
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and

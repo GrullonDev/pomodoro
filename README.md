@@ -49,22 +49,28 @@ Crear una app de productividad enfocada, agradable y extensible que no sólo mid
 | ✅ | Historial local | Registro de sesiones completadas y progreso diario. |
 | ✅ | Configuración básica | Duraciones, objetivo diario, intervalo de descansos largos. |
 | ✅ | Onboarding inicial | Explica el método al primer ingreso. |
-| 🔄 | Localización | EN / ES (migración a ARB en progreso). |
+| 🔄 | Localización | EN / ES (strings migrándose a ARB; base operativa). |
 | 🧪 | Testing | Pruebas iniciales de widgets (expandir). |
 | 🗄️ | Firebase (deshabilitado en UI) | Base preparada para reintroducir autenticación y sync. |
-| 🧩 | Extensible | Arquitectura por capas (Bloc + Repository). |
+| ✅ | Gestión de Tareas | Lista de tareas con sesiones asociadas y avance automático. |
+| ✅ | Theming dinámico | Tema oscuro + cambio futuro de color primario (persistente). |
+| ✅ | Arquitectura escalable | Capas Domain / Data / Presentation + Use Cases. |
+| 🧩 | Extensible | Repos + Use Cases + Service Locator para futuras integraciones. |
 
 ## Roadmap / Próximas Mejoras
 - [ ] Pantalla de estadísticas semanales avanzadas (gráficas).
 - [ ] Modo enfoque con bloqueo opcional de distracciones (Android).
 - [ ] Tema claro + ajustes de accesibilidad (alto contraste / tamaño fuente).
-- [ ] Migración completa de strings a ARB + guía de traducción.
+- [ ] Migración completa de strings a ARB + guía de traducción comunitaria.
 - [ ] Ajuste de volumen independiente (tick vs alertas).
 - [ ] Múltiples perfiles de configuración (estudio, deep work, repaso).
 - [ ] Sincronización opcional en la nube (re-habilitar auth). 
 - [ ] Exportar historial (CSV / Share).
 - [ ] Widget / Complication (Android / iOS futuro).
 - [ ] Animaciones de celebración al completar meta diaria.
+- [ ] Coordinador / Use Case para flujo secuencial de tareas (actual TaskFlowStarter).
+- [ ] Tests adicionales: TimerBloc, SettingsRepository, SessionRepository.
+- [ ] Refactor final de settings menores restantes hacia SettingsRepository.
 
 ¿Quieres ayudar? Revisa [Cómo Contribuir](#cómo-contribuir).
 
@@ -74,9 +80,11 @@ Crear una app de productividad enfocada, agradable y extensible que no sólo mid
 - **Persistencia local:** `shared_preferences`
 - **Audio:** `audioplayers`
 - **Notificaciones:** `flutter_local_notifications`
-- **Internacionalización:** `flutter_localizations` (migración a ARB pendiente)
+- **Internacionalización:** `flutter_localizations` + ARB (proceso de migración en curso)
 - **Firebase (core/auth/firestore):** Preparado pero autenticación temporalmente desactivada
 - **Diseño:** Material 3, tema oscuro personalizado
+- **Arquitectura:** Clean Architecture ligera (Domain / Data / Presentation) con Use Cases
+- **DI:** Service Locator simple (propio) — migrable a `get_it` si escala
 
 ## Requisitos
 - Flutter 3.32.4 (recomendado usar [FVM](https://fvm.app/))
@@ -118,12 +126,18 @@ lib/
    core/
       data/              # Repositorios (SessionRepository, etc.)
       timer/             # Bloc, estados, lógica de temporizador
-   features/
+         data/              # Implementaciones concretas (SessionRepository, TaskRepository, SettingsRepository)
+         domain/
+            entities/       # Entidades puras (TaskItem, PomodoroSession)
+            repositories/   # Interfaces (ISessionRepository, ITaskRepository, ISettingsRepository)
+            usecases/       # Casos de uso (AddTask, IncrementTaskSession, etc.)
       auth/              # Onboarding (auth temporalmente inactiva)
       summary/           # Pantalla resumen sesiones
+         theme/             # Controladores de tema / locale
    l10n/                # Localización y extensiones temporales
    utils/               # App root, theming, home, notificaciones
 assets/
+         tasks/             # UI de gestión de tareas
    sounds/              # last5.mp3, cronometro.mp3
 ```
 > Carpetas desktop/web fueron excluidas del versionado porque el foco es móvil.
@@ -135,11 +149,35 @@ assets/
 | Bloc | Orquestación de estados de temporizador y transiciones de fase. |
 | Repository | Persistencia + abstracción de fuente de datos (local / nube futura). |
 | Services | Notificaciones, audio (audioplayers), etc. |
+| Capa | Rol |
+|------|-----|
+| Presentation (UI + Bloc) | Widgets y TimerBloc coordinando fases y progreso. |
+| Domain (Entities + Use Cases + Interfaces) | Reglas de negocio puras y orquestación de acciones. |
+| Data (Repos concretos) | Implementaciones con SharedPreferences (persistencia local). |
+| Services | Notificaciones, audio, DND, etc. |
+| DI (Service Locator) | Provee instancias de repos para desacoplar creaciones. |
 
 Principios:
 - Separación de responsabilidades.
 - Persistencia simple (SharedPreferences) para velocidad + baja fricción.
+- Interfaz primero: dependencias contra abstracciones (DIP básico).
+- Use Cases como frontera de negocio reutilizable.
 - Soporte futuro para sincronización sin bloquear UX si Firebase falla (try/catch ya aplicado).
+- Refactor incremental: mantener funcionalidad mientras se introducen capas.
+
+### Refactor Reciente (Clean Architecture)
+Implementado:
+- Extracción de entidades (`TaskItem`, `PomodoroSession`).
+- Interfaces de repos: `ISessionRepository`, `ITaskRepository`, `ISettingsRepository`.
+- Casos de uso iniciales: `AddTaskUseCase`, `IncrementTaskSessionUseCase`, `NextPendingTaskUseCase` (en progreso), utilidades de sesión.
+- `SettingsRepository` separado de `SessionRepository` (tema/preset/colores).
+- Service Locator para evitar instanciación directa en UI.
+- Pruebas unitarias iniciales sobre casos de uso de tareas.
+
+Pendiente / Próximo:
+- Coordinator / Use Case para flujo completo de tareas (reemplazar `TaskFlowStarter`).
+- Tests para TimerBloc y repos restantes.
+- Migrar configuración residual (alertas, vibración) a SettingsRepository.
 
 ## Flujo de Uso de la App
 1. Usuario abre la app → Onboarding (solo la primera vez).
@@ -148,15 +186,18 @@ Principios:
 4. Últimos 5s: alerta sonora corta + vibración + flash (si habilitado).
 5. Cambia a descanso, repite hasta completar sesiones configuradas.
 6. Se registra la sesión y se actualiza progreso diario.
+7. (Opcional) Flujo secuencial de tareas: al terminar una, se propone continuar con la siguiente pendiente.
 
 ## Personalización y Opciones
-Configuraciones actuales (parte vía `SessionRepository`):
+Configuraciones actuales (divididas en `SessionRepository` y `SettingsRepository`):
 - Objetivo diario (minutos).
 - Intervalo para descanso largo.
 - Duración de descanso largo.
 - Notificación persistente on/off.
 - Alertas últimos 5 segundos (flash / sonido / vibración).
 - Sonido de tick (fase trabajo) on/off.
+- Selección de preset de trabajo (perfiles base).
+- Tema oscuro persistente.
 
 Próximas: volumen, perfiles, modo enfoque.
 
@@ -165,7 +206,11 @@ Ejecutar tests:
 ```bash
 fvm flutter test
 ```
-Se añadirán pruebas unitarias para lógica de temporizador y repositorio (pendiente).
+Actualmente:
+- Pruebas de use cases de tareas (`domain_usecases_test.dart`).
+En progreso / plan:
+- Tests para `TimerBloc` (ciclos de fase, restauración estado).
+- Tests para `SettingsRepository` y `SessionRepository` (persistencia y migraciones).
 
 ## Convenciones de Código
 - Formato: `dart format .`
@@ -179,6 +224,20 @@ Se añadirán pruebas unitarias para lógica de temporizador y repositorio (pend
 3. Asegura formato + lint + tests pasan.
 4. Abre PR hacia `develop` describiendo cambios, capturas si aplica.
 5. Mantén PRs pequeños y enfocados.
+
+### Pull Request hacia `main`
+`main` solo recibe merges desde `develop` tras completar:
+- Refactor o feature estable y testeado.
+- Lint sin warnings críticos.
+- README / docs actualizados.
+- Revisión mínima (self-review checklist en la descripción del PR).
+
+Checklist sugerido para PR:
+- [ ] Cambios compilando (Android / iOS).
+- [ ] `flutter analyze` sin issues nuevos.
+- [ ] Tests agregados / existentes pasando.
+- [ ] Actualizado README / CHANGELOG si aplica.
+- [ ] Sin credenciales ni datos sensibles.
 
 ### Sugerencias de buen primer aporte
 - Migrar más strings a ARB.
@@ -209,3 +268,5 @@ Desarrollado por **Jorge Grullón**.
 
 ---
 Si este proyecto te resulta útil, considera darle una ⭐ en GitHub para aumentar su visibilidad y atraer más colaboradores.
+
+---

@@ -9,12 +9,19 @@ class NotificationService {
   static final FlutterLocalNotificationsPlugin _notificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
+  // If true, the app will avoid playing notification sounds and will lower
+  // importance for notifications to mimic a local 'silent' mode when the
+  // system DND is not available/granted.
+  static bool appSilentMode = false;
+  // When true, the service will no-op platform interactions (used in tests)
+  static bool testMode = false;
+
   static Future<void> initialize() async {
     tz.initializeTimeZones();
     // Android initialization
-  const AndroidInitializationSettings androidSettings =
-    // Use dedicated status bar icon (monochrome / flat) for better contrast.
-    AndroidInitializationSettings('@drawable/ic_stat_pomodoro');
+    final AndroidInitializationSettings androidSettings =
+        // Use dedicated status bar icon (monochrome / flat) for better contrast.
+        AndroidInitializationSettings('@drawable/ic_stat_pomodoro');
 
     // iOS initialization
     final pauseResumeAction = DarwinNotificationAction.plain(
@@ -50,18 +57,18 @@ class NotificationService {
       await _notificationsPlugin.initialize(settings,
           onDidReceiveNotificationResponse:
               (NotificationResponse response) async {
-      if (response.actionId == 'pause_resume') {
-        TimerActionBus.instance.add('toggle');
-      } else if (response.actionId == 'skip') {
-        TimerActionBus.instance.add('skip');
-      } else {
-        final payload = response.payload;
-        if (payload != null && payload.startsWith('action:')) {
-          final action = payload.substring('action:'.length);
-          TimerActionBus.instance.add(action);
+        if (response.actionId == 'pause_resume') {
+          TimerActionBus.instance.add('toggle');
+        } else if (response.actionId == 'skip') {
+          TimerActionBus.instance.add('skip');
+        } else {
+          final payload = response.payload;
+          if (payload != null && payload.startsWith('action:')) {
+            final action = payload.substring('action:'.length);
+            TimerActionBus.instance.add(action);
+          }
         }
-      }
-          });
+      });
     } catch (e) {
       // Silently continue if initialization fails due to a resource issue; app can still function.
       if (kDebugMode) {
@@ -91,31 +98,26 @@ class NotificationService {
     required String title,
     required String body,
   }) async {
-    const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+    final androidDetails = AndroidNotificationDetails(
       'pomodoro_timer_channel',
       'Pomodoro Timer',
       channelDescription: 'Timer notifications for Pomodoro app',
-      importance: Importance.max,
-      priority: Priority.high,
+      importance: appSilentMode ? Importance.low : Importance.max,
+      priority: appSilentMode ? Priority.low : Priority.high,
       ticker: 'ticker',
-      // For Android 13+ notification permission
-      enableVibration: true,
-      playSound: true,
-      // For dynamic island (Android 14+), use styleInformation if needed
+      enableVibration: !appSilentMode,
+      playSound: !appSilentMode,
       icon: '@drawable/ic_stat_pomodoro',
     );
 
-    const DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
+    final iosDetails = DarwinNotificationDetails(
       presentAlert: true,
       presentBadge: true,
-      presentSound: true,
-      // For iOS 16.1+ Live Activities (Dynamic Island), use plugin like activitykit
+      presentSound: !appSilentMode,
     );
 
-    const NotificationDetails platformDetails = NotificationDetails(
-      android: androidDetails,
-      iOS: iosDetails,
-    );
+    final platformDetails =
+        NotificationDetails(android: androidDetails, iOS: iosDetails);
 
     await _notificationsPlugin.show(
       id,
@@ -128,17 +130,18 @@ class NotificationService {
 
   static Future<void> showSimple(
       {required String title, required String body, int id = 700}) async {
-    const androidDetails = AndroidNotificationDetails(
+    final androidDetails = AndroidNotificationDetails(
       'pomodoro_general',
       'General',
       channelDescription: 'Otras notificaciones',
-      importance: Importance.high,
-      priority: Priority.high,
+      importance: appSilentMode ? Importance.low : Importance.high,
+      priority: appSilentMode ? Priority.low : Priority.high,
       icon: '@drawable/ic_stat_pomodoro',
+      playSound: !appSilentMode,
     );
-    const ios = DarwinNotificationDetails();
+    final ios = DarwinNotificationDetails(presentSound: !appSilentMode);
     await _notificationsPlugin.show(id, title, body,
-        const NotificationDetails(android: androidDetails, iOS: ios));
+        NotificationDetails(android: androidDetails, iOS: ios));
   }
 
   static Future<void> showTimerFinishedNotification({
@@ -146,28 +149,28 @@ class NotificationService {
     required String title,
     required String body,
   }) async {
+    if (testMode) return;
     // Usamos el sonido por defecto del sistema para evitar el crash
     // (PlatformException invalid_sound) mientras no exista el recurso
     // raw "timer_end" (android/app/src/main/res/raw/timer_end.*) y el
     // archivo iOS (ios/Runner/timer_end.aiff). Cuando agregues los
     // archivos, puedes restaurar la propiedad 'sound'.
-    const androidDetails = AndroidNotificationDetails(
+    final androidDetails = AndroidNotificationDetails(
       'pomodoro_timer_finished_channel',
       'Pomodoro Timer Finished',
       channelDescription: 'Alerta sonora al finalizar el temporizador',
-      importance: Importance.max,
-      priority: Priority.high,
+      importance: appSilentMode ? Importance.low : Importance.max,
+      priority: appSilentMode ? Priority.low : Priority.high,
       ticker: 'ticker',
-      enableVibration: true,
-      playSound: true,
-      // sound: RawResourceAndroidNotificationSound('timer_end'), // <-- Re‑habilitar cuando exista el archivo
+      enableVibration: !appSilentMode,
+      playSound: !appSilentMode,
       icon: '@drawable/ic_stat_pomodoro',
     );
-    const iosDetails = DarwinNotificationDetails(
+    final iosDetails = DarwinNotificationDetails(
       presentAlert: true,
       presentBadge: true,
-      presentSound: true, // Usa sonido por defecto
-      // sound: 'timer_end.aiff', // <-- Re‑habilitar cuando agregues el archivo
+      presentSound:
+          !appSilentMode, // Usa sonido por defecto si no estamos en appSilentMode
     );
 
     try {
@@ -175,7 +178,7 @@ class NotificationService {
         id,
         title,
         body,
-        const NotificationDetails(android: androidDetails, iOS: iosDetails),
+        NotificationDetails(android: androidDetails, iOS: iosDetails),
         payload: 'timer_finished',
       );
     } catch (e) {
@@ -188,19 +191,21 @@ class NotificationService {
     required String title,
     required String body,
   }) async {
+    if (testMode) return;
     final scheduled =
         tz.TZDateTime.now(tz.local).add(Duration(seconds: seconds));
-    const androidDetails = AndroidNotificationDetails(
+    final androidDetails = AndroidNotificationDetails(
       'pomodoro_phase_end',
       'Fin de fase',
       channelDescription: 'Notificación al terminar fase',
-      importance: Importance.max,
-      priority: Priority.high,
+      importance: appSilentMode ? Importance.low : Importance.max,
+      priority: appSilentMode ? Priority.low : Priority.high,
+      playSound: !appSilentMode,
     );
-    const ios = DarwinNotificationDetails();
+    final ios = DarwinNotificationDetails(presentSound: !appSilentMode);
     try {
       await _notificationsPlugin.zonedSchedule(500, title, body, scheduled,
-          const NotificationDetails(android: androidDetails, iOS: ios),
+          NotificationDetails(android: androidDetails, iOS: ios),
           uiLocalNotificationDateInterpretation:
               UILocalNotificationDateInterpretation.absoluteTime,
           payload: 'phase_end',
@@ -209,7 +214,7 @@ class NotificationService {
       // Fallback to inexact if exact alarms not permitted
       try {
         await _notificationsPlugin.zonedSchedule(500, title, body, scheduled,
-            const NotificationDetails(android: androidDetails, iOS: ios),
+            NotificationDetails(android: androidDetails, iOS: ios),
             uiLocalNotificationDateInterpretation:
                 UILocalNotificationDateInterpretation.absoluteTime,
             payload: 'phase_end',
@@ -237,6 +242,7 @@ class NotificationService {
       priority: Priority.low,
       ongoing: true,
       autoCancel: false,
+      playSound: !appSilentMode,
       actions: <AndroidNotificationAction>[
         AndroidNotificationAction(
           'pause_resume',
@@ -255,9 +261,9 @@ class NotificationService {
       usesChronometer: true,
       chronometerCountDown: true,
     );
-    const ios = DarwinNotificationDetails(
+    final ios = DarwinNotificationDetails(
         presentAlert: false,
-        presentSound: false,
+        presentSound: !appSilentMode,
         presentBadge: false,
         categoryIdentifier: 'FOCUS_TIMER');
     await _notificationsPlugin.show(
@@ -287,6 +293,7 @@ class NotificationService {
       priority: Priority.low,
       ongoing: true,
       autoCancel: false,
+      playSound: !appSilentMode,
       usesChronometer: true,
       chronometerCountDown: true,
       when: endMillis, // Android uses 'when' as base for chronometer
@@ -306,9 +313,9 @@ class NotificationService {
         ),
       ],
     );
-    const ios = DarwinNotificationDetails(
+    final ios = DarwinNotificationDetails(
         presentAlert: false,
-        presentSound: false,
+        presentSound: !appSilentMode,
         presentBadge: false,
         categoryIdentifier: 'FOCUS_TIMER');
     await _notificationsPlugin.show(
