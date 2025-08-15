@@ -144,30 +144,65 @@ class _AnimatedGradientShellState extends State<AnimatedGradientShell>
     return AnimatedBuilder(
       animation: _c,
       builder: (context, _) {
-        final isDark = Theme.of(context).brightness == Brightness.dark;
-        final colors = isDark
-            ? [
-                const Color(0xFF0F2027),
-                const Color(0xFF203A43),
-                const Color(0xFF2C5364),
-              ]
-            : [
-                const Color(0xFFE9FDF5),
-                const Color(0xFFE3F5FF),
-                const Color(0xFFF0F3FF),
-              ];
-        return Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Color.lerp(colors[0], colors[1], _c.value * .8)!,
-                Color.lerp(colors[1], colors[2], _c.value)!,
-              ],
+        final theme = Theme.of(context);
+        final scheme = theme.colorScheme;
+        final base = theme.scaffoldBackgroundColor;
+        final primary = scheme.primary;
+        // Helper to blend two colors with given t
+        Color blend(Color a, Color b, double t) => Color.lerp(a, b, t)!;
+        final bool isDark = theme.brightness == Brightness.dark;
+        // Generate a smooth trio based on primary + base; darker themes keep subtle motion
+        final c1 = blend(base, primary, isDark ? 0.08 : 0.18);
+        final c2 = blend(base, primary, isDark ? 0.20 : 0.32);
+        final c3 = blend(base, Colors.white, isDark ? 0.04 : 0.55);
+        final animT = _c.value;
+        final g1 = Color.lerp(c1, c2, animT * .9)!;
+        final g2 = Color.lerp(c2, c3, animT)!;
+
+        return Stack(
+          fit: StackFit.expand,
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [g1, g2],
+                ),
+              ),
             ),
-          ),
-          child: widget.child,
+            // Radial accent glow (animated subtle pulse)
+            IgnorePointer(
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: RadialGradient(
+                    center: const Alignment(-0.8, -0.9),
+                    radius: 1.2,
+                    colors: [
+                      primary.withValues(alpha: isDark ? 0.10 : 0.18),
+                      Colors.transparent,
+                    ],
+                    stops: const [0, 1],
+                  ),
+                ),
+              ),
+            ),
+            // Very subtle vertical fade to base to reduce banding near bottom
+            IgnorePointer(
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [Colors.transparent, base.withValues(alpha: 0.25)],
+                    stops: const [0.55, 1.0],
+                  ),
+                ),
+              ),
+            ),
+            // Content
+            widget.child,
+          ],
         );
       },
     );

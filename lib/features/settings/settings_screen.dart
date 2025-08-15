@@ -81,7 +81,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final t = AppLocalizations.of(context);
     final scheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
           automaticallyImplyLeading: false,
           backgroundColor: Colors.transparent,
