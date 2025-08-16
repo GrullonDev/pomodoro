@@ -3,6 +3,7 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:audioplayers/audioplayers.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Simple singleton AudioService to centralize audio players and reduce
 /// repeated creation/disposal which can trigger platform MediaPlayer errors
@@ -18,6 +19,8 @@ class AudioService {
   late final AudioPlayer _sfxPlayer;
   late final AudioPlayer _tickPlayer;
   bool _preloaded = false;
+  static const _focusTrackKey = 'focus_track_asset';
+  String? _cachedFocusTrack; // asset path
   Uint8List? _generatedBeep;
 
   Future<void> preload() async {
@@ -48,11 +51,36 @@ class AudioService {
     }
   }
 
+  Future<List<String>> availableFocusTracks() async {
+    // Hardcode list of bundled assets for now; could be loaded from manifest.
+    return [
+      'sounds/cronometro.mp3',
+      'sounds/forest.mp3',
+      'sounds/rain.mp3',
+      'sounds/white_noise.mp3',
+    ];
+  }
+
+  Future<void> setFocusTrack(String assetPath) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_focusTrackKey, assetPath);
+    _cachedFocusTrack = assetPath;
+  }
+
+  Future<String> getFocusTrack() async {
+    if (_cachedFocusTrack != null) return _cachedFocusTrack!;
+    final prefs = await SharedPreferences.getInstance();
+    _cachedFocusTrack =
+        prefs.getString(_focusTrackKey) ?? 'sounds/cronometro.mp3';
+    return _cachedFocusTrack!;
+  }
+
   Future<void> startTicking() async {
     try {
       await _tickPlayer.setReleaseMode(ReleaseMode.loop);
       await _tickPlayer.setVolume(0.35);
-      await _tickPlayer.setSource(AssetSource('sounds/cronometro.mp3'));
+      final track = await getFocusTrack();
+      await _tickPlayer.setSource(AssetSource(track));
       await _tickPlayer.resume();
     } catch (e) {
       // ignore

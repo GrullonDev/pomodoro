@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'package:pomodoro/l10n/app_localizations.dart';
 
 class DayDetailScreen extends StatelessWidget {

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+
+import 'package:pomodoro/core/data/preset_profile.dart';
 import 'package:pomodoro/core/data/session_repository.dart'; // retains other timer related settings
 import 'package:pomodoro/core/di/service_locator.dart';
-import 'package:pomodoro/core/data/preset_profile.dart';
-import 'package:pomodoro/l10n/app_localizations.dart';
-import 'package:pomodoro/core/theme/theme_controller.dart';
 import 'package:pomodoro/core/theme/locale_controller.dart';
+import 'package:pomodoro/core/theme/theme_controller.dart';
 import 'package:pomodoro/core/timer/timer_screen.dart';
+import 'package:pomodoro/l10n/app_localizations.dart';
+import 'package:pomodoro/utils/audio_service.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -31,6 +33,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool? _notifActions;
   bool? _kbShortcuts;
   bool? _wearable;
+  String? _focusTrack;
 
   @override
   void initState() {
@@ -43,10 +46,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final l5 = await _repo.isLast5AlertEnabled();
     final l5s = await _repo.isLast5SoundEnabled();
     final l5f = await _repo.isLast5FlashEnabled();
-  var preset = await ServiceLocator.I.settingsRepository.getSelectedPreset();
+    var preset = await ServiceLocator.I.settingsRepository.getSelectedPreset();
     // Si aún no hay un preset seleccionado, usar por defecto 'work'
     preset ??= PresetProfile.work.key;
-  final dark = await ServiceLocator.I.settingsRepository.isThemeDarkEnabled();
+    final dark = await ServiceLocator.I.settingsRepository.isThemeDarkEnabled();
     final vol = await _repo.getTickingVolume();
     final vib = await _repo.isVibrationEnabled();
     final hap = await _repo.isHapticEnabled();
@@ -56,6 +59,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final notifActions = await _repo.isNotificationActionsEnabled();
     final kb = await _repo.isKeyboardShortcutsEnabled();
     final wear = await _repo.isWearableSupportEnabled();
+    // focus track
+    try {
+      _focusTrack = await AudioService.instance.getFocusTrack();
+    } catch (_) {}
     if (mounted) {
       setState(() {
         _persistent = v;
@@ -73,6 +80,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _notifActions = notifActions;
         _kbShortcuts = kb;
         _wearable = wear;
+        _focusTrack = _focusTrack;
       });
     }
   }
@@ -116,7 +124,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             color: baseColor.withValues(alpha: 0.55))),
                     onChanged: (v) async {
                       if (v == null) return;
-                      await ServiceLocator.I.settingsRepository.setSelectedPreset(v);
+                      await ServiceLocator.I.settingsRepository
+                          .setSelectedPreset(v);
                       PresetProfile selected = PresetProfile.custom;
                       if (v != PresetProfile.custom.key) {
                         selected = PresetProfile.defaults().firstWhere(
@@ -277,6 +286,50 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       setState(() => _tickVol = val);
                     },
                   ),
+                ),
+                ListTile(
+                  title: Text('Focus track',
+                      style: TextStyle(
+                          color:
+                              Theme.of(context).textTheme.bodyMedium?.color)),
+                  subtitle: Text(
+                      _focusTrack?.split('/').last ?? 'cronometro.mp3',
+                      style: TextStyle(
+                          color: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.color
+                              ?.withValues(alpha: 0.65))),
+                  onTap: () async {
+                    final tracks =
+                        await AudioService.instance.availableFocusTracks();
+                    final selected = await showModalBottomSheet<String>(
+                        context: context,
+                        builder: (ctx) => SafeArea(
+                              child: ListView(
+                                shrinkWrap: true,
+                                children: [
+                                  ...tracks.map((tPath) => ListTile(
+                                        title: Text(tPath.split('/').last),
+                                        trailing: tPath == _focusTrack
+                                            ? const Icon(Icons.check,
+                                                color: Colors.green)
+                                            : null,
+                                        onTap: () => Navigator.pop(ctx, tPath),
+                                      )),
+                                  const Divider(),
+                                  ListTile(
+                                    title: const Text('Cancelar'),
+                                    onTap: () => Navigator.pop(ctx),
+                                  )
+                                ],
+                              ),
+                            ));
+                    if (selected != null && selected.isNotEmpty) {
+                      await AudioService.instance.setFocusTrack(selected);
+                      setState(() => _focusTrack = selected);
+                    }
+                  },
                 ),
                 SwitchListTile(
                   title: Text('Vibration',

@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+
 import 'package:pomodoro/core/di/service_locator.dart';
 
 /// Singleton con ValueNotifier para reaccionar a cambios de tema.
@@ -11,11 +12,12 @@ class ThemeController {
       ValueNotifier<bool>(true); // default oscuro
 
   Future<void> load() async {
-  isDark.value = await ServiceLocator.I.settingsRepository.isThemeDarkEnabled();
+    isDark.value =
+        await ServiceLocator.I.settingsRepository.isThemeDarkEnabled();
   }
 
   Future<void> setDark(bool value) async {
     isDark.value = value;
-  await ServiceLocator.I.settingsRepository.setThemeDarkEnabled(value);
+    await ServiceLocator.I.settingsRepository.setThemeDarkEnabled(value);
   }
 }

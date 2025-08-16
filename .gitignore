@@ -2,6 +2,10 @@
 # Flutter / Dart (limpio) #
 ###########################
 .dart_tool/
+###########################
+# Flutter / Dart (limpio) #
+###########################
+.dart_tool/
 .packages
 .flutter-plugins
 .flutter-plugins-dependencies
@@ -17,6 +21,7 @@ coverage/
 .dart_tool/package_config_subset
 .dart_tool/package_graph.json
 .dart_tool/version
+package_graph.json
 
 # Registrants generados (web / desktop)
 lib/generated_plugin_registrant.dart
@@ -54,7 +59,6 @@ ios/Runner.xcodeproj/project.pbxproj
 ios/Runner.xcodeproj/xcuserdata/
 ios/Runner.xcodeproj/project.xcworkspace/
 ios/Runner.xcodeproj/xcshareddata/
-ios/Runner.xcodeproj/xcshareddata/**
 ios/Runner.xcodeproj/xcuserdata/**
 ios/Runner/GoogleService-Info.plist
 

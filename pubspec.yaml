@@ -59,6 +59,10 @@ flutter:
     - assets/sounds/last5.mp3
     - assets/sounds/last5.wav
     - assets/sounds/cronometro.mp3
+  # Additional focus tracks (ensure files added):
+  # - assets/sounds/forest.mp3
+  # - assets/sounds/rain.mp3
+  # - assets/sounds/white_noise.mp3
     - assets/sounds/
 
   # To add assets to your application, add an assets section, like this:

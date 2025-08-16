@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 
 import 'package:pomodoro/features/habit/habit.dart';
 import 'package:pomodoro/features/history/history_screen.dart';
-import 'package:pomodoro/l10n/app_localizations.dart';
 import 'package:pomodoro/features/settings/settings_screen.dart';
 import 'package:pomodoro/features/tasks/tasks_screen.dart';
+import 'package:pomodoro/l10n/app_localizations.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

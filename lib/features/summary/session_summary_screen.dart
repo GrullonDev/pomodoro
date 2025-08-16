@@ -1,12 +1,15 @@
+import 'dart:io';
 import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'dart:io';
+
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
+
 import 'package:pomodoro/core/data/session_repository.dart';
-import 'package:pomodoro/l10n/app_localizations.dart';
 import 'package:pomodoro/core/widgets/focus_weekly_chart.dart';
+import 'package:pomodoro/l10n/app_localizations.dart';
 
 class SessionSummaryScreen extends StatefulWidget {
   final int totalSessions;
