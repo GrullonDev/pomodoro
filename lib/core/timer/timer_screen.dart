@@ -56,26 +56,25 @@ class TimerScreen extends StatelessWidget {
         final breakSeconds = br * 60;
         return BlocProvider(
           create: (_) => TimerBloc(
-                ticker: const Ticker(),
-                repository: SessionRepository(),
-                onTaskCycleCompleted: task == null
-                    ? null
-                    : () async {
-                        final repo = TaskRepository();
-                        if (task!.id.isNotEmpty) {
-                          // marcar completada (ya terminó todas sus sesiones)
-                          await repo.markDone(task!.id);
-                        }
-                      },
-              )
-                ..add(TimerStarted(
-                  phase: TimerPhase.work,
-                  duration: workSeconds,
-                  workDuration: workSeconds,
-                  breakDuration: breakSeconds,
-                  session: 1,
-                  totalSessions: task?.sessions ?? sessions,
-                )),
+            ticker: const Ticker(),
+            repository: SessionRepository(),
+            onTaskCycleCompleted: task == null
+                ? null
+                : () async {
+                    final repo = TaskRepository();
+                    if (task!.id.isNotEmpty) {
+                      // marcar completada (ya terminó todas sus sesiones)
+                      await repo.markDone(task!.id);
+                    }
+                  },
+          )..add(TimerStarted(
+              phase: TimerPhase.work,
+              duration: workSeconds,
+              workDuration: workSeconds,
+              breakDuration: breakSeconds,
+              session: 1,
+              totalSessions: task?.sessions ?? sessions,
+            )),
           child: const _TimerView(),
         );
       },

@@ -14,6 +14,7 @@ import 'package:pomodoro/core/data/timer_storage.dart';
 
 part 'timer_event.dart';
 part 'timer_state.dart';
+
 // Task automation support
 typedef TaskCycleCompletedCallback = Future<void> Function();
 
@@ -22,7 +23,10 @@ enum TimerPhase { work, breakPhase }
 /// Estados: work, breakPhase, completed
 class TimerBloc extends Bloc<TimerEvent, TimerState> {
   final TaskCycleCompletedCallback? onTaskCycleCompleted;
-  TimerBloc({required Ticker ticker, ISessionRepository? repository, this.onTaskCycleCompleted})
+  TimerBloc(
+      {required Ticker ticker,
+      ISessionRepository? repository,
+      this.onTaskCycleCompleted})
       : _ticker = ticker,
         _repository = repository ?? SessionRepository(),
         super(const TimerInitial(workDuration: 1500, breakDuration: 300)) {
@@ -164,7 +168,7 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
       return elapsed;
     }
 
-  if (nextSession > current.totalSessions) {
+    if (nextSession > current.totalSessions) {
       // Guardar última fase de trabajo si la anterior fue de trabajo y terminó
       if (current.phase == TimerPhase.work) {
         final eff = effectiveWorkSeconds();

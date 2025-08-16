@@ -26,7 +26,8 @@ class TaskItem {
     int? breakMinutes,
     int? sessions,
     int? sessionsCompleted,
-  }) => TaskItem(
+  }) =>
+      TaskItem(
         id: id ?? this.id,
         title: title ?? this.title,
         done: done ?? this.done,

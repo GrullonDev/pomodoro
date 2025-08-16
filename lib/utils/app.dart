@@ -15,8 +15,8 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-  // Cargar locale guardado (solo se dispara una vez; si ya está cargado no hace nada)
-  LocaleController.instance.load();
+    // Cargar locale guardado (solo se dispara una vez; si ya está cargado no hace nada)
+    LocaleController.instance.load();
     ThemeData buildDark() {
       final base = ThemeData.dark(useMaterial3: true);
       final scheme = base.colorScheme.copyWith(
@@ -71,56 +71,56 @@ class MyApp extends StatelessWidget {
         return ValueListenableBuilder<Locale?>(
           valueListenable: LocaleController.instance.locale,
           builder: (_, loc, ___) => MaterialApp(
-          navigatorKey: navigatorKey,
-          debugShowCheckedModeBanner: false,
-          theme: isDark ? buildDark() : buildLight(),
-          localizationsDelegates: const [
-            AppLocalizations.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-          ],
-          supportedLocales: const [Locale('en'), Locale('es')],
-          locale: loc,
-          home: FutureBuilder<bool>(
-            future: SessionRepository().isOnboardingSeen(),
-            builder: (context, snap) {
-              if (!snap.hasData) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              final seen = snap.data ?? false;
-              if (seen) {
-                return const AnimatedGradientShell(child: HomePage());
-              }
-              return AnimatedGradientShell(
-                child: OnboardingScreen(
-                  onGetStarted: () async {
-                    await SessionRepository().setOnboardingSeen();
-                    if (navigatorKey.currentState?.mounted ?? false) {
-                      navigatorKey.currentState!.pushReplacement(
-                        MaterialPageRoute(
-                            builder: (_) => const AnimatedGradientShell(
-                                  child: HomePage(),
-                                )),
-                      );
-                    }
-                  },
-                  onSkip: () async {
-                    await SessionRepository().setOnboardingSeen();
-                    if (navigatorKey.currentState?.mounted ?? false) {
-                      navigatorKey.currentState!.pushReplacement(
-                        MaterialPageRoute(
-                            builder: (_) => const AnimatedGradientShell(
-                                  child: HomePage(),
-                                )),
-                      );
-                    }
-                  },
-                ),
-              );
-            },
+            navigatorKey: navigatorKey,
+            debugShowCheckedModeBanner: false,
+            theme: isDark ? buildDark() : buildLight(),
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+            ],
+            supportedLocales: const [Locale('en'), Locale('es')],
+            locale: loc,
+            home: FutureBuilder<bool>(
+              future: SessionRepository().isOnboardingSeen(),
+              builder: (context, snap) {
+                if (!snap.hasData) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                final seen = snap.data ?? false;
+                if (seen) {
+                  return const AnimatedGradientShell(child: HomePage());
+                }
+                return AnimatedGradientShell(
+                  child: OnboardingScreen(
+                    onGetStarted: () async {
+                      await SessionRepository().setOnboardingSeen();
+                      if (navigatorKey.currentState?.mounted ?? false) {
+                        navigatorKey.currentState!.pushReplacement(
+                          MaterialPageRoute(
+                              builder: (_) => const AnimatedGradientShell(
+                                    child: HomePage(),
+                                  )),
+                        );
+                      }
+                    },
+                    onSkip: () async {
+                      await SessionRepository().setOnboardingSeen();
+                      if (navigatorKey.currentState?.mounted ?? false) {
+                        navigatorKey.currentState!.pushReplacement(
+                          MaterialPageRoute(
+                              builder: (_) => const AnimatedGradientShell(
+                                    child: HomePage(),
+                                  )),
+                        );
+                      }
+                    },
+                  ),
+                );
+              },
+            ),
           ),
-        ),
         );
       },
     );

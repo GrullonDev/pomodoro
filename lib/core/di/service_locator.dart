@@ -14,7 +14,9 @@ class ServiceLocator {
   ITaskRepository? _taskRepo;
   ISettingsRepository? _settingsRepo;
 
-  ISessionRepository get sessionRepository => _sessionRepo ??= SessionRepository();
+  ISessionRepository get sessionRepository =>
+      _sessionRepo ??= SessionRepository();
   ITaskRepository get taskRepository => _taskRepo ??= TaskRepository();
-  ISettingsRepository get settingsRepository => _settingsRepo ??= SettingsRepository();
+  ISettingsRepository get settingsRepository =>
+      _settingsRepo ??= SettingsRepository();
 }

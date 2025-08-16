@@ -25,7 +25,8 @@ class TaskRepository implements ITaskRepository {
   }
 
   @override
-  Future<TaskItem> add(String title,{int work=25,int brk=5,int sessions=4}) async {
+  Future<TaskItem> add(String title,
+      {int work = 25, int brk = 5, int sessions = 4}) async {
     final tasks = await load();
     final t = TaskItem(
       id: DateTime.now().millisecondsSinceEpoch.toString(),

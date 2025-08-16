@@ -29,15 +29,20 @@ class _TasksScreenState extends State<TasksScreen> {
 
   Future<void> _load() async {
     final list = await _repo.all();
-    if (mounted) setState(() { _tasks = list; _loading = false; });
+    if (mounted) {
+      setState(() {
+        _tasks = list;
+        _loading = false;
+      });
+    }
   }
 
   Future<void> _syncDefaultsFromPreset() async {
-  final key = await ServiceLocator.I.settingsRepository.getSelectedPreset();
+    final key = await ServiceLocator.I.settingsRepository.getSelectedPreset();
     PresetProfile p = PresetProfile.work;
     if (key != null && key != PresetProfile.custom.key) {
-      p = PresetProfile.defaults().firstWhere((e) => e.key == key,
-          orElse: () => PresetProfile.work);
+      p = PresetProfile.defaults()
+          .firstWhere((e) => e.key == key, orElse: () => PresetProfile.work);
     }
     _workCtrl.text = p.workMinutes.toString();
     _breakCtrl.text = p.shortBreakMinutes.toString();
@@ -66,15 +71,15 @@ class _TasksScreenState extends State<TasksScreen> {
 
   @override
   Widget build(BuildContext context) {
-  final scheme = Theme.of(context).colorScheme;
-  final t = AppLocalizations.of(context);
+    final scheme = Theme.of(context).colorScheme;
+    final t = AppLocalizations.of(context);
     final total = _tasks.length;
     final done = _tasks.where((e) => e.done).length;
     final pending = total - done;
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
-  title: Text(t.tasksTitle),
+        title: Text(t.tasksTitle),
         backgroundColor: Colors.transparent,
       ),
       body: _loading
@@ -83,7 +88,9 @@ class _TasksScreenState extends State<TasksScreen> {
               children: [
                 Padding(
                   padding: const EdgeInsets.only(top: 12.0),
-                  child: Text(t.taskProgressSummary(done.toString(), pending.toString(), total.toString()),
+                  child: Text(
+                      t.taskProgressSummary(done.toString(), pending.toString(),
+                          total.toString()),
                       style: TextStyle(color: scheme.primary)),
                 ),
                 Padding(
@@ -93,7 +100,8 @@ class _TasksScreenState extends State<TasksScreen> {
                       Expanded(
                         child: TextField(
                           controller: _controller,
-                          decoration: InputDecoration(labelText: t.taskNewLabel),
+                          decoration:
+                              InputDecoration(labelText: t.taskNewLabel),
                           onSubmitted: (_) => _add(),
                         ),
                       ),
@@ -113,7 +121,8 @@ class _TasksScreenState extends State<TasksScreen> {
                       Flexible(
                         child: TextField(
                           controller: _workCtrl,
-                          decoration: InputDecoration(labelText: t.taskWorkLabel),
+                          decoration:
+                              InputDecoration(labelText: t.taskWorkLabel),
                           keyboardType: TextInputType.number,
                         ),
                       ),
@@ -121,7 +130,8 @@ class _TasksScreenState extends State<TasksScreen> {
                       Flexible(
                         child: TextField(
                           controller: _breakCtrl,
-                          decoration: InputDecoration(labelText: t.taskBreakLabel),
+                          decoration:
+                              InputDecoration(labelText: t.taskBreakLabel),
                           keyboardType: TextInputType.number,
                         ),
                       ),
@@ -129,7 +139,8 @@ class _TasksScreenState extends State<TasksScreen> {
                       Flexible(
                         child: TextField(
                           controller: _sessionsCtrl,
-                          decoration: InputDecoration(labelText: t.taskSessionsShort),
+                          decoration:
+                              InputDecoration(labelText: t.taskSessionsShort),
                           keyboardType: TextInputType.number,
                         ),
                       ),
@@ -179,7 +190,8 @@ class _TasksScreenState extends State<TasksScreen> {
                         onDismissed: (_) async {
                           // Simple delete: reload list except removed id
                           final id = t.id;
-                          await _repo.load(); // load just to simulate current state (persistence not yet updated)
+                          await _repo
+                              .load(); // load just to simulate current state (persistence not yet updated)
                           // direct save not exposed -> would require refactor; skip persistence for MVP of delete
                           setState(() {
                             _tasks.removeWhere((e) => e.id == id);
@@ -194,7 +206,8 @@ class _TasksScreenState extends State<TasksScreen> {
                                     ? 0
                                     : t.sessionsCompleted / t.sessions,
                                 strokeWidth: 4,
-                                backgroundColor: scheme.primary.withValues(alpha: 0.15),
+                                backgroundColor:
+                                    scheme.primary.withValues(alpha: 0.15),
                               ),
                               Icon(
                                 t.done ? Icons.check : Icons.play_arrow,
@@ -207,8 +220,10 @@ class _TasksScreenState extends State<TasksScreen> {
                                   decoration: t.done
                                       ? TextDecoration.lineThrough
                                       : TextDecoration.none)),
-                          subtitle: Text(
-                              AppLocalizations.of(context).taskSessionProgress(t.sessionsCompleted.toString(), t.sessions.toString())),
+                          subtitle: Text(AppLocalizations.of(context)
+                              .taskSessionProgress(
+                                  t.sessionsCompleted.toString(),
+                                  t.sessions.toString())),
                           trailing: IconButton(
                             icon: const Icon(Icons.play_circle_fill),
                             onPressed: t.done

@@ -3,7 +3,6 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:audioplayers/audioplayers.dart';
-import 'package:pomodoro/core/di/service_locator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Simple singleton AudioService to centralize audio players and reduce
@@ -71,7 +70,8 @@ class AudioService {
   Future<String> getFocusTrack() async {
     if (_cachedFocusTrack != null) return _cachedFocusTrack!;
     final prefs = await SharedPreferences.getInstance();
-    _cachedFocusTrack = prefs.getString(_focusTrackKey) ?? 'sounds/cronometro.mp3';
+    _cachedFocusTrack =
+        prefs.getString(_focusTrackKey) ?? 'sounds/cronometro.mp3';
     return _cachedFocusTrack!;
   }
 

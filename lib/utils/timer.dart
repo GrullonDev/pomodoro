@@ -90,7 +90,7 @@ class TimerState extends State<MyTimer> {
                       SizedBox(width: isMobile ? 20 : 50),
                       Flexible(
                         child: Text(
-                          "Por favor, introduzca números válidos mayores que 0 para empezar.",
+                          'Por favor, introduzca números válidos mayores que 0 para empezar.',
                           style: TextStyle(
                             color: Colors.black,
                             fontSize: isMobile ? 12 : 14,
@@ -120,7 +120,7 @@ class TimerState extends State<MyTimer> {
     curr = _prefs?.getString('time');
     var now = DateTime.now();
     DateTime date = DateTime(now.year, now.month, now.day);
-    String formattedDate = "${date.day}-${date.month}-${date.year}";
+    String formattedDate = '${date.day}-${date.month}-${date.year}';
     await _prefs!.setString(
         'time', '$curr / ${_sessionCount * _timeInt} $formattedDate');
   }
@@ -261,7 +261,7 @@ class TimerState extends State<MyTimer> {
   Widget build(BuildContext context) {
     final int minutes = _time.inMinutes;
     final int seconds = _time.inSeconds % 60;
-    String timerState = "Break";
+    String timerState = 'Break';
     if (_timerCount % 2 == 0) {
       timerState = '$_counter / $_sessionCount';
     }
