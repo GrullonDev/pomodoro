@@ -99,7 +99,8 @@ Para ejercer estos derechos contacte: prosystem155@gmail.com
 14. Incidentes de seguridad
     En caso de brechas que afecten datos personales, notificaremos a los usuarios afectados y, cuando la ley lo exija, a las autoridades competentes.
 
-15. Contacto
-    Si tiene preguntas o solicita acceso/rectificación/supresión, contacte:
+
+## Contacto
+Si tiene preguntas o solicita acceso/rectificación/supresión, contacte:
 
 Correo: prosystem155@gmail.com
