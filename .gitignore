@@ -2,6 +2,10 @@
 # Flutter / Dart (limpio) #
 ###########################
 .dart_tool/
+###########################
+# Flutter / Dart (limpio) #
+###########################
+.dart_tool/
 .packages
 .flutter-plugins
 .flutter-plugins-dependencies
@@ -54,7 +58,6 @@ ios/Runner.xcodeproj/project.pbxproj
 ios/Runner.xcodeproj/xcuserdata/
 ios/Runner.xcodeproj/project.xcworkspace/
 ios/Runner.xcodeproj/xcshareddata/
-ios/Runner.xcodeproj/xcshareddata/**
 ios/Runner.xcodeproj/xcuserdata/**
 ios/Runner/GoogleService-Info.plist
 
