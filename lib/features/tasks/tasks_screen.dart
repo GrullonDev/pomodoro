@@ -1,10 +1,11 @@
-import 'package:pomodoro/core/di/service_locator.dart';
 import 'package:flutter/material.dart';
+
+import 'package:pomodoro/core/data/preset_profile.dart';
 import 'package:pomodoro/core/data/task_repository.dart'; // data impl
 import 'package:pomodoro/core/domain/entities/task.dart';
+import 'package:pomodoro/core/di/service_locator.dart';
 import 'package:pomodoro/core/timer/timer_screen.dart';
 import 'package:pomodoro/l10n/app_localizations.dart';
-import 'package:pomodoro/core/data/preset_profile.dart';
 
 class TasksScreen extends StatefulWidget {
   const TasksScreen({super.key});

@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:pomodoro/l10n/app_localizations.dart';
 
-import 'package:pomodoro/utils/home_page.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+
 import 'package:pomodoro/core/data/session_repository.dart';
-import 'package:pomodoro/features/auth/screens/onboarding_screen.dart';
-import 'package:pomodoro/core/theme/theme_controller.dart';
 import 'package:pomodoro/core/theme/locale_controller.dart';
+import 'package:pomodoro/core/theme/theme_controller.dart';
+import 'package:pomodoro/features/auth/screens/onboarding_screen.dart';
+import 'package:pomodoro/l10n/app_localizations.dart';
+import 'package:pomodoro/utils/home_page.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key, required this.navigatorKey});

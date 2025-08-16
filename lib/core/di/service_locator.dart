@@ -1,9 +1,9 @@
 import 'package:pomodoro/core/data/session_repository.dart';
+import 'package:pomodoro/core/data/settings_repository.dart';
 import 'package:pomodoro/core/data/task_repository.dart';
 import 'package:pomodoro/core/domain/repositories/session_repository.dart';
-import 'package:pomodoro/core/domain/repositories/task_repository.dart';
-import 'package:pomodoro/core/data/settings_repository.dart';
 import 'package:pomodoro/core/domain/repositories/settings_repository.dart';
+import 'package:pomodoro/core/domain/repositories/task_repository.dart';
 
 /// Very lightweight service locator. For larger apps consider get_it.
 class ServiceLocator {

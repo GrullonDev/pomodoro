@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 // Firebase auth temporarily disabled to avoid exceptions when Firebase is not configured.
 // TODO: Re-enable Firebase Auth when ready:
 //  - Restore imports for `firebase_core` and `firebase_auth`.
@@ -6,7 +8,6 @@
 // import 'package:firebase_auth/firebase_auth.dart';
 // import 'package:firebase_core/firebase_core.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:flutter/foundation.dart';
 
 class AuthRepository {
   // FirebaseAuth? _auth; // lazily set when Firebase initialized

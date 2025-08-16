@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+
+import 'package:pomodoro/features/auth/auth_repository.dart';
 import 'package:pomodoro/features/auth/screens/onboarding_screen.dart';
 import 'package:pomodoro/features/auth/screens/sign_in_screen.dart';
 import 'package:pomodoro/utils/home_page.dart';
-import 'package:pomodoro/features/auth/auth_repository.dart';
 
 /// Simple local / pseudo-auth gate.
 /// Rules:

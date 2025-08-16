@@ -1,27 +1,26 @@
 import 'dart:async';
 import 'dart:io';
-// dart:math/typed_data once used for in-file beep generation; now moved to AudioService
 
 // ignore_for_file: use_build_context_synchronously
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-// audio handled by AudioService singleton
-import 'package:pomodoro/utils/audio_service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:pomodoro/utils/dnd.dart';
-import 'package:pomodoro/utils/notifications/notifications.dart';
 
-import 'package:pomodoro/core/data/session_repository.dart';
-import 'package:pomodoro/core/di/service_locator.dart';
 import 'package:pomodoro/core/data/preset_profile.dart';
+import 'package:pomodoro/core/data/session_repository.dart';
+import 'package:pomodoro/core/data/task_repository.dart';
+import 'package:pomodoro/core/di/service_locator.dart';
+import 'package:pomodoro/core/domain/entities/task.dart';
 import 'package:pomodoro/core/timer/ticker.dart';
 import 'package:pomodoro/core/timer/timer_action_bus.dart';
 import 'package:pomodoro/core/timer/timer_bloc.dart';
-import 'package:pomodoro/core/data/task_repository.dart';
-import 'package:pomodoro/core/domain/entities/task.dart';
 import 'package:pomodoro/features/summary/session_summary_screen.dart';
 import 'package:pomodoro/l10n/app_localizations.dart';
+// audio handled by AudioService singleton
+import 'package:pomodoro/utils/audio_service.dart';
+import 'package:pomodoro/utils/dnd.dart';
+import 'package:pomodoro/utils/notifications/notifications.dart';
 
 class TimerScreen extends StatelessWidget {
   final int workMinutes;

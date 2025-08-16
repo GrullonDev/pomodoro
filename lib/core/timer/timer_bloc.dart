@@ -1,16 +1,16 @@
 import 'dart:async';
 
+import 'package:equatable/equatable.dart';
 // Switched to flutter_bloc import to avoid depending on transitive 'bloc' package directly
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:equatable/equatable.dart';
-import 'package:pomodoro/utils/notifications/notifications.dart';
+
 import 'package:pomodoro/core/data/session_repository.dart';
-import 'package:pomodoro/core/domain/repositories/session_repository.dart';
+import 'package:pomodoro/core/data/timer_storage.dart';
 import 'package:pomodoro/core/domain/entities/pomodoro_session.dart';
-// timezone is configured inside NotificationService when needed
+import 'package:pomodoro/core/domain/repositories/session_repository.dart';
+import 'package:pomodoro/utils/notifications/notifications.dart';
 
 import 'ticker.dart';
-import 'package:pomodoro/core/data/timer_storage.dart';
 
 part 'timer_event.dart';
 part 'timer_state.dart';

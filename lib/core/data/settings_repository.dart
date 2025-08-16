@@ -1,4 +1,5 @@
 import 'package:shared_preferences/shared_preferences.dart';
+
 import 'package:pomodoro/core/domain/repositories/settings_repository.dart';
 
 class SettingsRepository implements ISettingsRepository {
