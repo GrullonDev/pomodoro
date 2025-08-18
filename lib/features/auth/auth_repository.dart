@@ -1,5 +1,3 @@
-import 'package:flutter/foundation.dart';
-
 // Firebase auth temporarily disabled to avoid exceptions when Firebase is not configured.
 // TODO: Re-enable Firebase Auth when ready:
 //  - Restore imports for `firebase_core` and `firebase_auth`.
@@ -8,53 +6,51 @@ import 'package:flutter/foundation.dart';
 // import 'package:firebase_auth/firebase_auth.dart';
 // import 'package:firebase_core/firebase_core.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:pomodoro/core/auth/auth_service.dart';
 
 class AuthRepository {
-  // FirebaseAuth? _auth; // lazily set when Firebase initialized
+  // Delegate to AuthService (which provides Firebase or local fallback behavior)
 
-  // bool get _isFirebaseReady => Firebase.apps.isNotEmpty;
+  Stream<dynamic> get userChanges => AuthService.instance.uidChanges();
 
-  // FirebaseAuth? get _safeAuth {
-  //   if (!_isFirebaseReady) return null;
-  //   return _auth ??= FirebaseAuth.instance;
-  // }
-  // TODO: When re-enabling, uncomment the above and remove stubs below.
-
-  // Stream<User?> get userChanges {
-  // Firebase disabled; provide a lightweight stub for code that depends on this.
-  // TODO: replace stub with actual `Stream<User?>` and `currentUser` when enabling Auth.
-  Stream<dynamic> get userChanges => Stream<dynamic>.value(null);
-
-  dynamic get currentUser => null;
+  dynamic get currentUser => null; // features relying on full Firebase User should be migrated
 
   Future<dynamic> signInWithEmail(String email, String password) async {
-    // Firebase sign-in disabled in this build.
-    // TODO: implement by restoring `_safeAuth` and calling `signInWithEmailAndPassword`.
-    throw StateError('Firebase disabled in this build');
+    return await AuthService.instance.signInWithEmail(email, password);
   }
 
   Future<dynamic> registerWithEmail(String email, String password) async {
-    // Firebase registration disabled in this build.
-    // TODO: implement by restoring `_safeAuth` and calling `createUserWithEmailAndPassword`.
-    throw StateError('Firebase disabled in this build');
+    return await AuthService.instance.registerWithEmail(email, password);
   }
 
   Future<dynamic> signInWithGoogle() async {
-    // Firebase social sign-in disabled in this build.
-    // TODO: implement by restoring Google credential flow and `_safeAuth.signInWithCredential`.
-    throw StateError('Firebase disabled in this build');
+    // For now, try GoogleSignIn as a best-effort placeholder; real Firebase credential flow
+    // should be implemented when enabling Firebase.
+    try {
+      final gs = await GoogleSignIn().signIn();
+      if (gs == null) throw StateError('Google sign-in canceled');
+      // No Firebase linking performed here; signal success by returning account info.
+      return gs;
+    } catch (e) {
+      rethrow;
+    }
   }
 
-  // Placeholder phone auth start; needs real verification flow (SMS) for production.
   Future<void> signInWithPhone(String phoneNumber) async {
-    // TODO: Implement full phone auth; here we just throw to indicate not implemented.
+    // Phone auth not implemented at feature level yet.
     throw UnimplementedError('Phone sign-in not implemented');
   }
 
   Future<void> signOut() async {
-    // No-op sign-out while Firebase is disabled.
-    // TODO: when enabling, call `_safeAuth?.signOut()` and preserve GoogleSignIn signOut.
-    debugPrint('signOut called but Firebase disabled in this build');
-    await GoogleSignIn().signOut();
+    return await AuthService.instance.signOut();
+  }
+
+  /// Expose a helper to check sign-in methods for an email (delegates to AuthService).
+  Future<List<String>> fetchSignInMethodsForEmail(String email) async {
+    try {
+      return await AuthService.instance.fetchSignInMethodsForEmail(email);
+    } catch (_) {
+      return [];
+    }
   }
 }

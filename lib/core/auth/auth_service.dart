@@ -112,6 +112,22 @@ class AuthService {
     return null;
   }
 
+  /// Returns a list of sign-in methods for the provided email (Firebase). Returns empty list when not available.
+  Future<List<String>> fetchSignInMethodsForEmail(String email) async {
+    if (await _firebaseAvailable) {
+      try {
+        final methods = await FirebaseAuth.instance.fetchSignInMethodsForEmail(email);
+        return methods;
+      } catch (_) {
+        return [];
+      }
+    }
+    // Local fallback: check local users map
+    final users = await _loadLocalUsers();
+    if (users.containsKey(email.toLowerCase())) return ['password'];
+    return [];
+  }
+
   Future<void> signOut() async {
     if (await _firebaseAvailable) {
       try {

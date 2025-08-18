@@ -1,13 +1,53 @@
 import 'package:flutter/material.dart';
+import 'package:pomodoro/features/auth/validator/email_validator.dart';
+import 'package:pomodoro/features/auth/auth_repository.dart';
+import 'package:pomodoro/core/di/injection.dart' show sl;
 
-class SignUpScreen extends StatelessWidget {
+class SignUpScreen extends StatefulWidget {
   final VoidCallback onSuccess;
-  const SignUpScreen({super.key, required this.onSuccess});
+  final String? initialEmail;
+  const SignUpScreen({super.key, required this.onSuccess, this.initialEmail});
+
+  @override
+  State<SignUpScreen> createState() => _SignUpScreenState();
+}
+
+class _SignUpScreenState extends State<SignUpScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final _name = TextEditingController();
+  final _email = TextEditingController();
+  final _password = TextEditingController();
+  final _confirm = TextEditingController();
+  bool _loading = false;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialEmail != null) _email.text = widget.initialEmail!;
+  }
+
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      final email = _email.text.trim();
+      final password = _password.text;
+  await sl<AuthRepository>().registerWithEmail(email, password);
+      widget.onSuccess();
+      if (mounted) Navigator.of(context).maybePop();
+    } catch (e) {
+      setState(() => _error = e.toString());
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    void goSignIn() => Navigator.of(context).maybePop();
-
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -21,102 +61,68 @@ class SignUpScreen extends StatelessWidget {
         centerTitle: true,
       ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
           child: Column(
             children: [
-              const SizedBox(height: 8),
-              const _TextField(hint: 'Name'),
-              const SizedBox(height: 12),
-              const _TextField(hint: 'Email'),
-              const SizedBox(height: 12),
-              const _TextField(hint: 'Password', obscure: true),
-              const SizedBox(height: 12),
-              const _TextField(hint: 'Confirm Password', obscure: true),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton(
-                  onPressed: onSuccess,
-                  style: FilledButton.styleFrom(
-                    backgroundColor: const Color(0xFF0A74E6),
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10)),
+              Card(
+                elevation: 2,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      children: [
+                        TextFormField(
+                          controller: _name,
+                          decoration: const InputDecoration(labelText: 'Name'),
+                          validator: (v) => (v == null || v.trim().isEmpty) ? 'Name is required' : null,
+                        ),
+                        const SizedBox(height: 12),
+                        TextFormField(
+                          controller: _email,
+                          keyboardType: TextInputType.emailAddress,
+                          decoration: const InputDecoration(labelText: 'Email'),
+                          validator: (v) => EmailValidator.validate(v),
+                        ),
+                        const SizedBox(height: 12),
+                        TextFormField(
+                          controller: _password,
+                          obscureText: true,
+                          decoration: const InputDecoration(labelText: 'Password'),
+                          validator: (v) => (v == null || v.length < 6) ? 'Password must be at least 6 characters' : null,
+                        ),
+                        const SizedBox(height: 12),
+                        TextFormField(
+                          controller: _confirm,
+                          obscureText: true,
+                          decoration: const InputDecoration(labelText: 'Confirm Password'),
+                          validator: (v) => (v != _password.text) ? 'Passwords do not match' : null,
+                        ),
+                        const SizedBox(height: 18),
+                        if (_error != null) Text(_error!, style: const TextStyle(color: Colors.red)),
+                        const SizedBox(height: 8),
+                        SizedBox(
+                          width: double.infinity,
+                          child: FilledButton(
+                            onPressed: _loading ? null : _submit,
+                            child: _loading ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2)) : const Text('Create account'),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  child: const Text('Sign up',
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                 ),
               ),
               const SizedBox(height: 16),
-              const Text('Or sign up with',
-                  style: TextStyle(color: Colors.black54)),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _SocialButton(label: 'Phone', onTap: onSuccess),
-                  const SizedBox(width: 16),
-                  _SocialButton(label: 'Google', onTap: onSuccess),
-                ],
-              ),
-              const Spacer(),
               TextButton(
-                onPressed: goSignIn,
-                child: const Text('Already have an account? Sign in',
-                    style: TextStyle(color: Colors.black54)),
+                onPressed: () => Navigator.of(context).maybePop(),
+                child: const Text('Already have an account? Sign in', style: TextStyle(color: Colors.black54)),
               ),
-              const SizedBox(height: 12),
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _TextField extends StatelessWidget {
-  final String hint;
-  final bool obscure;
-  const _TextField({required this.hint, this.obscure = false});
-  @override
-  Widget build(BuildContext context) {
-    return TextField(
-      obscureText: obscure,
-      decoration: InputDecoration(
-        hintText: hint,
-        filled: true,
-        fillColor: const Color(0xFFEFF3F7),
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide.none,
-        ),
-      ),
-    );
-  }
-}
-
-class _SocialButton extends StatelessWidget {
-  final String label;
-  final VoidCallback onTap;
-  const _SocialButton({required this.label, required this.onTap});
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: OutlinedButton(
-        onPressed: onTap,
-        style: OutlinedButton.styleFrom(
-          backgroundColor: const Color(0xFFEFF3F7),
-          foregroundColor: Colors.black87,
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        ),
-        child: Text(label,
-            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
       ),
     );
   }

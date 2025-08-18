@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 import 'package:pomodoro/core/data/session_repository.dart';
+import 'package:pomodoro/core/di/injection.dart';
 import 'package:pomodoro/core/theme/theme_controller.dart';
 import 'package:pomodoro/utils/app.dart';
 import 'package:pomodoro/utils/notifications/notifications.dart';
@@ -10,6 +11,8 @@ void main() async {
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
   WidgetsFlutterBinding.ensureInitialized();
+  // Initialize dependency injection
+  await init();
 
   // Initialize Firebase. If platform config files (google-services.json /
   // GoogleService-Info.plist) are present this will succeed; otherwise we
