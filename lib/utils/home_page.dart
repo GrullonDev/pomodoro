@@ -33,6 +33,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context);
     final scheme = Theme.of(context).colorScheme;
+
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: AnimatedSwitcher(
@@ -40,32 +41,33 @@ class _HomePageState extends State<HomePage> {
         child: _pageFor(_index),
       ),
       bottomNavigationBar: NavigationBar(
-          selectedIndex: _index,
-          backgroundColor: scheme.surface,
-          indicatorColor: scheme.primary.withValues(alpha: 0.15),
-          onDestinationSelected: (i) => setState(() => _index = i),
-          destinations: [
-            NavigationDestination(
-              icon: const Icon(Icons.timer_outlined),
-              selectedIcon: const Icon(Icons.timer),
-              label: t.configure,
-            ),
-            const NavigationDestination(
-              icon: Icon(Icons.task_outlined),
-              selectedIcon: Icon(Icons.task),
-              label: 'Tasks',
-            ),
-            NavigationDestination(
-              icon: const Icon(Icons.history_outlined),
-              selectedIcon: const Icon(Icons.history),
-              label: t.history,
-            ),
-            NavigationDestination(
-              icon: const Icon(Icons.settings_outlined),
-              selectedIcon: const Icon(Icons.settings),
-              label: t.settings,
-            ),
-          ]),
+        selectedIndex: _index,
+        backgroundColor: scheme.surface,
+        indicatorColor: scheme.primary.withValues(alpha: 0.15),
+        onDestinationSelected: (i) => setState(() => _index = i),
+        destinations: [
+          NavigationDestination(
+            icon: const Icon(Icons.timer_outlined),
+            selectedIcon: const Icon(Icons.timer),
+            label: t.configure,
+          ),
+          const NavigationDestination(
+            icon: Icon(Icons.task_outlined),
+            selectedIcon: Icon(Icons.task),
+            label: 'Tasks',
+          ),
+          NavigationDestination(
+            icon: const Icon(Icons.history_outlined),
+            selectedIcon: const Icon(Icons.history),
+            label: t.history,
+          ),
+          NavigationDestination(
+            icon: const Icon(Icons.settings_outlined),
+            selectedIcon: const Icon(Icons.settings),
+            label: t.settings,
+          ),
+        ],
+      ),
     );
   }
 }
