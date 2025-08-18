@@ -6,6 +6,7 @@
 // import 'package:firebase_auth/firebase_auth.dart';
 // import 'package:firebase_core/firebase_core.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+
 import 'package:pomodoro/core/auth/auth_service.dart';
 
 class AuthRepository {
@@ -13,7 +14,8 @@ class AuthRepository {
 
   Stream<dynamic> get userChanges => AuthService.instance.uidChanges();
 
-  dynamic get currentUser => null; // features relying on full Firebase User should be migrated
+  dynamic get currentUser =>
+      null; // features relying on full Firebase User should be migrated
 
   Future<dynamic> signInWithEmail(String email, String password) async {
     return await AuthService.instance.signInWithEmail(email, password);
