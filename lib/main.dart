@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 import 'package:pomodoro/core/data/session_repository.dart';
+import 'package:pomodoro/core/theme/theme_controller.dart';
 import 'package:pomodoro/utils/app.dart';
 import 'package:pomodoro/utils/notifications/notifications.dart';
-import 'package:pomodoro/core/theme/theme_controller.dart';
 
 void main() async {
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();

@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Importar para usar FilteringTextInputFormatter
 import 'package:pomodoro/utils/responsive/responsive.dart';
 
+import 'package:pomodoro/core/data/session_repository.dart';
 import 'package:pomodoro/core/timer/timer_screen.dart';
 import 'package:pomodoro/l10n/app_localizations.dart';
-import 'package:pomodoro/core/data/session_repository.dart';
 
 class Habit extends StatefulWidget {
   const Habit({super.key});

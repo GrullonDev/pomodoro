@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:pomodoro/utils/responsive/responsive.dart';
+
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'package:pomodoro/utils/responsive/responsive.dart';
 
 class Settings extends StatefulWidget {
   const Settings({super.key});
