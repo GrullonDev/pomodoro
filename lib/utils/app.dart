@@ -6,6 +6,8 @@ import 'package:pomodoro/core/data/session_repository.dart';
 import 'package:pomodoro/core/theme/locale_controller.dart';
 import 'package:pomodoro/core/theme/theme_controller.dart';
 import 'package:pomodoro/features/auth/screens/onboarding_screen.dart';
+import 'package:pomodoro/features/auth/login_screen.dart';
+import 'package:pomodoro/core/auth/auth_service.dart';
 import 'package:pomodoro/l10n/app_localizations.dart';
 import 'package:pomodoro/utils/home_page.dart';
 
@@ -90,34 +92,48 @@ class MyApp extends StatelessWidget {
                   return const Center(child: CircularProgressIndicator());
                 }
                 final seen = snap.data ?? false;
-                if (seen) {
-                  return const AnimatedGradientShell(child: HomePage());
+                if (!seen) {
+                  return AnimatedGradientShell(
+                    child: OnboardingScreen(
+                      onGetStarted: () async {
+                        await SessionRepository().setOnboardingSeen();
+                        if (navigatorKey.currentState?.mounted ?? false) {
+                          navigatorKey.currentState!.pushReplacement(
+                            MaterialPageRoute(
+                                builder: (_) => const AnimatedGradientShell(
+                                      child: HomePage(),
+                                    )),
+                          );
+                        }
+                      },
+                      onSkip: () async {
+                        await SessionRepository().setOnboardingSeen();
+                        if (navigatorKey.currentState?.mounted ?? false) {
+                          navigatorKey.currentState!.pushReplacement(
+                            MaterialPageRoute(
+                                builder: (_) => const AnimatedGradientShell(
+                                      child: HomePage(),
+                                    )),
+                          );
+                        }
+                      },
+                    ),
+                  );
                 }
-                return AnimatedGradientShell(
-                  child: OnboardingScreen(
-                    onGetStarted: () async {
-                      await SessionRepository().setOnboardingSeen();
-                      if (navigatorKey.currentState?.mounted ?? false) {
-                        navigatorKey.currentState!.pushReplacement(
-                          MaterialPageRoute(
-                              builder: (_) => const AnimatedGradientShell(
-                                    child: HomePage(),
-                                  )),
-                        );
-                      }
-                    },
-                    onSkip: () async {
-                      await SessionRepository().setOnboardingSeen();
-                      if (navigatorKey.currentState?.mounted ?? false) {
-                        navigatorKey.currentState!.pushReplacement(
-                          MaterialPageRoute(
-                              builder: (_) => const AnimatedGradientShell(
-                                    child: HomePage(),
-                                  )),
-                        );
-                      }
-                    },
-                  ),
+
+                // If onboarding completed, show Home or Login depending on auth state.
+                return StreamBuilder<String?>(
+                  stream: AuthService.instance.uidChanges(),
+                  builder: (context, authSnap) {
+                    final uid = authSnap.data;
+                    if (authSnap.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    if (uid == null) {
+                      return const AnimatedGradientShell(child: LoginScreen());
+                    }
+                    return const AnimatedGradientShell(child: HomePage());
+                  },
                 );
               },
             ),

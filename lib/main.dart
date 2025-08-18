@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 import 'package:pomodoro/core/data/session_repository.dart';
 import 'package:pomodoro/core/theme/theme_controller.dart';
@@ -9,19 +10,26 @@ void main() async {
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Firebase. If platform config files (google-services.json /
+  // GoogleService-Info.plist) are present this will succeed; otherwise we
+  // catch and continue so the app can still run locally.
+  try {
+    await Firebase.initializeApp();
+  } catch (e) {
+    // Initialization may fail on web if firebase_options.dart isn't provided
+    // or on misconfigured platforms. Log and continue; authentication calls
+    // should be guarded by error handling in the AuthService.
+    // ignore: avoid_print
+    print('Firebase.initializeApp() failed: $e');
+  }
+
   await NotificationService.initialize();
   await NotificationService.requestPermissions();
   // Migrar datos antiguos una vez
   await SessionRepository().migrateLegacyIfNeeded();
   // Cargar preferencia de tema (oscuro por defecto si no existe)
   await ThemeController.instance.load();
-
-  // Firebase disabled for now. To re-enable, uncomment initialization above and
-  // ensure platform options (google-services.json / GoogleService-Info.plist) are provided.
-  // TODO: On re-enable, consider wrapping `Firebase.initializeApp()` with
-  // a timeout and handle missing `firebase_options.dart`. Example steps:
-  //   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  // Also update CI/mobile release builds to include platform config files.
 
   runApp(MyApp(navigatorKey: navigatorKey));
 }

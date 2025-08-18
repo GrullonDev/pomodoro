@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:pomodoro/core/domain/entities/pomodoro_session.dart';
 import 'package:pomodoro/core/domain/repositories/session_repository.dart';
+import 'package:pomodoro/core/auth/auth_service.dart';
 // Firebase usage temporarily disabled. To re-enable, restore these imports
 // and ensure firebase_core is initialized in `main.dart`.
 // TODO: To re-enable Firestore/auth sync:
@@ -62,10 +63,8 @@ class SessionRepository implements ISessionRepository {
 
   Future<List<PomodoroSession>> loadSessions() async {
     final prefs = await SharedPreferences.getInstance();
-    // Firebase disabled: treat user as unauthenticated (guest)
-    // TODO: restore uid retrieval when Firebase Auth is re-enabled:
-    // final uid = FirebaseAuth.instance.currentUser?.uid;
-    final uid = null;
+  // Determine UID (Firebase or local fallback)
+  final uid = await AuthService.instance.currentUid();
     final raw = prefs.getString(_userKey(uid));
     if (raw == null || raw.isEmpty) return [];
     try {
@@ -82,9 +81,7 @@ class SessionRepository implements ISessionRepository {
   @override
   Future<void> addSession(PomodoroSession session) async {
     final prefs = await SharedPreferences.getInstance();
-    // TODO: restore uid retrieval when Firebase Auth is re-enabled:
-    // final uid = FirebaseAuth.instance.currentUser?.uid;
-    final uid = null;
+  final uid = await AuthService.instance.currentUid();
     final current = await loadSessions();
     current.add(session);
     await prefs.setString(
