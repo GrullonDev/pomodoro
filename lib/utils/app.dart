@@ -89,8 +89,11 @@ class MyApp extends StatelessWidget {
               future: SessionRepository().isOnboardingSeen(),
               builder: (context, snap) {
                 if (!snap.hasData) {
-                  return const Center(child: CircularProgressIndicator());
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
                 }
+
                 final seen = snap.data ?? false;
                 if (!seen) {
                   return AnimatedGradientShell(
@@ -100,9 +103,10 @@ class MyApp extends StatelessWidget {
                         if (navigatorKey.currentState?.mounted ?? false) {
                           navigatorKey.currentState!.pushReplacement(
                             MaterialPageRoute(
-                                builder: (_) => const AnimatedGradientShell(
-                                      child: HomePage(),
-                                    )),
+                              builder: (_) => AnimatedGradientShell(
+                                child: LoginScreen(),
+                              ),
+                            ),
                           );
                         }
                       },
@@ -111,9 +115,10 @@ class MyApp extends StatelessWidget {
                         if (navigatorKey.currentState?.mounted ?? false) {
                           navigatorKey.currentState!.pushReplacement(
                             MaterialPageRoute(
-                                builder: (_) => const AnimatedGradientShell(
-                                      child: HomePage(),
-                                    )),
+                              builder: (_) => AnimatedGradientShell(
+                                child: LoginScreen(),
+                              ),
+                            ),
                           );
                         }
                       },
@@ -127,12 +132,20 @@ class MyApp extends StatelessWidget {
                   builder: (context, authSnap) {
                     final uid = authSnap.data;
                     if (authSnap.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
                     }
+
                     if (uid == null) {
-                      return const AnimatedGradientShell(child: LoginScreen());
+                      return const AnimatedGradientShell(
+                        child: LoginScreen(),
+                      );
                     }
-                    return const AnimatedGradientShell(child: HomePage());
+
+                    return const AnimatedGradientShell(
+                      child: HomePage(),
+                    );
                   },
                 );
               },

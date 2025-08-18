@@ -260,4 +260,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get languageSyncPreset => 'Sync preset';
+
+  @override
+  String get onboardingTitle => 'Stay focused, achieve more';
+
+  @override
+  String get onboardingSubtitle =>
+      'Use structured focus & breaks to reach your goals faster.';
+
+  @override
+  String get getStarted => 'Get started';
 }

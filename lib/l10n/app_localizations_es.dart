@@ -259,4 +259,14 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get languageSyncPreset => 'Sincronizar preset';
+
+  @override
+  String get onboardingTitle => 'Mantén el enfoque, logra más';
+
+  @override
+  String get onboardingSubtitle =>
+      'Usa foco estructurado y descansos para alcanzar tus metas más rápido.';
+
+  @override
+  String get getStarted => 'Comenzar';
 }

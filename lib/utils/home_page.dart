@@ -5,6 +5,7 @@ import 'package:pomodoro/features/history/history_screen.dart';
 import 'package:pomodoro/features/settings/settings_screen.dart';
 import 'package:pomodoro/features/tasks/tasks_screen.dart';
 import 'package:pomodoro/l10n/app_localizations.dart';
+import 'package:pomodoro/core/auth/auth_service.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -36,6 +37,30 @@ class _HomePageState extends State<HomePage> {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        automaticallyImplyLeading: false,
+        title: Text(t.appTitle, style: const TextStyle(color: Colors.black87)),
+        actions: [
+          FutureBuilder<String?>(
+            future: AuthService.instance.currentUid(),
+            builder: (context, snap) {
+              final uid = snap.data;
+              return PopupMenuButton<int>(
+                icon: const Icon(Icons.account_circle, color: Colors.black54),
+                itemBuilder: (ctx) => [
+                  PopupMenuItem<int>(value: 0, child: Text(uid ?? 'No account')),
+                  const PopupMenuItem<int>(value: 1, child: Text('Sign out')),
+                ],
+                onSelected: (v) async {
+                  if (v == 1) await AuthService.instance.signOut();
+                },
+              );
+            },
+          )
+        ],
+      ),
       body: AnimatedSwitcher(
         duration: const Duration(milliseconds: 300),
         child: _pageFor(_index),
