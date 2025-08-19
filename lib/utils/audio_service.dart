@@ -22,6 +22,8 @@ class AudioService {
   static const _focusTrackKey = 'focus_track_asset';
   String? _cachedFocusTrack; // asset path
   Uint8List? _generatedBeep;
+  bool _tickingActive = false; // guard to avoid re-initializing every second
+  String? _currentTickAsset; // track currently loaded in tick player
 
   Future<void> preload() async {
     if (_preloaded) return;
@@ -52,12 +54,9 @@ class AudioService {
   }
 
   Future<List<String>> availableFocusTracks() async {
-    // Hardcode list of bundled assets for now; could be loaded from manifest.
+    // List only assets that are actually bundled (see pubspec.yaml). Add more when you include them.
     return [
       'sounds/cronometro.mp3',
-      'sounds/forest.mp3',
-      'sounds/rain.mp3',
-      'sounds/white_noise.mp3',
     ];
   }
 
@@ -70,26 +69,38 @@ class AudioService {
   Future<String> getFocusTrack() async {
     if (_cachedFocusTrack != null) return _cachedFocusTrack!;
     final prefs = await SharedPreferences.getInstance();
-    _cachedFocusTrack =
-        prefs.getString(_focusTrackKey) ?? 'sounds/cronometro.mp3';
+  final saved = prefs.getString(_focusTrackKey);
+  final allowed = await availableFocusTracks();
+  _cachedFocusTrack =
+    (saved != null && allowed.contains(saved)) ? saved : 'sounds/cronometro.mp3';
     return _cachedFocusTrack!;
   }
 
-  Future<void> startTicking() async {
+  Future<void> startTicking({bool force = false}) async {
+    // Idempotent: if already ticking and not forcing/track unchanged, skip.
     try {
+      final track = await getFocusTrack();
+      if (!force && _tickingActive && _currentTickAsset == track) {
+        return; // already playing desired track
+      }
+      // If forcing or track changed, (re)configure the looping player.
+      await _tickPlayer.stop();
       await _tickPlayer.setReleaseMode(ReleaseMode.loop);
       await _tickPlayer.setVolume(0.35);
-      final track = await getFocusTrack();
       await _tickPlayer.setSource(AssetSource(track));
       await _tickPlayer.resume();
+      _currentTickAsset = track;
+      _tickingActive = true;
     } catch (e) {
-      // ignore
+      // ignore but reset active flag so future attempts can retry
+      _tickingActive = false;
     }
   }
 
   Future<void> stopTicking() async {
     try {
       await _tickPlayer.stop();
+  _tickingActive = false;
     } catch (_) {}
   }
 

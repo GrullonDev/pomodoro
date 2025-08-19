@@ -67,6 +67,10 @@ class MainActivity : FlutterActivity() {
 								result.success(null)
 							} catch (se: SecurityException) {
 								result.error("PERMISSION_DENIED", "Notification policy access denied", null)
+							} catch (iae: IllegalArgumentException) {
+								// Some OEM firmwares may reject values; fall back to ALL instead of crashing
+								try { nm.setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_ALL) } catch (_: Exception) {}
+								result.error("INVALID_FILTER", "Invalid interruption filter $filter", null)
 							}
 						} else {
 							result.error("PERMISSION_DENIED", "Notification policy access denied", null)
