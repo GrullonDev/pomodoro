@@ -269,4 +269,49 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get getStarted => 'Comenzar';
+
+  @override
+  String get profileMenu => 'Mi Perfil';
+
+  @override
+  String get profileTitle => 'Mi Perfil';
+
+  @override
+  String get profileUpdated => 'Perfil actualizado';
+
+  @override
+  String get profileInfoSection => 'Información';
+
+  @override
+  String get profileNameLabel => 'Nombre';
+
+  @override
+  String get profileSave => 'Guardar';
+
+  @override
+  String get profileChangePassword => 'Cambiar contraseña';
+
+  @override
+  String get profileCurrentPasswordOptional => 'Contraseña actual (opcional)';
+
+  @override
+  String get profileNewPassword => 'Nueva contraseña';
+
+  @override
+  String get profileConfirmNewPassword => 'Confirmar nueva contraseña';
+
+  @override
+  String get profileUpdatePassword => 'Actualizar contraseña';
+
+  @override
+  String get passwordMismatch => 'Las contraseñas no coinciden';
+
+  @override
+  String get passwordUpdated => 'Contraseña actualizada';
+
+  @override
+  String get signOut => 'Cerrar sesión';
+
+  @override
+  String get idUnavailable => 'ID no disponible';
 }
