@@ -1,6 +1,9 @@
 // Single authoritative (Groovy) build script. The duplicate build.gradle.kts will be removed.
 plugins {
     id "com.android.application"
+    // START: FlutterFire Configuration
+    id 'com.google.gms.google-services'
+    // END: FlutterFire Configuration
     id "org.jetbrains.kotlin.android"
     id "dev.flutter.flutter-gradle-plugin"
 }

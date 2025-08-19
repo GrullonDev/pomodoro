@@ -50,7 +50,7 @@ Tu privacidad es importante. Esta sección describe qué datos recopilamos, cóm
    Podemos actualizar estos términos y la política de privacidad. Te notificaremos dentro de la app o por correo electrónico. El uso continuado implica aceptación de las modificaciones.
 
 7. Contacto  
-   Si tienes preguntas o solicitudes, escríbenos a: privacy@pomodoroapp.example.com
+   Si tienes preguntas o solicitudes, escríbenos a: prosystem155@gmail.com
 
 ---
-*Última actualización: 2024-06-01*
+*Última actualización: 2025-08-15*
