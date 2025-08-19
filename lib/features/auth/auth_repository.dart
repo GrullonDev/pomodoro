@@ -21,8 +21,8 @@ class AuthRepository {
     return await AuthService.instance.signInWithEmail(email, password);
   }
 
-  Future<dynamic> registerWithEmail(String email, String password) async {
-    return await AuthService.instance.registerWithEmail(email, password);
+  Future<dynamic> registerWithEmail(String email, String password, {String? name}) async {
+    return await AuthService.instance.registerWithEmail(email, password, name: name);
   }
 
   Future<dynamic> signInWithGoogle() async {

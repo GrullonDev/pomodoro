@@ -28,57 +28,9 @@ class _LoginScreenState extends State<LoginScreen> {
       _error = null;
     });
     try {
-      // Check if email exists in Firebase (best-effort). If no Firebase, fall back to AuthService sign in.
       final email = _email.text.trim();
-      // If Firebase available, try to fetch sign-in methods for email to check existence via repository.
       final repo = sl<AuthRepository>();
-      bool emailExists = true;
-      try {
-        final methodsFetched = await repo.fetchSignInMethodsForEmail(email);
-        emailExists = methodsFetched.isNotEmpty;
-      } catch (e) {
-        emailExists = true;
-      }
-
-      if (!emailExists) {
-        // Show dialog suggesting registration
-        if (!mounted) return;
-        showDialog<void>(
-          context: context,
-          builder: (ctx) => AlertDialog(
-            title: const Text('Cuenta no encontrada'),
-            content: const Text(
-                'No existe una cuenta con ese correo. ¿Deseas registrarte?'),
-            actions: [
-              TextButton(
-                  onPressed: () => Navigator.of(ctx).pop(),
-                  child: const Text('Cancelar')),
-              FilledButton(
-                onPressed: () {
-                  Navigator.of(ctx).pop();
-                  // Navigate to sign up screen with pre-filled email
-                  Navigator.of(context).push(MaterialPageRoute(
-                      builder: (_) => SignUpScreen(
-                          onSuccess: () {
-                            if (!mounted) return;
-                            Navigator.of(context).pushReplacement(
-                              MaterialPageRoute(
-                                builder: (_) => const AnimatedGradientShell(
-                                  child: HomePage(),
-                                ),
-                              ),
-                            );
-                          },
-                          initialEmail: email)));
-                },
-                child: const Text('Registrarse'),
-              ),
-            ],
-          ),
-        );
-        return;
-      }
-
+      // Intento directo de login; si el usuario no existe o password incorrecto, el AuthService lanza excepción.
       await repo.signInWithEmail(email, _password.text);
       if (!mounted) return;
       Navigator.of(context).pushReplacement(
