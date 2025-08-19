@@ -39,7 +39,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     try {
       final email = _email.text.trim();
       final password = _password.text;
-      await sl<AuthRepository>().registerWithEmail(email, password);
+  await sl<AuthRepository>().registerWithEmail(email, password, name: _name.text.trim());
       widget.onSuccess();
       if (!mounted) return;
       Navigator.of(context).pushReplacement(

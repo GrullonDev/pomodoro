@@ -72,17 +72,23 @@ class _SessionSummaryScreenState extends State<SessionSummaryScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 16),
-              Text(t.sessionCompleted,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                      color: Colors.greenAccent,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold)),
+              Text(
+                t.sessionCompleted,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Colors.greenAccent,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
               const SizedBox(height: 8),
               Text(
-                  'Total: ${widget.totalSessions} x ${widget.workMinutesPerSession} min',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(color: Colors.greenAccent)),
+                'Total: ${widget.totalSessions} x ${widget.workMinutesPerSession} min',
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Colors.greenAccent,
+                ),
+              ),
               const SizedBox(height: 16),
               RepaintBoundary(
                 key: _shareKey,
@@ -94,15 +100,22 @@ class _SessionSummaryScreenState extends State<SessionSummaryScreen> {
                     padding: const EdgeInsets.all(16.0),
                     child: Column(
                       children: [
-                        Text(t.todayProgress,
-                            style: const TextStyle(
-                                color: Colors.greenAccent, fontSize: 18)),
+                        Text(
+                          t.todayProgress,
+                          style: const TextStyle(
+                            color: Colors.greenAccent,
+                            fontSize: 18,
+                          ),
+                        ),
                         const SizedBox(height: 12),
-                        Text(_formatMinutes(todaySeconds),
-                            style: const TextStyle(
-                                color: Colors.greenAccent,
-                                fontSize: 32,
-                                fontWeight: FontWeight.bold)),
+                        Text(
+                          _formatMinutes(todaySeconds),
+                          style: const TextStyle(
+                            color: Colors.greenAccent,
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                         const SizedBox(height: 12),
                         LinearProgressIndicator(
                           value: progress.clamp(0, 1),
@@ -112,9 +125,13 @@ class _SessionSummaryScreenState extends State<SessionSummaryScreen> {
                           minHeight: 6,
                         ),
                         const SizedBox(height: 8),
-                        Text(t.dailyGoal(goalMinutes),
-                            style: const TextStyle(
-                                color: Colors.greenAccent, fontSize: 12)),
+                        Text(
+                          t.dailyGoal(goalMinutes),
+                          style: const TextStyle(
+                            color: Colors.greenAccent,
+                            fontSize: 12,
+                          ),
+                        ),
                         const SizedBox(height: 12),
                         FocusWeeklyChart(data: map),
                       ],
@@ -123,10 +140,14 @@ class _SessionSummaryScreenState extends State<SessionSummaryScreen> {
                 ),
               ),
               const SizedBox(height: 20),
-              Text(t.last7Days,
-                  textAlign: TextAlign.center,
-                  style:
-                      const TextStyle(color: Colors.greenAccent, fontSize: 18)),
+              Text(
+                t.last7Days,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Colors.greenAccent,
+                  fontSize: 18,
+                ),
+              ),
               const Spacer(),
               ElevatedButton(
                 onPressed: () =>
@@ -139,26 +160,47 @@ class _SessionSummaryScreenState extends State<SessionSummaryScreen> {
                   final totalMin =
                       (widget.totalSessions * widget.workMinutesPerSession);
                   Share.share(
-                      '🔥 Pomodoro: $totalMin min (${_formatMinutes(todaySeconds)})');
+                    '🔥 Pomodoro: $totalMin min (${_formatMinutes(todaySeconds)})',
+                  );
                 },
-                icon: const Icon(Icons.share, color: Colors.greenAccent),
-                label: Text(t.share,
-                    style: const TextStyle(color: Colors.greenAccent)),
+                icon: const Icon(
+                  Icons.share,
+                  color: Colors.greenAccent,
+                ),
+                label: Text(
+                  t.share,
+                  style: const TextStyle(
+                    color: Colors.greenAccent,
+                  ),
+                ),
                 style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Colors.greenAccent)),
+                  side: const BorderSide(
+                    color: Colors.greenAccent,
+                  ),
+                ),
               ),
               const SizedBox(height: 8),
               OutlinedButton(
                 onPressed: _sharing
                     ? null
-                    : () => _shareImage(todaySeconds, goalMinutes),
+                    : () => _shareImage(
+                          todaySeconds,
+                          goalMinutes,
+                        ),
                 child: _sharing
                     ? const SizedBox(
                         height: 16,
                         width: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2))
-                    : Text(t.shareImage,
-                        style: const TextStyle(color: Colors.greenAccent)),
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : Text(
+                        t.shareImage,
+                        style: const TextStyle(
+                          color: Colors.greenAccent,
+                        ),
+                      ),
               ),
               const SizedBox(height: 16),
             ],
@@ -167,9 +209,11 @@ class _SessionSummaryScreenState extends State<SessionSummaryScreen> {
         return Scaffold(
           backgroundColor: Colors.black,
           body: SafeArea(
-              child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: body)),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: body,
+            ),
+          ),
         );
       },
     );
