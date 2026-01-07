@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -30,7 +31,6 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       final email = _email.text.trim();
       final repo = sl<AuthRepository>();
-      // Intento directo de login; si el usuario no existe o password incorrecto, el AuthService lanza excepción.
       await repo.signInWithEmail(email, _password.text);
       if (!mounted) return;
       Navigator.of(context).pushReplacement(
@@ -47,117 +47,230 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  // Registration handled by dedicated SignUpScreen.
+  Future<void> _checkBiometrics() async {
+    final repo = sl<AuthRepository>();
+    final authenticated = await repo.authenticateWithBiometrics();
+    if (authenticated && mounted) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => const AnimatedGradientShell(child: HomePage()),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
-          child: Card(
-            elevation: 6,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-            child: Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text('Welcome',
-                        style: Theme.of(context).textTheme.headlineSmall),
-                    const SizedBox(height: 12),
-                    TextFormField(
-                      controller: _email,
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: const InputDecoration(
-                          labelText: 'Email', prefixIcon: Icon(Icons.email)),
-                      validator: (v) => EmailValidator.validate(v),
+      body: Stack(
+        children: [
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFF4A00E0), Color(0xFF8E2DE2)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+          ),
+          Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: Colors.white.withOpacity(0.2)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 10,
+                          spreadRadius: 2,
+                        )
+                      ],
                     ),
-                    const SizedBox(height: 12),
-                    TextFormField(
-                      controller: _password,
-                      obscureText: true,
-                      decoration: const InputDecoration(
-                          labelText: 'Password', prefixIcon: Icon(Icons.lock)),
-                      validator: (v) => (v == null || v.length < 6)
-                          ? 'La contraseña debe tener al menos 6 caracteres'
-                          : null,
-                    ),
-                    const SizedBox(height: 18),
-                    if (_error != null)
-                      Text(_error!, style: const TextStyle(color: Colors.red)),
-                    const SizedBox(height: 8),
-                    SizedBox(
-                      width: double.infinity,
-                      child: FilledButton(
-                        onPressed: _loading ? null : _signIn,
-                        child: _loading
-                            ? const SizedBox(
-                                height: 18,
-                                width: 18,
-                                child:
-                                    CircularProgressIndicator(strokeWidth: 2))
-                            : const Text('Log In'),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    SizedBox(
-                      width: double.infinity,
-                      child: OutlinedButton(
-                        onPressed: _loading
-                            ? null
-                            : () {
-                                final email = _email.text.trim();
-                                Navigator.of(context).push(MaterialPageRoute(
-                                    builder: (_) => SignUpScreen(
-                                        onSuccess: () {},
-                                        initialEmail: email)));
-                              },
-                        child: const Text('Sign Up'),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    TextButton(
-                      onPressed: () async {
-                        // Load policy asset and show it in a scrollable dialog
-                        String policyText;
-                        try {
-                          policyText = await rootBundle
-                              .loadString('assets/terms_privacy.md');
-                        } catch (e) {
-                          policyText =
-                              'Policy file not found. Please check assets.';
-                        }
-
-                        if (!mounted) return;
-                        showDialog<void>(
-                          context: context,
-                          builder: (_) => AlertDialog(
-                            title: const Text('Terms & Privacy'),
-                            content: SingleChildScrollView(
-                              child: Text(policyText),
+                    padding: const EdgeInsets.all(30.0),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.lock_outline_rounded,
+                              size: 60, color: Colors.white.withOpacity(0.9)),
+                          const SizedBox(height: 20),
+                          Text(
+                            'Welcome Back',
+                            style: Theme.of(context)
+                                .textTheme
+                                .headlineMedium
+                                ?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                          ),
+                          const SizedBox(height: 30),
+                          TextFormField(
+                            controller: _email,
+                            style: const TextStyle(color: Colors.white),
+                            keyboardType: TextInputType.emailAddress,
+                            decoration: InputDecoration(
+                              labelText: 'Email',
+                              labelStyle: TextStyle(
+                                  color: Colors.white.withOpacity(0.8)),
+                              prefixIcon: const Icon(Icons.email,
+                                  color: Colors.white70),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(
+                                    color: Colors.white.withOpacity(0.3)),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide:
+                                    const BorderSide(color: Colors.white),
+                              ),
                             ),
-                            actions: [
+                            validator: (v) => EmailValidator.validate(v),
+                          ),
+                          const SizedBox(height: 16),
+                          TextFormField(
+                            controller: _password,
+                            obscureText: true,
+                            style: const TextStyle(color: Colors.white),
+                            decoration: InputDecoration(
+                              labelText: 'Password',
+                              labelStyle: TextStyle(
+                                  color: Colors.white.withOpacity(0.8)),
+                              prefixIcon:
+                                  const Icon(Icons.lock, color: Colors.white70),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(
+                                    color: Colors.white.withOpacity(0.3)),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide:
+                                    const BorderSide(color: Colors.white),
+                              ),
+                            ),
+                            validator: (v) => (v == null || v.length < 6)
+                                ? 'La contraseña debe tener al menos 6 caracteres'
+                                : null,
+                          ),
+                          const SizedBox(height: 24),
+                          if (_error != null)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 16.0),
+                              child: Text(_error!,
+                                  style: const TextStyle(
+                                      color: Colors.redAccent,
+                                      fontWeight: FontWeight.bold)),
+                            ),
+                          SizedBox(
+                            width: double.infinity,
+                            height: 50,
+                            child: ElevatedButton(
+                              onPressed: _loading ? null : _signIn,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.white,
+                                foregroundColor: Colors.deepPurple,
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12)),
+                                elevation: 0,
+                              ),
+                              child: _loading
+                                  ? const SizedBox(
+                                      height: 20,
+                                      width: 20,
+                                      child: CircularProgressIndicator(
+                                          strokeWidth: 2))
+                                  : const Text('LOG IN',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16)),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          // Biometric Button
+                          IconButton(
+                            onPressed: _checkBiometrics,
+                            icon: const Icon(Icons.fingerprint,
+                                size: 40, color: Colors.white),
+                            tooltip: 'Biometric Login',
+                          ),
+                          const SizedBox(height: 16),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text("Don't have an account?",
+                                  style: TextStyle(
+                                      color: Colors.white.withOpacity(0.8))),
                               TextButton(
-                                  onPressed: () => Navigator.of(context).pop(),
-                                  child: const Text('Close'))
+                                onPressed: _loading
+                                    ? null
+                                    : () {
+                                        final email = _email.text.trim();
+                                        Navigator.of(context).push(
+                                            MaterialPageRoute(
+                                                builder: (_) => SignUpScreen(
+                                                    onSuccess: () {},
+                                                    initialEmail: email)));
+                                      },
+                                child: const Text('Sign Up',
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold)),
+                              ),
                             ],
                           ),
-                        );
-                      },
-                      child: const Text('Terms & Privacy',
-                          style: TextStyle(fontSize: 12)),
-                    )
-                  ],
+                          TextButton(
+                            onPressed: () async {
+                              // Load policy asset and show it in a scrollable dialog
+                              String policyText;
+                              try {
+                                policyText = await rootBundle
+                                    .loadString('assets/terms_privacy.md');
+                              } catch (e) {
+                                policyText =
+                                    'Policy file not found. Please check assets.';
+                              }
+
+                              if (!mounted) return;
+                              showDialog<void>(
+                                context: context,
+                                builder: (_) => AlertDialog(
+                                  title: const Text('Terms & Privacy'),
+                                  content: SingleChildScrollView(
+                                    child: Text(policyText),
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                        onPressed: () =>
+                                            Navigator.of(context).pop(),
+                                        child: const Text('Close'))
+                                  ],
+                                ),
+                              );
+                            },
+                            child: Text('Terms & Privacy',
+                                style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.white.withOpacity(0.6))),
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }

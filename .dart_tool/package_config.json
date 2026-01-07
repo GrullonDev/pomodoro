@@ -284,6 +284,12 @@
       "languageVersion": "3.8"
     },
     {
+      "name": "flutter_plugin_android_lifecycle",
+      "rootUri": "file:///C:/Users/jgrullon/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_plugin_android_lifecycle-2.0.33",
+      "packageUri": "lib/",
+      "languageVersion": "3.9"
+    },
+    {
       "name": "flutter_test",
       "rootUri": "file:///C:/Users/jgrullon/fvm/versions/3.38.3/packages/flutter_test",
       "packageUri": "lib/",
@@ -388,6 +394,36 @@
     {
       "name": "lints",
       "rootUri": "file:///C:/Users/jgrullon/AppData/Local/Pub/Cache/hosted/pub.dev/lints-6.0.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.8"
+    },
+    {
+      "name": "local_auth",
+      "rootUri": "file:///C:/Users/jgrullon/AppData/Local/Pub/Cache/hosted/pub.dev/local_auth-3.0.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.9"
+    },
+    {
+      "name": "local_auth_android",
+      "rootUri": "file:///C:/Users/jgrullon/AppData/Local/Pub/Cache/hosted/pub.dev/local_auth_android-2.0.4",
+      "packageUri": "lib/",
+      "languageVersion": "3.9"
+    },
+    {
+      "name": "local_auth_darwin",
+      "rootUri": "file:///C:/Users/jgrullon/AppData/Local/Pub/Cache/hosted/pub.dev/local_auth_darwin-2.0.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.9"
+    },
+    {
+      "name": "local_auth_platform_interface",
+      "rootUri": "file:///C:/Users/jgrullon/AppData/Local/Pub/Cache/hosted/pub.dev/local_auth_platform_interface-1.1.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.7"
+    },
+    {
+      "name": "local_auth_windows",
+      "rootUri": "file:///C:/Users/jgrullon/AppData/Local/Pub/Cache/hosted/pub.dev/local_auth_windows-2.0.1",
       "packageUri": "lib/",
       "languageVersion": "3.8"
     },

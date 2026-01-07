@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 
 import 'package:pomodoro/core/auth/auth_service.dart';
+import 'package:pomodoro/features/auth/login_screen.dart';
 import 'package:pomodoro/features/auth/screens/profile_screen.dart';
 import 'package:pomodoro/features/habit/habit.dart';
 import 'package:pomodoro/features/history/history_screen.dart';
 import 'package:pomodoro/features/settings/settings_screen.dart';
 import 'package:pomodoro/features/tasks/tasks_screen.dart';
 import 'package:pomodoro/l10n/app_localizations.dart';
+import 'package:pomodoro/utils/app.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -82,6 +84,14 @@ class _HomePageState extends State<HomePage> {
                     );
                   } else if (v == 1) {
                     await AuthService.instance.signOut();
+                    if (!mounted) return;
+                    Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            const AnimatedGradientShell(child: LoginScreen()),
+                      ),
+                      (route) => false,
+                    );
                   }
                 },
               );
