@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pomodoro/utils/glass_container.dart';
 
 import 'package:pomodoro/core/data/preset_profile.dart';
 import 'package:pomodoro/core/data/task_repository.dart'; // data impl
@@ -87,43 +88,52 @@ class _TasksScreenState extends State<TasksScreen> {
           ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
-                Padding(
-                  padding: const EdgeInsets.only(top: 12.0),
-                  child: Text(
-                      t.taskProgressSummary(done.toString(), pending.toString(),
-                          total.toString()),
-                      style: TextStyle(color: scheme.primary)),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(12.0),
+                _GlassSummary(done: done, pending: pending, total: total),
+                GlassContainer(
+                  margin: const EdgeInsets.all(12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: Row(
                     children: [
                       Expanded(
                         child: TextField(
                           controller: _controller,
-                          decoration:
-                              InputDecoration(labelText: t.taskNewLabel),
+                          decoration: InputDecoration(
+                            labelText: t.taskNewLabel,
+                            border: InputBorder.none,
+                            hintText: 'E.g. Read a book',
+                          ),
                           onSubmitted: (_) => _add(),
                         ),
                       ),
                       const SizedBox(width: 8),
-                      ElevatedButton(
+                      IconButton(
                         onPressed: _add,
-                        child: Text(t.taskAdd),
+                        style: IconButton.styleFrom(
+                          backgroundColor: scheme.primary,
+                          foregroundColor: Colors.white,
+                        ),
+                        icon: const Icon(Icons.add),
                       ),
                     ],
                   ),
                 ),
                 // Config defaults row
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                // Config defaults row inside Glass
+                GlassContainer(
+                  margin: const EdgeInsets.symmetric(horizontal: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  borderRadius: 12,
                   child: Row(
                     children: [
                       Flexible(
                         child: TextField(
                           controller: _workCtrl,
-                          decoration:
-                              InputDecoration(labelText: t.taskWorkLabel),
+                          textAlign: TextAlign.center,
+                          decoration: InputDecoration(
+                              labelText: t.taskWorkLabel,
+                              border: InputBorder.none),
                           keyboardType: TextInputType.number,
                         ),
                       ),
@@ -131,8 +141,10 @@ class _TasksScreenState extends State<TasksScreen> {
                       Flexible(
                         child: TextField(
                           controller: _breakCtrl,
-                          decoration:
-                              InputDecoration(labelText: t.taskBreakLabel),
+                          textAlign: TextAlign.center,
+                          decoration: InputDecoration(
+                              labelText: t.taskBreakLabel,
+                              border: InputBorder.none),
                           keyboardType: TextInputType.number,
                         ),
                       ),
@@ -140,8 +152,10 @@ class _TasksScreenState extends State<TasksScreen> {
                       Flexible(
                         child: TextField(
                           controller: _sessionsCtrl,
-                          decoration:
-                              InputDecoration(labelText: t.taskSessionsShort),
+                          textAlign: TextAlign.center,
+                          decoration: InputDecoration(
+                              labelText: t.taskSessionsShort,
+                              border: InputBorder.none),
                           keyboardType: TextInputType.number,
                         ),
                       ),
@@ -198,51 +212,63 @@ class _TasksScreenState extends State<TasksScreen> {
                             _tasks.removeWhere((e) => e.id == id);
                           });
                         },
-                        child: ListTile(
-                          leading: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              CircularProgressIndicator(
-                                value: t.sessions == 0
-                                    ? 0
-                                    : t.sessionsCompleted / t.sessions,
-                                strokeWidth: 4,
-                                backgroundColor:
-                                    scheme.primary.withValues(alpha: 0.15),
-                              ),
-                              Icon(
-                                t.done ? Icons.check : Icons.play_arrow,
-                                color: t.done ? scheme.primary : null,
-                              ),
-                            ],
-                          ),
-                          title: Text(t.title,
-                              style: TextStyle(
-                                  decoration: t.done
-                                      ? TextDecoration.lineThrough
-                                      : TextDecoration.none)),
-                          subtitle: Text(AppLocalizations.of(context)
-                              .taskSessionProgress(
-                                  t.sessionsCompleted.toString(),
-                                  t.sessions.toString())),
-                          trailing: IconButton(
-                            icon: const Icon(Icons.play_circle_fill),
-                            onPressed: t.done
-                                ? null
-                                : () async {
-                                    await Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => TimerScreen(
-                                          workMinutes: t.workMinutes,
-                                          breakMinutes: t.breakMinutes,
-                                          sessions: t.sessions,
-                                          task: t,
+                        child: GlassContainer(
+                          margin: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 6),
+                          padding: const EdgeInsets.all(0),
+                          color: t.done
+                              ? Colors.white.withOpacity(0.05)
+                              : Colors.white.withOpacity(0.15),
+                          child: ListTile(
+                            contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 8),
+                            leading: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                CircularProgressIndicator(
+                                  value: t.sessions == 0
+                                      ? 0
+                                      : t.sessionsCompleted / t.sessions,
+                                  strokeWidth: 4,
+                                  backgroundColor:
+                                      scheme.primary.withOpacity(0.15),
+                                ),
+                                Icon(
+                                  t.done ? Icons.check : Icons.play_arrow,
+                                  color: t.done ? scheme.primary : null,
+                                  size: 20,
+                                ),
+                              ],
+                            ),
+                            title: Text(t.title,
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    decoration: t.done
+                                        ? TextDecoration.lineThrough
+                                        : TextDecoration.none)),
+                            subtitle: Text(AppLocalizations.of(context)
+                                .taskSessionProgress(
+                                    t.sessionsCompleted.toString(),
+                                    t.sessions.toString())),
+                            trailing: IconButton(
+                              icon: const Icon(Icons.play_circle_fill),
+                              onPressed: t.done
+                                  ? null
+                                  : () async {
+                                      await Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => TimerScreen(
+                                            workMinutes: t.workMinutes,
+                                            breakMinutes: t.breakMinutes,
+                                            sessions: t.sessions,
+                                            task: t,
+                                          ),
                                         ),
-                                      ),
-                                    );
-                                    await _load();
-                                  },
+                                      );
+                                      await _load();
+                                    },
+                            ),
                           ),
                         ),
                       );
@@ -260,6 +286,62 @@ class _TasksScreenState extends State<TasksScreen> {
                   ),
               ],
             ),
+    );
+  }
+}
+
+class _GlassSummary extends StatelessWidget {
+  final int done;
+  final int pending;
+  final int total;
+
+  const _GlassSummary({
+    required this.done,
+    required this.pending,
+    required this.total,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
+    return GlassContainer(
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _StatItem(label: 'Done', value: done.toString(), color: Colors.green),
+          _StatItem(
+              label: 'Pending',
+              value: pending.toString(),
+              color: Colors.orange),
+          _StatItem(
+              label: 'Total', value: total.toString(), color: scheme.primary),
+        ],
+      ),
+    );
+  }
+}
+
+class _StatItem extends StatelessWidget {
+  final String label;
+  final String value;
+  final Color color;
+
+  const _StatItem(
+      {required this.label, required this.value, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(value,
+            style: TextStyle(
+                fontSize: 22, fontWeight: FontWeight.bold, color: color)),
+        Text(label,
+            style: const TextStyle(fontSize: 12, color: Colors.black54)),
+      ],
     );
   }
 }

@@ -21,6 +21,8 @@ import 'package:pomodoro/l10n/app_localizations.dart';
 import 'package:pomodoro/utils/audio_service.dart';
 import 'package:pomodoro/utils/dnd.dart';
 import 'package:pomodoro/utils/notifications/notifications.dart';
+import 'package:pomodoro/utils/glass_container.dart';
+import 'package:pomodoro/utils/app.dart';
 
 class TimerScreen extends StatelessWidget {
   final int workMinutes;
@@ -320,27 +322,37 @@ class _TimerViewState extends State<_TimerView>
 
   @override
   Widget build(BuildContext context) {
-    final background =
-        _flashing ? Colors.greenAccent.withValues(alpha: 0.10) : Colors.black;
-    return AnimatedOpacity(
-        duration: const Duration(milliseconds: 220),
-        opacity: _flashing ? 0.92 : 1.0,
-        child: Scaffold(
-          backgroundColor: background,
-          appBar: AppBar(
-            backgroundColor: Colors.transparent,
-            title: Text(AppLocalizations.of(context).appTitle,
-                style: TextStyle(color: Theme.of(context).colorScheme.primary)),
-            actions: [
-              IconButton(
-                icon: Icon(Icons.refresh,
-                    color: Theme.of(context).colorScheme.primary),
-                onPressed: () => context.read<TimerBloc>().add(TimerReset()),
-              )
-            ],
-          ),
-          body: SafeArea(
-            child: Center(
+    // Flash overlay logic
+    final flashOverlay = _flashing
+        ? IgnorePointer(
+            child: Container(
+            color: Colors.greenAccent.withOpacity(0.15),
+          ))
+        : const SizedBox.shrink();
+
+    return AnimatedGradientShell(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          title: Text(AppLocalizations.of(context).appTitle,
+              style: TextStyle(
+                  color: Colors.white.withOpacity(0.9),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 22)),
+          centerTitle: true,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.refresh, color: Colors.white70),
+              onPressed: () => context.read<TimerBloc>().add(TimerReset()),
+            )
+          ],
+        ),
+        body: Stack(
+          fit: StackFit.expand,
+          children: [
+            SafeArea(
               child: BlocConsumer<TimerBloc, TimerState>(
                 listener: (context, state) {
                   if (!mounted) return;
@@ -534,8 +546,12 @@ class _TimerViewState extends State<_TimerView>
                 },
                 builder: (context, state) {
                   if (state is TimerInitial) {
-                    return Text(AppLocalizations.of(context).timerReady,
-                        style: const TextStyle(color: Colors.greenAccent));
+                    return Center(
+                        child: Text(AppLocalizations.of(context).timerReady,
+                            style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold)));
                   } else if (state is TimerRunInProgress) {
                     final loc = AppLocalizations.of(context);
                     final isWork = state.phase == TimerPhase.work;
@@ -548,6 +564,7 @@ class _TimerViewState extends State<_TimerView>
                         : loc.breakPhase;
 
                     return OrientationBuilder(builder: (context, orientation) {
+                      // Colors for glassmorphism
                       const accentBase = Colors.greenAccent;
                       final alertColor = isWork
                           ? Color.lerp(accentBase, Colors.orangeAccent,
@@ -581,30 +598,44 @@ class _TimerViewState extends State<_TimerView>
                                 _format(remaining),
                                 key: ValueKey(remaining),
                                 style: TextStyle(
-                                  fontSize: orientation == Orientation.portrait
-                                      ? 64
-                                      : 72,
-                                  color: alertColor,
-                                  fontFamily: 'Arial',
-                                  fontWeight: FontWeight.w600,
-                                ),
+                                    fontSize:
+                                        orientation == Orientation.portrait
+                                            ? 80
+                                            : 72, // Larger font
+                                    color: Colors.white,
+                                    fontWeight:
+                                        FontWeight.w200, // Thinner, modern look
+                                    letterSpacing: -2,
+                                    shadows: [
+                                      Shadow(
+                                          blurRadius: 10,
+                                          color: alertColor.withOpacity(0.5))
+                                    ]),
                               ),
                             ),
                           ),
                           const SizedBox(height: 8),
-                          AnimatedSwitcher(
-                            duration: const Duration(milliseconds: 300),
-                            child: Text(
-                              phaseText,
-                              key: ValueKey(state.phase.toString() +
-                                  state.session.toString()),
-                              style: TextStyle(
-                                  color: alertColor,
-                                  fontSize: 14,
-                                  letterSpacing: 0.5),
+                          GlassContainer(
+                            // Glass pill for phase
+                            borderRadius: 20,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 6),
+                            color: Colors.white.withOpacity(0.1),
+                            child: AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 300),
+                              child: Text(
+                                phaseText,
+                                key: ValueKey(state.phase.toString() +
+                                    state.session.toString()),
+                                style: TextStyle(
+                                    color: Colors.white.withOpacity(0.9),
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w500,
+                                    letterSpacing: 0.5),
+                              ),
                             ),
                           ),
-                          const SizedBox(height: 12),
+                          const SizedBox(height: 20),
                           if (_todayGoalRemaining >= 0 && _dailyGoalMinutes > 0)
                             _GoalProgressBar(
                                 goalMinutes: _dailyGoalMinutes,
@@ -618,19 +649,22 @@ class _TimerViewState extends State<_TimerView>
                         alignment: WrapAlignment.center,
                         children: [
                           _TimerButton(
-                            icon: state.paused ? Icons.play_arrow : Icons.pause,
+                            icon: state.paused
+                                ? Icons.play_arrow_rounded
+                                : Icons.pause_rounded,
                             label: state.paused ? loc.resume : loc.pause,
                             onTap: () => context.read<TimerBloc>().add(
                                 state.paused ? TimerResumed() : TimerPaused()),
                             color: alertColor,
                           ),
                           _TimerButton(
-                            icon: Icons.skip_next,
+                            icon: Icons.skip_next_rounded,
                             label: loc.skip,
                             onTap: () => context
                                 .read<TimerBloc>()
                                 .add(TimerPhaseCompleted()),
-                            color: alertColor,
+                            color:
+                                alertColor, // secondary button style could be different
                           ),
                         ],
                       );
@@ -639,26 +673,35 @@ class _TimerViewState extends State<_TimerView>
                         return Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            // Separate ring on top
-                            SizedBox(height: 220, child: Center(child: ring)),
-                            const SizedBox(height: 24),
-                            timeCol,
-                            const SizedBox(height: 40),
-                            buttons,
-                            if (_todayGoalRemaining >= 0 &&
-                                _dailyGoalMinutes > 0) ...[
-                              const SizedBox(height: 24),
-                              Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 40),
-                                child: _GoalProgressBar(
-                                    goalMinutes: _dailyGoalMinutes,
-                                    remaining: _todayGoalRemaining),
-                              ),
-                            ],
+                            Expanded(
+                                flex: 5,
+                                child: Center(
+                                    child: Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    // Glow behind
+                                    Container(
+                                      width: 200,
+                                      height: 200,
+                                      decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          boxShadow: [
+                                            BoxShadow(
+                                                color:
+                                                    alertColor.withOpacity(0.2),
+                                                blurRadius: 60,
+                                                spreadRadius: 10)
+                                          ]),
+                                    ),
+                                    ring
+                                  ],
+                                ))),
+                            Expanded(flex: 4, child: timeCol),
+                            Expanded(flex: 3, child: buttons),
                           ],
                         );
                       } else {
+                        // Landscape
                         return Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 32),
                           child: Row(
@@ -670,19 +713,8 @@ class _TimerViewState extends State<_TimerView>
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     timeCol,
-                                    const SizedBox(height: 40),
+                                    const SizedBox(height: 30),
                                     buttons,
-                                    if (_todayGoalRemaining >= 0 &&
-                                        _dailyGoalMinutes > 0) ...[
-                                      const SizedBox(height: 24),
-                                      Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 24),
-                                        child: _GoalProgressBar(
-                                            goalMinutes: _dailyGoalMinutes,
-                                            remaining: _todayGoalRemaining),
-                                      ),
-                                    ]
                                   ],
                                 ),
                               ),
@@ -695,16 +727,28 @@ class _TimerViewState extends State<_TimerView>
                     return Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.celebration,
-                            color: Colors.greenAccent, size: 100),
-                        const SizedBox(height: 16),
+                        const Icon(Icons.celebration_rounded,
+                            color: Colors.white, size: 80),
+                        const SizedBox(height: 24),
                         Text(
                             '¡Listo! Tiempo total ${(state.workDuration / 60 * state.totalSessions).round()}m',
-                            style: const TextStyle(color: Colors.greenAccent)),
-                        const SizedBox(height: 32),
-                        ElevatedButton(
-                          onPressed: () => Navigator.of(context).pop(),
-                          child: const Text('Terminar'),
+                            style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 40),
+                        GlassContainer(
+                          borderRadius: 30,
+                          child: TextButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            child: const Padding(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 24, vertical: 8),
+                              child: Text('Terminar',
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 16)),
+                            ),
+                          ),
                         )
                       ],
                     );
@@ -713,8 +757,11 @@ class _TimerViewState extends State<_TimerView>
                 },
               ),
             ),
-          ),
-        ));
+            flashOverlay, // Overlay on top
+          ],
+        ),
+      ),
+    );
   }
 
   Future<void> _ensureTicking() async {
@@ -745,25 +792,27 @@ class _TimerButton extends StatelessWidget {
       required this.color});
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      label: label,
-      child: ElevatedButton.icon(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: color.withValues(alpha: 0.85),
-          foregroundColor: Colors.black,
-          elevation: 0,
-          minimumSize: const Size(140, 54),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        ),
-        onPressed: onTap,
-        icon: Icon(icon, color: Colors.black),
-        label: Text(label,
-            style: const TextStyle(
-                color: Colors.black, fontWeight: FontWeight.w600)),
-      ),
-    );
+    return GestureDetector(
+        onTap: onTap,
+        child: GlassContainer(
+          borderRadius: 30,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          color: Colors.white.withOpacity(0.1),
+          border: Border.all(color: Colors.white.withOpacity(0.3)),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, color: Colors.white, size: 22),
+              const SizedBox(width: 12),
+              Text(label.toUpperCase(),
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1.2,
+                      fontSize: 14))
+            ],
+          ),
+        ));
   }
 }
 
@@ -825,24 +874,30 @@ class _GoalProgressBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final done = (goalMinutes - remaining).clamp(0, goalMinutes);
     final pct = goalMinutes == 0 ? 0.0 : done / goalMinutes;
-    const barColor = Colors.greenAccent;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: LinearProgressIndicator(
-            minHeight: 10,
-            value: pct.clamp(0, 1),
-            backgroundColor: barColor.withValues(alpha: 0.15),
-            valueColor: const AlwaysStoppedAnimation(barColor),
+
+    return GlassContainer(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      borderRadius: 12,
+      color: Colors.white.withOpacity(0.05),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: LinearProgressIndicator(
+              minHeight: 8,
+              value: pct.clamp(0, 1),
+              backgroundColor: Colors.white.withOpacity(0.2),
+              valueColor: const AlwaysStoppedAnimation(Colors.greenAccent),
+            ),
           ),
-        ),
-        const SizedBox(height: 4),
-        Text(AppLocalizations.of(context).goalProgressLabel(done, goalMinutes),
-            style:
-                TextStyle(fontSize: 12, color: barColor.withValues(alpha: 0.9)))
-      ],
+          const SizedBox(height: 6),
+          Text(
+              AppLocalizations.of(context).goalProgressLabel(done, goalMinutes),
+              style:
+                  TextStyle(fontSize: 12, color: Colors.white.withOpacity(0.8)))
+        ],
+      ),
     );
   }
 }

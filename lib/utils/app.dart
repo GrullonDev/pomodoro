@@ -174,20 +174,24 @@ class _AnimatedGradientShellState extends State<AnimatedGradientShell>
     return AnimatedBuilder(
       animation: _c,
       builder: (context, _) {
-        final theme = Theme.of(context);
-        final scheme = theme.colorScheme;
-        final base = theme.scaffoldBackgroundColor;
-        final primary = scheme.primary;
-        // Helper to blend two colors with given t
-        Color blend(Color a, Color b, double t) => Color.lerp(a, b, t)!;
-        final bool isDark = theme.brightness == Brightness.dark;
-        // Generate a smooth trio based on primary + base; darker themes keep subtle motion
-        final c1 = blend(base, primary, isDark ? 0.08 : 0.18);
-        final c2 = blend(base, primary, isDark ? 0.20 : 0.32);
-        final c3 = blend(base, Colors.white, isDark ? 0.04 : 0.55);
+        // We use a rich dark gradient by default to make the glassmorphism pop,
+        // regardless of the system light/dark mode for this shell.
+
+        // Deep teal/ocean palette
+        const c1 = Color(0xFF0F2027);
+        const c2 = Color(0xFF203A43);
+        const c3 = Color(0xFF2C5364);
+
+        // Secondary accent palette (Emerald) for animation
+        const a1 = Color(0xFF134E5E);
+        const a2 = Color(0xFF71B280);
+
         final animT = _c.value;
-        final g1 = Color.lerp(c1, c2, animT * .9)!;
-        final g2 = Color.lerp(c2, c3, animT)!;
+
+        // Animate between the deep palette and a slightly more vibrant one
+        final g1 = Color.lerp(c1, a1, animT * 0.5)!;
+        final g2 = Color.lerp(c2, c1, animT * 0.3)!;
+        final g3 = Color.lerp(c3, a2, animT * 0.4)!;
 
         return Stack(
           fit: StackFit.expand,
@@ -197,7 +201,8 @@ class _AnimatedGradientShellState extends State<AnimatedGradientShell>
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: [g1, g2],
+                  colors: [g1, g2, g3],
+                  stops: const [0.0, 0.5, 1.0],
                 ),
               ),
             ),
@@ -206,26 +211,13 @@ class _AnimatedGradientShellState extends State<AnimatedGradientShell>
               child: Container(
                 decoration: BoxDecoration(
                   gradient: RadialGradient(
-                    center: const Alignment(-0.8, -0.9),
-                    radius: 1.2,
+                    center: const Alignment(0.8, -0.6),
+                    radius: 1.5,
                     colors: [
-                      primary.withValues(alpha: isDark ? 0.10 : 0.18),
+                      Colors.greenAccent.withOpacity(0.1 + (animT * 0.05)),
                       Colors.transparent,
                     ],
                     stops: const [0, 1],
-                  ),
-                ),
-              ),
-            ),
-            // Very subtle vertical fade to base to reduce banding near bottom
-            IgnorePointer(
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [Colors.transparent, base.withValues(alpha: 0.25)],
-                    stops: const [0.55, 1.0],
                   ),
                 ),
               ),
