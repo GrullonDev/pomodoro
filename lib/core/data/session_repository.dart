@@ -37,6 +37,7 @@ class SessionRepository implements ISessionRepository {
   static const _notificationActionsKey = 'notification_actions_enabled';
   static const _keyboardShortcutsKey = 'keyboard_shortcuts_enabled';
   static const _wearableSupportKey = 'wearable_support_enabled';
+  static const _biometricEnabledKey = 'biometric_enabled';
   static const _onboardingSeenKey = 'onboarding_seen';
   // Stream for live daily goal remaining updates
   static final SessionRepository _singleton = SessionRepository._internal();
@@ -63,8 +64,8 @@ class SessionRepository implements ISessionRepository {
 
   Future<List<PomodoroSession>> loadSessions() async {
     final prefs = await SharedPreferences.getInstance();
-  // Determine UID (Firebase or local fallback)
-  final uid = await AuthService.instance.currentUid();
+    // Determine UID (Firebase or local fallback)
+    final uid = await AuthService.instance.currentUid();
     final raw = prefs.getString(_userKey(uid));
     if (raw == null || raw.isEmpty) return [];
     try {
@@ -81,7 +82,7 @@ class SessionRepository implements ISessionRepository {
   @override
   Future<void> addSession(PomodoroSession session) async {
     final prefs = await SharedPreferences.getInstance();
-  final uid = await AuthService.instance.currentUid();
+    final uid = await AuthService.instance.currentUid();
     final current = await loadSessions();
     current.add(session);
     await prefs.setString(
@@ -297,6 +298,16 @@ class SessionRepository implements ISessionRepository {
   Future<bool> isOnboardingSeen() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getBool(_onboardingSeenKey) ?? false;
+  }
+
+  Future<void> setBiometricEnabled(bool enabled) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_biometricEnabledKey, enabled);
+  }
+
+  Future<bool> isBiometricEnabled() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_biometricEnabledKey) ?? false;
   }
 
   @override

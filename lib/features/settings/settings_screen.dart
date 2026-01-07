@@ -8,6 +8,7 @@ import 'package:pomodoro/core/theme/theme_controller.dart';
 import 'package:pomodoro/core/timer/timer_screen.dart';
 import 'package:pomodoro/l10n/app_localizations.dart';
 import 'package:pomodoro/utils/audio_service.dart';
+import 'package:pomodoro/core/auth/biometric_service.dart'; // Add import
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -34,6 +35,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool? _kbShortcuts;
   bool? _wearable;
   String? _focusTrack;
+  bool? _biometricEnabled;
 
   @override
   void initState() {
@@ -59,6 +61,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final notifActions = await _repo.isNotificationActionsEnabled();
     final kb = await _repo.isKeyboardShortcutsEnabled();
     final wear = await _repo.isWearableSupportEnabled();
+    final bio = await _repo.isBiometricEnabled();
     // focus track
     try {
       _focusTrack = await AudioService.instance.getFocusTrack();
@@ -81,6 +84,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _kbShortcuts = kb;
         _wearable = wear;
         _focusTrack = _focusTrack;
+        _biometricEnabled = bio;
       });
     }
   }
@@ -436,6 +440,47 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     final next = ((_alarmDur ?? 5) % 10) + 1;
                     await _repo.setAlarmDurationSeconds(next);
                     setState(() => _alarmDur = next);
+                  },
+                ),
+                const Divider(),
+                ListTile(
+                    title: Text('Seguridad',
+                        style: TextStyle(color: scheme.primary))),
+                SwitchListTile(
+                  title: Text('Habilitar Biometría',
+                      style: TextStyle(
+                          color:
+                              Theme.of(context).textTheme.bodyMedium?.color)),
+                  subtitle: Text(
+                      'Usar huella digital o FaceID para iniciar sesión',
+                      style: TextStyle(
+                          color: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.color
+                              ?.withValues(alpha: 0.55))),
+                  value: _biometricEnabled ?? false,
+                  onChanged: (v) async {
+                    if (v) {
+                      // Try to authenticate first to confirm ownership
+                      final success = await BiometricService().authenticate();
+                      if (success) {
+                        await _repo.setBiometricEnabled(true);
+                        setState(() => _biometricEnabled = true);
+                      } else {
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text(
+                                    'Autenticación fallida no se pudo activar biometría.')),
+                          );
+                        }
+                        setState(() => _biometricEnabled = false);
+                      }
+                    } else {
+                      await _repo.setBiometricEnabled(false);
+                      setState(() => _biometricEnabled = false);
+                    }
                   },
                 ),
                 const Divider(),

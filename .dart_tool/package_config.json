@@ -33,7 +33,7 @@
     },
     {
       "name": "audioplayers",
-      "rootUri": "file:///C:/Users/jgrullon/AppData/Local/Pub/Cache/hosted/pub.dev/audioplayers-6.5.0",
+      "rootUri": "file:///C:/Users/jgrullon/AppData/Local/Pub/Cache/hosted/pub.dev/audioplayers-6.5.1",
       "packageUri": "lib/",
       "languageVersion": "3.6"
     },
@@ -141,13 +141,13 @@
     },
     {
       "name": "cross_file",
-      "rootUri": "file:///C:/Users/jgrullon/AppData/Local/Pub/Cache/hosted/pub.dev/cross_file-0.3.4+2",
+      "rootUri": "file:///C:/Users/jgrullon/AppData/Local/Pub/Cache/hosted/pub.dev/cross_file-0.3.5+1",
       "packageUri": "lib/",
-      "languageVersion": "3.3"
+      "languageVersion": "3.8"
     },
     {
       "name": "crypto",
-      "rootUri": "file:///C:/Users/jgrullon/AppData/Local/Pub/Cache/hosted/pub.dev/crypto-3.0.6",
+      "rootUri": "file:///C:/Users/jgrullon/AppData/Local/Pub/Cache/hosted/pub.dev/crypto-3.0.7",
       "packageUri": "lib/",
       "languageVersion": "3.4"
     },
@@ -171,7 +171,7 @@
     },
     {
       "name": "equatable",
-      "rootUri": "file:///C:/Users/jgrullon/AppData/Local/Pub/Cache/hosted/pub.dev/equatable-2.0.7",
+      "rootUri": "file:///C:/Users/jgrullon/AppData/Local/Pub/Cache/hosted/pub.dev/equatable-2.0.8",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
@@ -183,7 +183,7 @@
     },
     {
       "name": "ffi",
-      "rootUri": "file:///C:/Users/jgrullon/AppData/Local/Pub/Cache/hosted/pub.dev/ffi-2.1.4",
+      "rootUri": "file:///C:/Users/jgrullon/AppData/Local/Pub/Cache/hosted/pub.dev/ffi-2.1.5",
       "packageUri": "lib/",
       "languageVersion": "3.7"
     },
@@ -219,7 +219,7 @@
     },
     {
       "name": "firebase_core_platform_interface",
-      "rootUri": "file:///C:/Users/jgrullon/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_core_platform_interface-6.0.0",
+      "rootUri": "file:///C:/Users/jgrullon/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_core_platform_interface-6.0.2",
       "packageUri": "lib/",
       "languageVersion": "3.2"
     },
@@ -345,7 +345,7 @@
     },
     {
       "name": "http",
-      "rootUri": "file:///C:/Users/jgrullon/AppData/Local/Pub/Cache/hosted/pub.dev/http-1.5.0",
+      "rootUri": "file:///C:/Users/jgrullon/AppData/Local/Pub/Cache/hosted/pub.dev/http-1.6.0",
       "packageUri": "lib/",
       "languageVersion": "3.4"
     },
@@ -357,7 +357,7 @@
     },
     {
       "name": "image",
-      "rootUri": "file:///C:/Users/jgrullon/AppData/Local/Pub/Cache/hosted/pub.dev/image-4.5.4",
+      "rootUri": "file:///C:/Users/jgrullon/AppData/Local/Pub/Cache/hosted/pub.dev/image-4.7.2",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
@@ -471,15 +471,15 @@
     },
     {
       "name": "path_provider_android",
-      "rootUri": "file:///C:/Users/jgrullon/AppData/Local/Pub/Cache/hosted/pub.dev/path_provider_android-2.2.17",
+      "rootUri": "file:///C:/Users/jgrullon/AppData/Local/Pub/Cache/hosted/pub.dev/path_provider_android-2.2.22",
       "packageUri": "lib/",
-      "languageVersion": "3.6"
+      "languageVersion": "3.9"
     },
     {
       "name": "path_provider_foundation",
-      "rootUri": "file:///C:/Users/jgrullon/AppData/Local/Pub/Cache/hosted/pub.dev/path_provider_foundation-2.4.2",
+      "rootUri": "file:///C:/Users/jgrullon/AppData/Local/Pub/Cache/hosted/pub.dev/path_provider_foundation-2.5.1",
       "packageUri": "lib/",
-      "languageVersion": "3.7"
+      "languageVersion": "3.9"
     },
     {
       "name": "path_provider_linux",
@@ -543,21 +543,21 @@
     },
     {
       "name": "shared_preferences",
-      "rootUri": "file:///C:/Users/jgrullon/AppData/Local/Pub/Cache/hosted/pub.dev/shared_preferences-2.5.3",
+      "rootUri": "file:///C:/Users/jgrullon/AppData/Local/Pub/Cache/hosted/pub.dev/shared_preferences-2.5.4",
       "packageUri": "lib/",
-      "languageVersion": "3.5"
+      "languageVersion": "3.9"
     },
     {
       "name": "shared_preferences_android",
-      "rootUri": "file:///C:/Users/jgrullon/AppData/Local/Pub/Cache/hosted/pub.dev/shared_preferences_android-2.4.11",
+      "rootUri": "file:///C:/Users/jgrullon/AppData/Local/Pub/Cache/hosted/pub.dev/shared_preferences_android-2.4.18",
       "packageUri": "lib/",
-      "languageVersion": "3.6"
+      "languageVersion": "3.9"
     },
     {
       "name": "shared_preferences_foundation",
-      "rootUri": "file:///C:/Users/jgrullon/AppData/Local/Pub/Cache/hosted/pub.dev/shared_preferences_foundation-2.5.4",
+      "rootUri": "file:///C:/Users/jgrullon/AppData/Local/Pub/Cache/hosted/pub.dev/shared_preferences_foundation-2.5.6",
       "packageUri": "lib/",
-      "languageVersion": "3.4"
+      "languageVersion": "3.9"
     },
     {
       "name": "shared_preferences_linux",
@@ -594,12 +594,6 @@
       "rootUri": "file:///C:/Users/jgrullon/AppData/Local/Pub/Cache/hosted/pub.dev/source_span-1.10.1",
       "packageUri": "lib/",
       "languageVersion": "3.1"
-    },
-    {
-      "name": "sprintf",
-      "rootUri": "file:///C:/Users/jgrullon/AppData/Local/Pub/Cache/hosted/pub.dev/sprintf-7.0.0",
-      "packageUri": "lib/",
-      "languageVersion": "2.12"
     },
     {
       "name": "stack_trace",
@@ -651,9 +645,9 @@
     },
     {
       "name": "url_launcher_linux",
-      "rootUri": "file:///C:/Users/jgrullon/AppData/Local/Pub/Cache/hosted/pub.dev/url_launcher_linux-3.2.1",
+      "rootUri": "file:///C:/Users/jgrullon/AppData/Local/Pub/Cache/hosted/pub.dev/url_launcher_linux-3.2.2",
       "packageUri": "lib/",
-      "languageVersion": "3.3"
+      "languageVersion": "3.8"
     },
     {
       "name": "url_launcher_platform_interface",
@@ -669,13 +663,13 @@
     },
     {
       "name": "url_launcher_windows",
-      "rootUri": "file:///C:/Users/jgrullon/AppData/Local/Pub/Cache/hosted/pub.dev/url_launcher_windows-3.1.4",
+      "rootUri": "file:///C:/Users/jgrullon/AppData/Local/Pub/Cache/hosted/pub.dev/url_launcher_windows-3.1.5",
       "packageUri": "lib/",
-      "languageVersion": "3.4"
+      "languageVersion": "3.8"
     },
     {
       "name": "uuid",
-      "rootUri": "file:///C:/Users/jgrullon/AppData/Local/Pub/Cache/hosted/pub.dev/uuid-4.5.1",
+      "rootUri": "file:///C:/Users/jgrullon/AppData/Local/Pub/Cache/hosted/pub.dev/uuid-4.5.2",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
@@ -687,9 +681,9 @@
     },
     {
       "name": "vm_service",
-      "rootUri": "file:///C:/Users/jgrullon/AppData/Local/Pub/Cache/hosted/pub.dev/vm_service-15.0.0",
+      "rootUri": "file:///C:/Users/jgrullon/AppData/Local/Pub/Cache/hosted/pub.dev/vm_service-15.0.2",
       "packageUri": "lib/",
-      "languageVersion": "3.3"
+      "languageVersion": "3.5"
     },
     {
       "name": "web",
@@ -699,7 +693,7 @@
     },
     {
       "name": "win32",
-      "rootUri": "file:///C:/Users/jgrullon/AppData/Local/Pub/Cache/hosted/pub.dev/win32-5.14.0",
+      "rootUri": "file:///C:/Users/jgrullon/AppData/Local/Pub/Cache/hosted/pub.dev/win32-5.15.0",
       "packageUri": "lib/",
       "languageVersion": "3.8"
     },
