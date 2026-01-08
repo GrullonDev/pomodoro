@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:upgrader/upgrader.dart';
 
 import 'package:flutter_localizations/flutter_localizations.dart';
 
@@ -6,6 +7,8 @@ import 'package:pomodoro/core/data/session_repository.dart';
 import 'package:pomodoro/core/theme/locale_controller.dart';
 import 'package:pomodoro/core/theme/theme_controller.dart';
 import 'package:pomodoro/features/auth/screens/onboarding_screen.dart';
+import 'package:pomodoro/features/auth/login_screen.dart';
+import 'package:pomodoro/core/auth/auth_service.dart';
 import 'package:pomodoro/l10n/app_localizations.dart';
 import 'package:pomodoro/utils/home_page.dart';
 
@@ -83,43 +86,79 @@ class MyApp extends StatelessWidget {
             ],
             supportedLocales: const [Locale('en'), Locale('es')],
             locale: loc,
-            home: FutureBuilder<bool>(
-              future: SessionRepository().isOnboardingSeen(),
-              builder: (context, snap) {
-                if (!snap.hasData) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                final seen = snap.data ?? false;
-                if (seen) {
-                  return const AnimatedGradientShell(child: HomePage());
-                }
-                return AnimatedGradientShell(
-                  child: OnboardingScreen(
-                    onGetStarted: () async {
-                      await SessionRepository().setOnboardingSeen();
-                      if (navigatorKey.currentState?.mounted ?? false) {
-                        navigatorKey.currentState!.pushReplacement(
-                          MaterialPageRoute(
-                              builder: (_) => const AnimatedGradientShell(
-                                    child: HomePage(),
-                                  )),
+            home: UpgradeAlert(
+              showIgnore: false,
+              showLater: false,
+              showReleaseNotes: true,
+              dialogStyle: UpgradeDialogStyle.cupertino,
+              upgrader: Upgrader(
+                messages: UpgraderMessages(code: 'es'),
+              ),
+              child: FutureBuilder<bool>(
+                future: SessionRepository().isOnboardingSeen(),
+                builder: (context, snap) {
+                  if (!snap.hasData) {
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
+
+                  final seen = snap.data ?? false;
+                  if (!seen) {
+                    return AnimatedGradientShell(
+                      child: OnboardingScreen(
+                        onGetStarted: () async {
+                          await SessionRepository().setOnboardingSeen();
+                          if (navigatorKey.currentState?.mounted ?? false) {
+                            navigatorKey.currentState!.pushReplacement(
+                              MaterialPageRoute(
+                                builder: (_) => AnimatedGradientShell(
+                                  child: LoginScreen(),
+                                ),
+                              ),
+                            );
+                          }
+                        },
+                        onSkip: () async {
+                          await SessionRepository().setOnboardingSeen();
+                          if (navigatorKey.currentState?.mounted ?? false) {
+                            navigatorKey.currentState!.pushReplacement(
+                              MaterialPageRoute(
+                                builder: (_) => AnimatedGradientShell(
+                                  child: LoginScreen(),
+                                ),
+                              ),
+                            );
+                          }
+                        },
+                      ),
+                    );
+                  }
+
+                  // If onboarding completed, show Home or Login depending on auth state.
+                  return StreamBuilder<String?>(
+                    stream: AuthService.instance.uidChanges(),
+                    builder: (context, authSnap) {
+                      final uid = authSnap.data;
+                      if (authSnap.connectionState == ConnectionState.waiting) {
+                        return const Center(
+                          child: CircularProgressIndicator(),
                         );
                       }
-                    },
-                    onSkip: () async {
-                      await SessionRepository().setOnboardingSeen();
-                      if (navigatorKey.currentState?.mounted ?? false) {
-                        navigatorKey.currentState!.pushReplacement(
-                          MaterialPageRoute(
-                              builder: (_) => const AnimatedGradientShell(
-                                    child: HomePage(),
-                                  )),
+
+                      if (uid == null) {
+                        return const AnimatedGradientShell(
+                          child: LoginScreen(),
                         );
                       }
+
+                      return const AnimatedGradientShell(
+                        child: HomePage(),
+                      );
                     },
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
           ),
         );
@@ -145,20 +184,37 @@ class _AnimatedGradientShellState extends State<AnimatedGradientShell>
     return AnimatedBuilder(
       animation: _c,
       builder: (context, _) {
-        final theme = Theme.of(context);
-        final scheme = theme.colorScheme;
-        final base = theme.scaffoldBackgroundColor;
-        final primary = scheme.primary;
-        // Helper to blend two colors with given t
-        Color blend(Color a, Color b, double t) => Color.lerp(a, b, t)!;
-        final bool isDark = theme.brightness == Brightness.dark;
-        // Generate a smooth trio based on primary + base; darker themes keep subtle motion
-        final c1 = blend(base, primary, isDark ? 0.08 : 0.18);
-        final c2 = blend(base, primary, isDark ? 0.20 : 0.32);
-        final c3 = blend(base, Colors.white, isDark ? 0.04 : 0.55);
+        // We use a rich dark gradient by default to make the glassmorphism pop,
+        // regardless of the system light/dark mode for this shell.
+
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+
+        // Dark palette
+        const darkC1 = Color(0xFF0F2027);
+        const darkC2 = Color(0xFF203A43);
+        const darkC3 = Color(0xFF2C5364);
+        const darkA1 = Color(0xFF134E5E);
+        const darkA2 = Color(0xFF71B280);
+
+        // Light palette (Fresh/Mental/Nature feel)
+        const lightC1 = Color(0xFFFFFFFF);
+        const lightC2 = Color(0xFFF0F4C3); // Lime 100
+        const lightC3 = Color(0xFFDCEDC8); // Light Green 100
+        const lightA1 = Color(0xFFC5E1A5); // Light Green 200
+        const lightA2 = Color(0xFF81C784); // Green 300
+
+        final c1 = isDark ? darkC1 : lightC1;
+        final c2 = isDark ? darkC2 : lightC2;
+        final c3 = isDark ? darkC3 : lightC3;
+        final a1 = isDark ? darkA1 : lightA1;
+        final a2 = isDark ? darkA2 : lightA2;
+
         final animT = _c.value;
-        final g1 = Color.lerp(c1, c2, animT * .9)!;
-        final g2 = Color.lerp(c2, c3, animT)!;
+
+        // Animate between the deep palette and a slightly more vibrant one
+        final g1 = Color.lerp(c1, a1, animT * 0.5)!;
+        final g2 = Color.lerp(c2, c1, animT * 0.3)!;
+        final g3 = Color.lerp(c3, a2, animT * 0.4)!;
 
         return Stack(
           fit: StackFit.expand,
@@ -168,7 +224,8 @@ class _AnimatedGradientShellState extends State<AnimatedGradientShell>
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: [g1, g2],
+                  colors: [g1, g2, g3],
+                  stops: const [0.0, 0.5, 1.0],
                 ),
               ),
             ),
@@ -177,26 +234,13 @@ class _AnimatedGradientShellState extends State<AnimatedGradientShell>
               child: Container(
                 decoration: BoxDecoration(
                   gradient: RadialGradient(
-                    center: const Alignment(-0.8, -0.9),
-                    radius: 1.2,
+                    center: const Alignment(0.8, -0.6),
+                    radius: 1.5,
                     colors: [
-                      primary.withValues(alpha: isDark ? 0.10 : 0.18),
+                      Colors.greenAccent.withOpacity(0.1 + (animT * 0.05)),
                       Colors.transparent,
                     ],
                     stops: const [0, 1],
-                  ),
-                ),
-              ),
-            ),
-            // Very subtle vertical fade to base to reduce banding near bottom
-            IgnorePointer(
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [Colors.transparent, base.withValues(alpha: 0.25)],
-                    stops: const [0.55, 1.0],
                   ),
                 ),
               ),

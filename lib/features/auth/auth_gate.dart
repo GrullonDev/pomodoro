@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:pomodoro/core/di/injection.dart' show sl;
 import 'package:pomodoro/features/auth/auth_repository.dart';
 import 'package:pomodoro/features/auth/screens/onboarding_screen.dart';
 import 'package:pomodoro/features/auth/screens/sign_in_screen.dart';
@@ -17,7 +18,7 @@ class AuthGate extends StatefulWidget {
 }
 
 class _AuthGateState extends State<AuthGate> {
-  final _authRepo = AuthRepository();
+  final _authRepo = sl<AuthRepository>();
 
   @override
   Widget build(BuildContext context) {

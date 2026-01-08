@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import 'package:pomodoro/l10n/app_localizations.dart';
-import 'package:pomodoro/l10n/app_localizations_ext.dart';
 
 class OnboardingScreen extends StatefulWidget {
   final VoidCallback onGetStarted;

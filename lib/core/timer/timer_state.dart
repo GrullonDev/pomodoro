@@ -58,11 +58,19 @@ class TimerRunInProgress extends TimerState {
 
 class TimerCompleted extends TimerState {
   final int totalSessions;
+  // Last phase completed, usually work or long break.
+  // We'll store the session number that just finished.
+  final int session;
+  final TimerPhase phase;
+
   const TimerCompleted({
     required this.totalSessions,
+    required this.session,
+    required this.phase,
     required super.workDuration,
     required super.breakDuration,
   });
   @override
-  List<Object?> get props => [totalSessions, workDuration, breakDuration];
+  List<Object?> get props =>
+      [totalSessions, session, phase, workDuration, breakDuration];
 }

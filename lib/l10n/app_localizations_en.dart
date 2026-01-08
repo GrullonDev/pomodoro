@@ -260,4 +260,59 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get languageSyncPreset => 'Sync preset';
+
+  @override
+  String get onboardingTitle => 'Stay focused, achieve more';
+
+  @override
+  String get onboardingSubtitle =>
+      'Use structured focus & breaks to reach your goals faster.';
+
+  @override
+  String get getStarted => 'Get started';
+
+  @override
+  String get profileMenu => 'My Profile';
+
+  @override
+  String get profileTitle => 'My Profile';
+
+  @override
+  String get profileUpdated => 'Profile updated';
+
+  @override
+  String get profileInfoSection => 'Information';
+
+  @override
+  String get profileNameLabel => 'Name';
+
+  @override
+  String get profileSave => 'Save';
+
+  @override
+  String get profileChangePassword => 'Change password';
+
+  @override
+  String get profileCurrentPasswordOptional => 'Current password (optional)';
+
+  @override
+  String get profileNewPassword => 'New password';
+
+  @override
+  String get profileConfirmNewPassword => 'Confirm new password';
+
+  @override
+  String get profileUpdatePassword => 'Update password';
+
+  @override
+  String get passwordMismatch => 'Passwords do not match';
+
+  @override
+  String get passwordUpdated => 'Password updated';
+
+  @override
+  String get signOut => 'Sign out';
+
+  @override
+  String get idUnavailable => 'ID unavailable';
 }

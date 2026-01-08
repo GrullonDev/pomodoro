@@ -565,6 +565,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sync preset'**
   String get languageSyncPreset;
+
+  /// No description provided for @onboardingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Stay focused, achieve more'**
+  String get onboardingTitle;
+
+  /// No description provided for @onboardingSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Use structured focus & breaks to reach your goals faster.'**
+  String get onboardingSubtitle;
+
+  /// No description provided for @getStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Get started'**
+  String get getStarted;
+
+  /// No description provided for @profileMenu.
+  ///
+  /// In en, this message translates to:
+  /// **'My Profile'**
+  String get profileMenu;
+
+  /// No description provided for @profileTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My Profile'**
+  String get profileTitle;
+
+  /// No description provided for @profileUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile updated'**
+  String get profileUpdated;
+
+  /// No description provided for @profileInfoSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Information'**
+  String get profileInfoSection;
+
+  /// No description provided for @profileNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get profileNameLabel;
+
+  /// No description provided for @profileSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get profileSave;
+
+  /// No description provided for @profileChangePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Change password'**
+  String get profileChangePassword;
+
+  /// No description provided for @profileCurrentPasswordOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Current password (optional)'**
+  String get profileCurrentPasswordOptional;
+
+  /// No description provided for @profileNewPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'New password'**
+  String get profileNewPassword;
+
+  /// No description provided for @profileConfirmNewPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm new password'**
+  String get profileConfirmNewPassword;
+
+  /// No description provided for @profileUpdatePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Update password'**
+  String get profileUpdatePassword;
+
+  /// No description provided for @passwordMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords do not match'**
+  String get passwordMismatch;
+
+  /// No description provided for @passwordUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Password updated'**
+  String get passwordUpdated;
+
+  /// No description provided for @signOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out'**
+  String get signOut;
+
+  /// No description provided for @idUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'ID unavailable'**
+  String get idUnavailable;
 }
 
 class _AppLocalizationsDelegate

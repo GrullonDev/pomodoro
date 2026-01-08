@@ -10,8 +10,9 @@ class HistoryScreen extends StatelessWidget {
   Future<List<_DayEntry>> _load() async {
     final repo = SessionRepository();
     final map = await repo.workSecondsByDayLast7();
-    // Convert to list and sort descending by date key
-    final entries = map.entries.map((e) {
+    // Convert to list and sort descending by date key, but only include days
+    // with recorded seconds > 0 (filter out empty/no-op days).
+    final entries = map.entries.where((e) => e.value > 0).map((e) {
       final parts = e.key.split('-');
       final y = int.parse(parts[0]);
       final m = int.parse(parts[1]);
@@ -38,27 +39,32 @@ class HistoryScreen extends StatelessWidget {
         backgroundColor: Colors.transparent,
         title: Text(t.history, style: TextStyle(color: scheme.primary)),
       ),
-      body: FutureBuilder(
+      body: FutureBuilder<List<_DayEntry>>(
         future: _load(),
         builder: (context, snap) {
           if (!snap.hasData) {
             return const Center(child: CircularProgressIndicator());
           }
+
           final items = snap.data!;
+
           if (items.isEmpty) {
             return Center(
               child: Text(t.noHistory,
-                  style: const TextStyle(color: Colors.white54)),
+                  style: TextStyle(
+                      color: scheme.onSurface.withValues(alpha: 0.5))),
             );
           }
+
           return ListView.separated(
             padding: const EdgeInsets.all(12),
             itemCount: items.length,
-            separatorBuilder: (_, __) => const Divider(color: Colors.white12),
+            separatorBuilder: (_, __) => Divider(color: scheme.outlineVariant),
             itemBuilder: (context, i) {
               final e = items[i];
               final dateStr =
                   '${e.day.year}-${e.day.month.toString().padLeft(2, '0')}-${e.day.day.toString().padLeft(2, '0')}';
+
               return ListTile(
                 onTap: () => Navigator.of(context).push(
                   PageRouteBuilder(

@@ -181,6 +181,8 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
       await TimerStorage.clear();
       emit(TimerCompleted(
         totalSessions: current.totalSessions,
+        session: current.session,
+        phase: current.phase,
         workDuration: current.workDuration,
         breakDuration: current.breakDuration,
       ));
