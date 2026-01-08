@@ -24,6 +24,7 @@ import 'package:pomodoro/utils/notifications/notifications.dart';
 import 'package:pomodoro/utils/glass_container.dart';
 import 'package:pomodoro/utils/app.dart';
 import 'package:pomodoro/features/gamification/gamification_service.dart';
+import 'package:pomodoro/features/integrations/calendar/calendar_service.dart';
 
 class TimerScreen extends StatelessWidget {
   final int workMinutes;
@@ -530,6 +531,17 @@ class _TimerViewState extends State<_TimerView>
                     final xpEarned = (workDur / 60 * state.session)
                         .round(); // Minimal simple XP logic
                     GamificationService.instance.awardXP(xpEarned);
+
+                    // Calendar Export Integration
+                    final endTime = DateTime.now();
+                    final startTime = endTime.subtract(
+                        Duration(seconds: workDur * state.totalSessions));
+                    CalendarService.instance.exportSession(
+                        startTime: startTime,
+                        endTime: endTime,
+                        title: 'Sesión de Enfoque (Pomodoro)',
+                        description:
+                            'Sesión productiva en la app Pomodoro. Ganaste $xpEarned XP.');
 
                     NotificationService.showTimerFinishedNotification(
                       id: 1000,

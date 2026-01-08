@@ -10,6 +10,9 @@ import 'package:pomodoro/l10n/app_localizations.dart';
 import 'package:pomodoro/utils/audio_service.dart';
 import 'package:pomodoro/core/auth/biometric_service.dart'; // Add import
 
+import 'package:pomodoro/features/integrations/calendar/calendar_service.dart';
+import 'package:device_calendar/device_calendar.dart';
+
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
 
@@ -483,6 +486,68 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     }
                   },
                 ),
+                const Divider(),
+                // Calendar Integration Settings
+                ListTile(
+                    title: Text('Integraciones',
+                        style: TextStyle(color: scheme.primary))),
+                SwitchListTile(
+                  title: Text('Sincronizar con Calendario',
+                      style: TextStyle(
+                          color:
+                              Theme.of(context).textTheme.bodyMedium?.color)),
+                  value: CalendarService.instance.isEnabled.value,
+                  onChanged: (v) async {
+                    await CalendarService.instance.setEnabled(v);
+                    setState(() {});
+                    // If enabled, try to fetch calendars immediately to verify permissions
+                    if (v) {
+                      await CalendarService.instance.retrieveCalendars();
+                    }
+                  },
+                ),
+                if (CalendarService.instance.isEnabled.value)
+                  ListTile(
+                    title: Text('Seleccionar Calendario',
+                        style: TextStyle(
+                            color:
+                                Theme.of(context).textTheme.bodyMedium?.color)),
+                    subtitle: FutureBuilder<List<Calendar>>(
+                      future: CalendarService.instance.retrieveCalendars(),
+                      builder: (context, snap) {
+                        if (!snap.hasData) return const Text('Cargando...');
+                        if (snap.data!.isEmpty)
+                          return const Text('No se encontraron calendarios');
+                        // Find selected name? We store ID but UI might want name.
+                        // For now just "Tap to select"
+                        return const Text('Toca para seleccionar');
+                      },
+                    ),
+                    onTap: () async {
+                      final calendars =
+                          await CalendarService.instance.retrieveCalendars();
+                      if (!mounted) return;
+
+                      final selectedId = await showModalBottomSheet<String>(
+                          context: context,
+                          builder: (ctx) => SafeArea(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: calendars
+                                      .map((c) => ListTile(
+                                            title: Text(c.name ?? 'Sin nombre'),
+                                            onTap: () =>
+                                                Navigator.pop(ctx, c.id),
+                                          ))
+                                      .toList(),
+                                ),
+                              ));
+
+                      if (selectedId != null) {
+                        await CalendarService.instance.setCalendar(selectedId);
+                      }
+                    },
+                  ),
                 const Divider(),
                 SwitchListTile(
                   title: Text('Home Widget Enabled',

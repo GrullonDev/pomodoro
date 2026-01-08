@@ -4,7 +4,7 @@ import 'package:pomodoro/core/auth/auth_service.dart';
 import 'package:pomodoro/features/auth/login_screen.dart';
 import 'package:pomodoro/features/auth/screens/profile_screen.dart';
 import 'package:pomodoro/features/habit/habit.dart';
-import 'package:pomodoro/features/history/history_screen.dart';
+
 import 'package:pomodoro/features/settings/settings_screen.dart';
 import 'package:pomodoro/features/tasks/tasks_screen.dart';
 import 'package:pomodoro/l10n/app_localizations.dart';
@@ -12,6 +12,8 @@ import 'package:pomodoro/utils/app.dart';
 import 'package:pomodoro/features/gamification/gamification_service.dart';
 
 import 'package:pomodoro/features/gamification/presentation/screens/achievements_screen.dart';
+import 'package:pomodoro/features/audio/presentation/audio_mixer_sheet.dart';
+import 'package:pomodoro/features/analytics/presentation/screens/analytics_screen.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -29,7 +31,7 @@ class _HomePageState extends State<HomePage> {
       case 1:
         return const TasksScreen();
       case 2:
-        return const HistoryScreen();
+        return const AnalyticsScreen();
       case 3:
       default:
         return const SettingsScreen();
@@ -49,6 +51,19 @@ class _HomePageState extends State<HomePage> {
         automaticallyImplyLeading: false,
         title: Text(t.appTitle),
         actions: [
+          // Audio Mixer Button
+          IconButton(
+            icon: const Icon(Icons.queue_music),
+            tooltip: 'Sonidos Ambientales',
+            onPressed: () {
+              showModalBottomSheet(
+                  context: context,
+                  backgroundColor: Colors.transparent,
+                  builder: (ctx) => const AudioMixerSheet());
+            },
+            color:
+                Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+          ),
           // Level Indicator
           Padding(
             padding: const EdgeInsets.only(right: 8.0),

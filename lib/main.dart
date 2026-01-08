@@ -9,6 +9,9 @@ import 'package:pomodoro/utils/app.dart';
 import 'package:pomodoro/utils/notifications/notifications.dart';
 import 'package:pomodoro/features/gamification/gamification_service.dart';
 
+import 'package:timezone/data/latest.dart' as tz;
+import 'package:pomodoro/features/integrations/calendar/calendar_service.dart';
+
 void main() async {
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -36,6 +39,9 @@ void main() async {
   // Cargar preferencia de tema (oscuro por defecto si no existe)
   await ThemeController.instance.load();
   await GamificationService.instance.init();
+
+  tz.initializeTimeZones();
+  await CalendarService.instance.init();
 
   runApp(MyApp(navigatorKey: navigatorKey));
 }
