@@ -10,6 +10,8 @@ import 'package:share_plus/share_plus.dart';
 import 'package:pomodoro/core/data/session_repository.dart';
 import 'package:pomodoro/core/widgets/focus_weekly_chart.dart';
 import 'package:pomodoro/l10n/app_localizations.dart';
+import 'package:pomodoro/utils/app.dart';
+import 'package:pomodoro/utils/glass_container.dart';
 
 class SessionSummaryScreen extends StatefulWidget {
   final int totalSessions;
@@ -52,170 +54,203 @@ class _SessionSummaryScreenState extends State<SessionSummaryScreen> {
   Widget build(BuildContext context) {
     final repo = SessionRepository();
     final t = AppLocalizations.of(context);
-    return FutureBuilder(
-      future: Future.wait([
-        repo.todayWorkSeconds(),
-        repo.workSecondsByDayLast7(),
-        repo.getDailyGoalMinutes(),
-        repo.todayProgress(),
-      ]),
-      builder: (context, snap) {
-        Widget body;
-        if (!snap.hasData) {
-          body = const Center(child: CircularProgressIndicator());
-        } else {
-          final todaySeconds = snap.data![0] as int;
-          final map = snap.data![1] as Map<String, int>;
-          final goalMinutes = snap.data![2] as int;
-          final progress = snap.data![3] as double;
-          body = Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const SizedBox(height: 16),
-              Text(
-                t.sessionCompleted,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: Colors.greenAccent,
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Total: ${widget.totalSessions} x ${widget.workMinutesPerSession} min',
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: Colors.greenAccent,
-                ),
-              ),
-              const SizedBox(height: 16),
-              RepaintBoundary(
-                key: _shareKey,
-                child: Card(
-                  color: Colors.black,
-                  shadowColor: Colors.greenAccent,
-                  elevation: 8,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      children: [
-                        Text(
-                          t.todayProgress,
-                          style: const TextStyle(
-                            color: Colors.greenAccent,
-                            fontSize: 18,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          _formatMinutes(todaySeconds),
-                          style: const TextStyle(
-                            color: Colors.greenAccent,
-                            fontSize: 32,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        LinearProgressIndicator(
-                          value: progress.clamp(0, 1),
-                          backgroundColor:
-                              Colors.greenAccent.withValues(alpha: 0.15),
-                          color: Colors.greenAccent,
-                          minHeight: 6,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          t.dailyGoal(goalMinutes),
-                          style: const TextStyle(
-                            color: Colors.greenAccent,
-                            fontSize: 12,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        FocusWeeklyChart(data: map),
-                      ],
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+
+    return AnimatedGradientShell(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: SafeArea(
+          child: FutureBuilder(
+            future: Future.wait([
+              repo.todayWorkSeconds(),
+              repo.workSecondsByDayLast7(),
+              repo.getDailyGoalMinutes(),
+              repo.todayProgress(),
+            ]),
+            builder: (context, snap) {
+              if (!snap.hasData) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              final todaySeconds = snap.data![0] as int;
+              final map = snap.data![1] as Map<String, int>;
+              final goalMinutes = snap.data![2] as int;
+              final progress = snap.data![3] as double;
+
+              return Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const Spacer(),
+                    // Icon & Title
+                    Icon(Icons.check_circle_outline_rounded,
+                        size: 80, color: scheme.primary),
+                    const SizedBox(height: 16),
+                    Text(
+                      t.sessionCompleted,
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.headlineMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: scheme.onSurface,
+                      ),
                     ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                t.last7Days,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: Colors.greenAccent,
-                  fontSize: 18,
-                ),
-              ),
-              const Spacer(),
-              ElevatedButton(
-                onPressed: () =>
-                    Navigator.of(context).popUntil((r) => r.isFirst),
-                child: Text(t.newSession),
-              ),
-              const SizedBox(height: 8),
-              OutlinedButton.icon(
-                onPressed: () {
-                  final totalMin =
-                      (widget.totalSessions * widget.workMinutesPerSession);
-                  Share.share(
-                    '🔥 Pomodoro: $totalMin min (${_formatMinutes(todaySeconds)})',
-                  );
-                },
-                icon: const Icon(
-                  Icons.share,
-                  color: Colors.greenAccent,
-                ),
-                label: Text(
-                  t.share,
-                  style: const TextStyle(
-                    color: Colors.greenAccent,
-                  ),
-                ),
-                style: OutlinedButton.styleFrom(
-                  side: const BorderSide(
-                    color: Colors.greenAccent,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-              OutlinedButton(
-                onPressed: _sharing
-                    ? null
-                    : () => _shareImage(
-                          todaySeconds,
-                          goalMinutes,
-                        ),
-                child: _sharing
-                    ? const SizedBox(
-                        height: 16,
-                        width: 16,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                        ),
-                      )
-                    : Text(
-                        t.shareImage,
-                        style: const TextStyle(
-                          color: Colors.greenAccent,
+                    const SizedBox(height: 8),
+                    Text(
+                      '${widget.totalSessions} sesiones • ${widget.totalSessions * widget.workMinutesPerSession} min total',
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        color: scheme.onSurface.withValues(alpha: 0.7),
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+
+                    // Main Stats Card
+                    RepaintBoundary(
+                      key: _shareKey,
+                      child: GlassContainer(
+                        padding: const EdgeInsets.all(24),
+                        child: Column(
+                          children: [
+                            Text(
+                              t.todayProgress.toUpperCase(),
+                              style: theme.textTheme.labelMedium?.copyWith(
+                                letterSpacing: 1.5,
+                                color: scheme.onSurface.withValues(alpha: 0.6),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.baseline,
+                              textBaseline: TextBaseline.alphabetic,
+                              children: [
+                                Text(
+                                  _formatMinutes(todaySeconds),
+                                  style:
+                                      theme.textTheme.displayMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: scheme.primary,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  '/ ${goalMinutes}m',
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    color:
+                                        scheme.onSurface.withValues(alpha: 0.5),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: LinearProgressIndicator(
+                                value: progress.clamp(0.0, 1.0),
+                                minHeight: 8,
+                                backgroundColor:
+                                    scheme.onSurface.withValues(alpha: 0.1),
+                                color: scheme.primary,
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+                            SizedBox(
+                              height: 100,
+                              child: FocusWeeklyChart(data: map),
+                            )
+                          ],
                         ),
                       ),
-              ),
-              const SizedBox(height: 16),
-            ],
-          );
-        }
-        return Scaffold(
-          backgroundColor: Colors.black,
-          body: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: body,
-            ),
+                    ),
+                    const Spacer(flex: 2),
+
+                    // Actions
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () => Navigator.of(context)
+                                .popUntil((r) => r.isFirst),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: scheme.primary,
+                              foregroundColor: scheme.onPrimary,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                            ),
+                            child: Text(
+                              t.newSession,
+                              style: const TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: () {
+                              final totalMin = (widget.totalSessions *
+                                  widget.workMinutesPerSession);
+                              Share.share(
+                                '🔥 Pomodoro: $totalMin min (${_formatMinutes(todaySeconds)})',
+                              );
+                            },
+                            icon: const Icon(Icons.share_rounded, size: 20),
+                            label: Text(t.share),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: scheme.onSurface,
+                              side: BorderSide(
+                                  color:
+                                      scheme.onSurface.withValues(alpha: 0.2)),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: _sharing
+                                ? null
+                                : () => _shareImage(todaySeconds, goalMinutes),
+                            icon: _sharing
+                                ? const SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: CircularProgressIndicator(
+                                        strokeWidth: 2))
+                                : const Icon(Icons.image_outlined, size: 20),
+                            label: Text(t.shareImage),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: scheme.onSurface,
+                              side: BorderSide(
+                                  color:
+                                      scheme.onSurface.withValues(alpha: 0.2)),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            },
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 }
