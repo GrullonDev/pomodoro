@@ -12,14 +12,19 @@ import 'package:pomodoro/core/widgets/focus_weekly_chart.dart';
 import 'package:pomodoro/l10n/app_localizations.dart';
 import 'package:pomodoro/utils/app.dart';
 import 'package:pomodoro/utils/glass_container.dart';
+import 'package:pomodoro/features/gamification/gamification_service.dart';
+import 'package:pomodoro/features/gamification/domain/level_calculator.dart';
 
 class SessionSummaryScreen extends StatefulWidget {
   final int totalSessions;
   final int workMinutesPerSession;
+  final int? earnedXP; // Add this parameter
+
   const SessionSummaryScreen(
       {super.key,
       required this.totalSessions,
-      required this.workMinutesPerSession});
+      required this.workMinutesPerSession,
+      this.earnedXP});
 
   @override
   State<SessionSummaryScreen> createState() => _SessionSummaryScreenState();
@@ -159,11 +164,83 @@ class _SessionSummaryScreenState extends State<SessionSummaryScreen> {
                             SizedBox(
                               height: 100,
                               child: FocusWeeklyChart(data: map),
-                            )
+                            ),
                           ],
                         ),
                       ),
                     ),
+
+                    const SizedBox(height: 16),
+
+                    // Level Progress Card
+                    ValueListenableBuilder<int>(
+                        valueListenable: GamificationService.instance.currentXp,
+                        builder: (context, currentXp, _) {
+                          final level = LevelCalculator.getLevel(currentXp);
+                          final nextLevelXp =
+                              LevelCalculator.xpForLevel(level + 1);
+                          final currentLevelBaseXp =
+                              LevelCalculator.xpForLevel(level);
+                          final needed = nextLevelXp - currentLevelBaseXp;
+                          final gainedInLevel = currentXp - currentLevelBaseXp;
+                          final progress =
+                              (gainedInLevel / needed).clamp(0.0, 1.0);
+                          final remaining = nextLevelXp - currentXp;
+
+                          return GlassContainer(
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text('Nivel $level',
+                                        style: TextStyle(
+                                            color: scheme.onSurface,
+                                            fontWeight: FontWeight.bold)),
+                                    Text('${(progress * 100).toInt()}%',
+                                        style: TextStyle(
+                                            color: scheme.onSurface
+                                                .withValues(alpha: 0.7))),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(4),
+                                  child: LinearProgressIndicator(
+                                    value: progress,
+                                    backgroundColor: Colors.white10,
+                                    color: Colors.amber,
+                                    minHeight: 6,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  remaining <= 0
+                                      ? '¡Nivel Completado!'
+                                      : 'Faltan $remaining XP para el Nivel ${level + 1}',
+                                  style: TextStyle(
+                                      color: scheme.onSurface
+                                          .withValues(alpha: 0.6),
+                                      fontSize: 12),
+                                ),
+                                if (widget.earnedXP != null)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 4.0),
+                                    child: Text(
+                                      '+${widget.earnedXP} XP ganados en esta sesión',
+                                      style: const TextStyle(
+                                          color: Colors.amber,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 12),
+                                    ),
+                                  )
+                              ],
+                            ),
+                          );
+                        }),
+
                     const Spacer(flex: 2),
 
                     // Actions

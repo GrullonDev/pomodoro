@@ -525,6 +525,7 @@ class _TimerViewState extends State<_TimerView>
                         builder: (_) => SessionSummaryScreen(
                           totalSessions: totalSessions,
                           workMinutesPerSession: workDur ~/ 60,
+                          earnedXP: (workDur / 60 * state.session).round(),
                         ),
                       ),
                     );
