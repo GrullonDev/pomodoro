@@ -7,6 +7,7 @@ import 'package:pomodoro/core/di/injection.dart';
 import 'package:pomodoro/core/theme/theme_controller.dart';
 import 'package:pomodoro/utils/app.dart';
 import 'package:pomodoro/utils/notifications/notifications.dart';
+import 'package:pomodoro/features/gamification/gamification_service.dart';
 
 void main() async {
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -34,6 +35,7 @@ void main() async {
   await SessionRepository().migrateLegacyIfNeeded();
   // Cargar preferencia de tema (oscuro por defecto si no existe)
   await ThemeController.instance.load();
+  await GamificationService.instance.init();
 
   runApp(MyApp(navigatorKey: navigatorKey));
 }

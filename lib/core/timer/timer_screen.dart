@@ -23,6 +23,7 @@ import 'package:pomodoro/utils/dnd.dart';
 import 'package:pomodoro/utils/notifications/notifications.dart';
 import 'package:pomodoro/utils/glass_container.dart';
 import 'package:pomodoro/utils/app.dart';
+import 'package:pomodoro/features/gamification/gamification_service.dart';
 
 class TimerScreen extends StatelessWidget {
   final int workMinutes;
@@ -526,10 +527,15 @@ class _TimerViewState extends State<_TimerView>
                         ),
                       ),
                     );
+                    final xpEarned = (workDur / 60 * state.session)
+                        .round(); // Minimal simple XP logic
+                    GamificationService.instance.awardXP(xpEarned);
+
                     NotificationService.showTimerFinishedNotification(
                       id: 1000,
                       title: loc.sessionCompleted,
-                      body: 'Completaste $totalSessions sesiones!',
+                      body:
+                          'Completaste $totalSessions sesiones! +$xpEarned XP',
                     );
                   } else if (state is TimerInitial) {
                     // Restore DND if user reset/cancelled

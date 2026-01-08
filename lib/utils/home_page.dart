@@ -9,6 +9,7 @@ import 'package:pomodoro/features/settings/settings_screen.dart';
 import 'package:pomodoro/features/tasks/tasks_screen.dart';
 import 'package:pomodoro/l10n/app_localizations.dart';
 import 'package:pomodoro/utils/app.dart';
+import 'package:pomodoro/features/gamification/gamification_service.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -46,6 +47,27 @@ class _HomePageState extends State<HomePage> {
         automaticallyImplyLeading: false,
         title: Text(t.appTitle),
         actions: [
+          // Level Indicator
+          Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: ValueListenableBuilder<int>(
+              valueListenable: GamificationService.instance.currentLevel,
+              builder: (context, level, _) {
+                return Chip(
+                  avatar: const Icon(Icons.star, size: 16, color: Colors.amber),
+                  label: Text('Lvl $level',
+                      style: TextStyle(
+                          fontSize: 12,
+                          color: Theme.of(context).colorScheme.onSurface)),
+                  backgroundColor: Theme.of(context)
+                      .colorScheme
+                      .surface
+                      .withValues(alpha: 0.2),
+                  side: BorderSide.none,
+                );
+              },
+            ),
+          ),
           FutureBuilder<Map<String, String?>>(
             future: AuthService.instance.currentProfile(),
             builder: (context, snap) {

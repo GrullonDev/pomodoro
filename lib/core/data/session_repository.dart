@@ -375,5 +375,17 @@ class SessionRepository implements ISessionRepository {
     _goalRemainingController.close();
   }
 
+  static const _totalXpKey = 'user_total_xp';
+
+  Future<void> setTotalXP(int xp) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_totalXpKey, xp);
+  }
+
+  Future<int> getTotalXP() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt(_totalXpKey) ?? 0;
+  }
+
   String _formatDay(DateTime d) => '${d.year}-${d.month}-${d.day}';
 }
