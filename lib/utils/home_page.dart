@@ -11,6 +11,8 @@ import 'package:pomodoro/l10n/app_localizations.dart';
 import 'package:pomodoro/utils/app.dart';
 import 'package:pomodoro/features/gamification/gamification_service.dart';
 
+import 'package:pomodoro/features/gamification/presentation/screens/achievements_screen.dart';
+
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
   @override
@@ -53,17 +55,24 @@ class _HomePageState extends State<HomePage> {
             child: ValueListenableBuilder<int>(
               valueListenable: GamificationService.instance.currentLevel,
               builder: (context, level, _) {
-                return Chip(
-                  avatar: const Icon(Icons.star, size: 16, color: Colors.amber),
-                  label: Text('Lvl $level',
-                      style: TextStyle(
-                          fontSize: 12,
-                          color: Theme.of(context).colorScheme.onSurface)),
-                  backgroundColor: Theme.of(context)
-                      .colorScheme
-                      .surface
-                      .withValues(alpha: 0.2),
-                  side: BorderSide.none,
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (_) => const AchievementsScreen()));
+                  },
+                  child: Chip(
+                    avatar:
+                        const Icon(Icons.star, size: 16, color: Colors.amber),
+                    label: Text('Lvl $level',
+                        style: TextStyle(
+                            fontSize: 12,
+                            color: Theme.of(context).colorScheme.onSurface)),
+                    backgroundColor: Theme.of(context)
+                        .colorScheme
+                        .surface
+                        .withValues(alpha: 0.2),
+                    side: BorderSide.none,
+                  ),
                 );
               },
             ),
