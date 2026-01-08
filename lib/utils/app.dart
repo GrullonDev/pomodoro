@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:upgrader/upgrader.dart';
 
 import 'package:flutter_localizations/flutter_localizations.dart';
 
@@ -85,70 +86,79 @@ class MyApp extends StatelessWidget {
             ],
             supportedLocales: const [Locale('en'), Locale('es')],
             locale: loc,
-            home: FutureBuilder<bool>(
-              future: SessionRepository().isOnboardingSeen(),
-              builder: (context, snap) {
-                if (!snap.hasData) {
-                  return const Center(
-                    child: CircularProgressIndicator(),
-                  );
-                }
-
-                final seen = snap.data ?? false;
-                if (!seen) {
-                  return AnimatedGradientShell(
-                    child: OnboardingScreen(
-                      onGetStarted: () async {
-                        await SessionRepository().setOnboardingSeen();
-                        if (navigatorKey.currentState?.mounted ?? false) {
-                          navigatorKey.currentState!.pushReplacement(
-                            MaterialPageRoute(
-                              builder: (_) => AnimatedGradientShell(
-                                child: LoginScreen(),
-                              ),
-                            ),
-                          );
-                        }
-                      },
-                      onSkip: () async {
-                        await SessionRepository().setOnboardingSeen();
-                        if (navigatorKey.currentState?.mounted ?? false) {
-                          navigatorKey.currentState!.pushReplacement(
-                            MaterialPageRoute(
-                              builder: (_) => AnimatedGradientShell(
-                                child: LoginScreen(),
-                              ),
-                            ),
-                          );
-                        }
-                      },
-                    ),
-                  );
-                }
-
-                // If onboarding completed, show Home or Login depending on auth state.
-                return StreamBuilder<String?>(
-                  stream: AuthService.instance.uidChanges(),
-                  builder: (context, authSnap) {
-                    final uid = authSnap.data;
-                    if (authSnap.connectionState == ConnectionState.waiting) {
-                      return const Center(
-                        child: CircularProgressIndicator(),
-                      );
-                    }
-
-                    if (uid == null) {
-                      return const AnimatedGradientShell(
-                        child: LoginScreen(),
-                      );
-                    }
-
-                    return const AnimatedGradientShell(
-                      child: HomePage(),
+            home: UpgradeAlert(
+              showIgnore: false,
+              showLater: false,
+              showReleaseNotes: true,
+              dialogStyle: UpgradeDialogStyle.cupertino,
+              upgrader: Upgrader(
+                messages: UpgraderMessages(code: 'es'),
+              ),
+              child: FutureBuilder<bool>(
+                future: SessionRepository().isOnboardingSeen(),
+                builder: (context, snap) {
+                  if (!snap.hasData) {
+                    return const Center(
+                      child: CircularProgressIndicator(),
                     );
-                  },
-                );
-              },
+                  }
+
+                  final seen = snap.data ?? false;
+                  if (!seen) {
+                    return AnimatedGradientShell(
+                      child: OnboardingScreen(
+                        onGetStarted: () async {
+                          await SessionRepository().setOnboardingSeen();
+                          if (navigatorKey.currentState?.mounted ?? false) {
+                            navigatorKey.currentState!.pushReplacement(
+                              MaterialPageRoute(
+                                builder: (_) => AnimatedGradientShell(
+                                  child: LoginScreen(),
+                                ),
+                              ),
+                            );
+                          }
+                        },
+                        onSkip: () async {
+                          await SessionRepository().setOnboardingSeen();
+                          if (navigatorKey.currentState?.mounted ?? false) {
+                            navigatorKey.currentState!.pushReplacement(
+                              MaterialPageRoute(
+                                builder: (_) => AnimatedGradientShell(
+                                  child: LoginScreen(),
+                                ),
+                              ),
+                            );
+                          }
+                        },
+                      ),
+                    );
+                  }
+
+                  // If onboarding completed, show Home or Login depending on auth state.
+                  return StreamBuilder<String?>(
+                    stream: AuthService.instance.uidChanges(),
+                    builder: (context, authSnap) {
+                      final uid = authSnap.data;
+                      if (authSnap.connectionState == ConnectionState.waiting) {
+                        return const Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      }
+
+                      if (uid == null) {
+                        return const AnimatedGradientShell(
+                          child: LoginScreen(),
+                        );
+                      }
+
+                      return const AnimatedGradientShell(
+                        child: HomePage(),
+                      );
+                    },
+                  );
+                },
+              ),
             ),
           ),
         );
