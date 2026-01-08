@@ -338,13 +338,20 @@ class _TimerViewState extends State<_TimerView>
           elevation: 0,
           title: Text(AppLocalizations.of(context).appTitle,
               style: TextStyle(
-                  color: Colors.white.withOpacity(0.9),
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onSurface
+                      .withValues(alpha: 0.9),
                   fontWeight: FontWeight.bold,
                   fontSize: 22)),
           centerTitle: true,
           actions: [
             IconButton(
-              icon: const Icon(Icons.refresh, color: Colors.white70),
+              icon: Icon(Icons.refresh,
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onSurface
+                      .withValues(alpha: 0.7)),
               onPressed: () => context.read<TimerBloc>().add(TimerReset()),
             )
           ],
@@ -602,7 +609,8 @@ class _TimerViewState extends State<_TimerView>
                                         orientation == Orientation.portrait
                                             ? 80
                                             : 72, // Larger font
-                                    color: Colors.white,
+                                    color:
+                                        Theme.of(context).colorScheme.onSurface,
                                     fontWeight:
                                         FontWeight.w200, // Thinner, modern look
                                     letterSpacing: -2,
@@ -620,7 +628,10 @@ class _TimerViewState extends State<_TimerView>
                             borderRadius: 20,
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 16, vertical: 6),
-                            color: Colors.white.withOpacity(0.1),
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withValues(alpha: 0.1),
                             child: AnimatedSwitcher(
                               duration: const Duration(milliseconds: 300),
                               child: Text(
@@ -628,7 +639,10 @@ class _TimerViewState extends State<_TimerView>
                                 key: ValueKey(state.phase.toString() +
                                     state.session.toString()),
                                 style: TextStyle(
-                                    color: Colors.white.withOpacity(0.9),
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurface
+                                        .withValues(alpha: 0.9),
                                     fontSize: 15,
                                     fontWeight: FontWeight.w500,
                                     letterSpacing: 0.5),
@@ -727,13 +741,14 @@ class _TimerViewState extends State<_TimerView>
                     return Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.celebration_rounded,
-                            color: Colors.white, size: 80),
+                        Icon(Icons.celebration_rounded,
+                            color: Theme.of(context).colorScheme.onSurface,
+                            size: 80),
                         const SizedBox(height: 24),
                         Text(
                             '¡Listo! Tiempo total ${(state.workDuration / 60 * state.totalSessions).round()}m',
-                            style: const TextStyle(
-                                color: Colors.white,
+                            style: TextStyle(
+                                color: Theme.of(context).colorScheme.onSurface,
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold)),
                         const SizedBox(height: 40),
@@ -741,12 +756,15 @@ class _TimerViewState extends State<_TimerView>
                           borderRadius: 30,
                           child: TextButton(
                             onPressed: () => Navigator.of(context).pop(),
-                            child: const Padding(
+                            child: Padding(
                               padding: EdgeInsets.symmetric(
                                   horizontal: 24, vertical: 8),
                               child: Text('Terminar',
                                   style: TextStyle(
-                                      color: Colors.white, fontSize: 16)),
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurface,
+                                      fontSize: 16)),
                             ),
                           ),
                         )

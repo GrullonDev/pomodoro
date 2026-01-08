@@ -340,7 +340,9 @@ class _StatItem extends StatelessWidget {
             style: TextStyle(
                 fontSize: 22, fontWeight: FontWeight.bold, color: color)),
         Text(label,
-            style: const TextStyle(fontSize: 12, color: Colors.black54)),
+            style: TextStyle(
+                fontSize: 12,
+                color: Theme.of(context).textTheme.bodySmall?.color)),
       ],
     );
   }

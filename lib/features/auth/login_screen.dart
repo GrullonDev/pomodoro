@@ -76,15 +76,6 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xFF4A00E0), Color(0xFF8E2DE2)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-            ),
-          ),
           Center(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
@@ -96,13 +87,20 @@ class _LoginScreenState extends State<LoginScreen> {
                     filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                     child: Container(
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.1),
+                        color: Theme.of(context)
+                            .colorScheme
+                            .surface
+                            .withValues(alpha: 0.2), // Adaptive glass
                         borderRadius: BorderRadius.circular(20),
-                        border:
-                            Border.all(color: Colors.white.withOpacity(0.2)),
+                        border: Border.all(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withValues(alpha: 0.1),
+                        ),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
+                            color: Colors.black.withValues(alpha: 0.1),
                             blurRadius: 10,
                             spreadRadius: 2,
                           )
@@ -115,7 +113,11 @@ class _LoginScreenState extends State<LoginScreen> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(Icons.lock_outline_rounded,
-                                size: 60, color: Colors.white.withOpacity(0.9)),
+                                size: 60,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurface
+                                    .withValues(alpha: 0.9)),
                             const SizedBox(height: 20),
                             Text(
                               'Welcome Back',
@@ -123,30 +125,44 @@ class _LoginScreenState extends State<LoginScreen> {
                                   .textTheme
                                   .headlineMedium
                                   ?.copyWith(
-                                    color: Colors.white,
+                                    color:
+                                        Theme.of(context).colorScheme.onSurface,
                                     fontWeight: FontWeight.bold,
                                   ),
                             ),
                             const SizedBox(height: 30),
                             TextFormField(
                               controller: _email,
-                              style: const TextStyle(color: Colors.white),
+                              style: TextStyle(
+                                  color:
+                                      Theme.of(context).colorScheme.onSurface),
                               keyboardType: TextInputType.emailAddress,
                               decoration: InputDecoration(
                                 labelText: 'Email',
                                 labelStyle: TextStyle(
-                                    color: Colors.white.withOpacity(0.8)),
-                                prefixIcon: const Icon(Icons.email,
-                                    color: Colors.white70),
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurface
+                                        .withValues(alpha: 0.8)),
+                                prefixIcon: Icon(Icons.email,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurface
+                                        .withValues(alpha: 0.7)),
                                 enabledBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
                                   borderSide: BorderSide(
-                                      color: Colors.white.withOpacity(0.3)),
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurface
+                                          .withValues(alpha: 0.3)),
                                 ),
                                 focusedBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
-                                  borderSide:
-                                      const BorderSide(color: Colors.white),
+                                  borderSide: BorderSide(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurface),
                                 ),
                               ),
                               validator: (v) => EmailValidator.validate(v),
@@ -155,22 +171,35 @@ class _LoginScreenState extends State<LoginScreen> {
                             TextFormField(
                               controller: _password,
                               obscureText: true,
-                              style: const TextStyle(color: Colors.white),
+                              style: TextStyle(
+                                  color:
+                                      Theme.of(context).colorScheme.onSurface),
                               decoration: InputDecoration(
                                 labelText: 'Password',
                                 labelStyle: TextStyle(
-                                    color: Colors.white.withOpacity(0.8)),
-                                prefixIcon: const Icon(Icons.lock,
-                                    color: Colors.white70),
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurface
+                                        .withValues(alpha: 0.8)),
+                                prefixIcon: Icon(Icons.lock,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurface
+                                        .withValues(alpha: 0.7)),
                                 enabledBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
                                   borderSide: BorderSide(
-                                      color: Colors.white.withOpacity(0.3)),
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurface
+                                          .withValues(alpha: 0.3)),
                                 ),
                                 focusedBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
-                                  borderSide:
-                                      const BorderSide(color: Colors.white),
+                                  borderSide: BorderSide(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurface),
                                 ),
                               ),
                               validator: (v) => (v == null || v.length < 6)
@@ -214,8 +243,10 @@ class _LoginScreenState extends State<LoginScreen> {
                             // Biometric Button - Always visible for now, or check preference
                             IconButton(
                               onPressed: _checkBiometrics,
-                              icon: const Icon(Icons.fingerprint,
-                                  size: 40, color: Colors.white),
+                              icon: Icon(Icons.fingerprint,
+                                  size: 40,
+                                  color:
+                                      Theme.of(context).colorScheme.onSurface),
                               tooltip: 'Biometric Login',
                             ),
                             const SizedBox(height: 16),
@@ -224,7 +255,10 @@ class _LoginScreenState extends State<LoginScreen> {
                               children: [
                                 Text("Don't have an account?",
                                     style: TextStyle(
-                                        color: Colors.white.withOpacity(0.8))),
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurface
+                                            .withValues(alpha: 0.8))),
                                 TextButton(
                                   onPressed: _loading
                                       ? null
@@ -236,9 +270,11 @@ class _LoginScreenState extends State<LoginScreen> {
                                                       onSuccess: () {},
                                                       initialEmail: email)));
                                         },
-                                  child: const Text('Sign Up',
+                                  child: Text('Sign Up',
                                       style: TextStyle(
-                                          color: Colors.white,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary,
                                           fontWeight: FontWeight.bold)),
                                 ),
                               ],
@@ -275,7 +311,10 @@ class _LoginScreenState extends State<LoginScreen> {
                               child: Text('Terms & Privacy',
                                   style: TextStyle(
                                       fontSize: 12,
-                                      color: Colors.white.withOpacity(0.6))),
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurface
+                                          .withValues(alpha: 0.6))),
                             )
                           ],
                         ),

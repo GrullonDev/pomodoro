@@ -41,10 +41,10 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        // Remove hardcoded backgroundColor so it uses the theme (transparent)
         elevation: 0,
         automaticallyImplyLeading: false,
-        title: Text(t.appTitle, style: const TextStyle(color: Colors.black87)),
+        title: Text(t.appTitle),
         actions: [
           FutureBuilder<Map<String, String?>>(
             future: AuthService.instance.currentProfile(),
@@ -54,7 +54,7 @@ class _HomePageState extends State<HomePage> {
               final uid = profile?['uid'];
               final t = AppLocalizations.of(context);
               return PopupMenuButton<int>(
-                icon: const Icon(Icons.account_circle, color: Colors.black54),
+                icon: const Icon(Icons.account_circle),
                 itemBuilder: (ctx) => [
                   PopupMenuItem<int>(
                     value: 0,

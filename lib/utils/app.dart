@@ -177,14 +177,27 @@ class _AnimatedGradientShellState extends State<AnimatedGradientShell>
         // We use a rich dark gradient by default to make the glassmorphism pop,
         // regardless of the system light/dark mode for this shell.
 
-        // Deep teal/ocean palette
-        const c1 = Color(0xFF0F2027);
-        const c2 = Color(0xFF203A43);
-        const c3 = Color(0xFF2C5364);
+        final isDark = Theme.of(context).brightness == Brightness.dark;
 
-        // Secondary accent palette (Emerald) for animation
-        const a1 = Color(0xFF134E5E);
-        const a2 = Color(0xFF71B280);
+        // Dark palette
+        const darkC1 = Color(0xFF0F2027);
+        const darkC2 = Color(0xFF203A43);
+        const darkC3 = Color(0xFF2C5364);
+        const darkA1 = Color(0xFF134E5E);
+        const darkA2 = Color(0xFF71B280);
+
+        // Light palette (Fresh/Mental/Nature feel)
+        const lightC1 = Color(0xFFFFFFFF);
+        const lightC2 = Color(0xFFF0F4C3); // Lime 100
+        const lightC3 = Color(0xFFDCEDC8); // Light Green 100
+        const lightA1 = Color(0xFFC5E1A5); // Light Green 200
+        const lightA2 = Color(0xFF81C784); // Green 300
+
+        final c1 = isDark ? darkC1 : lightC1;
+        final c2 = isDark ? darkC2 : lightC2;
+        final c3 = isDark ? darkC3 : lightC3;
+        final a1 = isDark ? darkA1 : lightA1;
+        final a2 = isDark ? darkA2 : lightA2;
 
         final animT = _c.value;
 

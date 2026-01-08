@@ -51,14 +51,15 @@ class HistoryScreen extends StatelessWidget {
           if (items.isEmpty) {
             return Center(
               child: Text(t.noHistory,
-                  style: const TextStyle(color: Colors.white54)),
+                  style: TextStyle(
+                      color: scheme.onSurface.withValues(alpha: 0.5))),
             );
           }
 
           return ListView.separated(
             padding: const EdgeInsets.all(12),
             itemCount: items.length,
-            separatorBuilder: (_, __) => const Divider(color: Colors.white12),
+            separatorBuilder: (_, __) => Divider(color: scheme.outlineVariant),
             itemBuilder: (context, i) {
               final e = items[i];
               final dateStr =
