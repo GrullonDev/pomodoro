@@ -54,7 +54,7 @@ class _HabitState extends State<Habit> {
 
     // More legible text colors
     final textColor = isDark ? Colors.white : Colors.black87;
-    final labelColor = textColor.withOpacity(0.7);
+    final labelColor = textColor.withValues(alpha: 0.7);
 
     return GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
@@ -70,7 +70,7 @@ class _HabitState extends State<Habit> {
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
                   color:
-                      isDark ? Colors.white : scheme.primary.withOpacity(0.8),
+                      isDark ? Colors.white : scheme.primary.withValues(alpha: 0.8),
                   fontFamily: 'Arial',
                 ))),
         body: Center(
@@ -204,7 +204,7 @@ class _HabitState extends State<Habit> {
                       backgroundColor: scheme.primary,
                       foregroundColor: Colors.white,
                       elevation: 4,
-                      shadowColor: scheme.primary.withOpacity(0.4),
+                      shadowColor: scheme.primary.withValues(alpha: 0.4),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
@@ -231,7 +231,7 @@ class _HabitState extends State<Habit> {
                       style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: textColor.withOpacity(0.8))),
+                          color: textColor.withValues(alpha: 0.8))),
                   collapsedIconColor: scheme.primary,
                   iconColor: scheme.primary,
                   children: [
@@ -328,8 +328,8 @@ class _GlassInput extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: isDark
-            ? Colors.white.withOpacity(0.05)
-            : Colors.black.withOpacity(0.03),
+            ? Colors.white.withValues(alpha: 0.05)
+            : Colors.black.withValues(alpha: 0.03),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: isDark ? Colors.white24 : Colors.black12),
       ),
@@ -350,7 +350,7 @@ class _GlassInput extends StatelessWidget {
           border: InputBorder.none,
           hintText: hint,
           hintStyle: TextStyle(
-              color: (isDark ? Colors.white : Colors.black).withOpacity(0.3)),
+              color: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.3)),
         ),
       ),
     );
@@ -369,7 +369,7 @@ class _PresetChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          color: scheme.primary.withOpacity(0.2),
+          color: scheme.primary.withValues(alpha: 0.2),
           borderRadius: BorderRadius.circular(30),
           border: Border.all(color: scheme.primary, width: 1.5),
         ),

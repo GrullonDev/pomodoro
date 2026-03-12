@@ -237,7 +237,7 @@ class _AnimatedGradientShellState extends State<AnimatedGradientShell>
                     center: const Alignment(0.8, -0.6),
                     radius: 1.5,
                     colors: [
-                      Colors.greenAccent.withOpacity(0.1 + (animT * 0.05)),
+                      Colors.greenAccent.withValues(alpha: 0.1 + (animT * 0.05)),
                       Colors.transparent,
                     ],
                     stops: const [0, 1],

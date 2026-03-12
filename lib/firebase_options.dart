@@ -53,7 +53,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyBLu2JeIx9RGndolKv0RH0bBlAi81v97PQ',
-    appId: '1:792091963600:android:e55780845de273e1f42ed5',
+    appId: '1:792091963600:android:2b64b85b9d22ee48f42ed5',
     messagingSenderId: '792091963600',
     projectId: 'pomodoro-53e3e',
     databaseURL: 'https://pomodoro-53e3e-default-rtdb.firebaseio.com',
