@@ -118,12 +118,12 @@ key.properties
 *.dSYM.zip
 *.symbols
 
-################
 # Archivos de configuración / entorno (añade si se crean)
 ################
 .env
 .env.*
 firebase_app_id_file.json
+lib/firebase_options.dart
 
 ################
 # Parches / merges y logs auxiliares
