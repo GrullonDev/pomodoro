@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'dart:ui';
 class FocusWeeklyChart extends StatelessWidget {
   final Map<String, int> data; // key yyyy-m-d -> seconds
   final Color barColor;

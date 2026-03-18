@@ -2,7 +2,7 @@ name: pomodoro
 description: "Project of a pomodoro made in flutter."
 publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
-version: 1.0.1
+version: 1.0.3+3
 
 environment:
   sdk: ">=3.4.4 <4.0.0"
@@ -21,7 +21,7 @@ dependencies:
   animated_snack_bar: ^0.4.0
   curved_navigation_bar: ^1.0.6
   flutter_local_notifications: ^18.0.1
-  timezone: ^0.10.1
+  timezone: ^0.9.4
   equatable: ^2.0.5
   share_plus: ^10.0.2
   path_provider: ^2.1.4
@@ -33,7 +33,7 @@ dependencies:
   cloud_firestore: ^5.5.0
   google_sign_in: ^6.2.0
   local_auth: ^3.0.0
-  device_calendar: ^3.9.0
+  device_calendar: ^4.3.2
   upgrader: ^12.3.0
 
 
@@ -43,6 +43,7 @@ dev_dependencies:
 
   flutter_lints: ^6.0.0
   flutter_launcher_icons: ^0.14.1
+  flutter_native_splash: ^2.4.1
 
 # Launcher icon generation config
 flutter_launcher_icons:

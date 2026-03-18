@@ -134,6 +134,7 @@ class MainActivity : FlutterFragmentActivity() {
 
 				"updateForegroundNotification" -> {
 					try {
+						@Suppress("UNCHECKED_CAST")
 						val args = call.arguments as? Map<String, Any>
 						if (args != null) {
 							val remaining = (args["remainingSeconds"] as? Number)?.toLong() ?: 0L

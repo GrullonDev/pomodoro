@@ -328,7 +328,7 @@ class _TimerViewState extends State<_TimerView>
     final flashOverlay = _flashing
         ? IgnorePointer(
             child: Container(
-            color: Colors.greenAccent.withOpacity(0.15),
+            color: Colors.greenAccent.withValues(alpha: 0.15),
           ))
         : const SizedBox.shrink();
 
@@ -636,7 +636,7 @@ class _TimerViewState extends State<_TimerView>
                                     shadows: [
                                       Shadow(
                                           blurRadius: 10,
-                                          color: alertColor.withOpacity(0.5))
+                                          color: alertColor.withValues(alpha: 0.5))
                                     ]),
                               ),
                             ),
@@ -721,7 +721,7 @@ class _TimerViewState extends State<_TimerView>
                                           boxShadow: [
                                             BoxShadow(
                                                 color:
-                                                    alertColor.withOpacity(0.2),
+                                                    alertColor.withValues(alpha: 0.2),
                                                 blurRadius: 60,
                                                 spreadRadius: 10)
                                           ]),
@@ -834,8 +834,8 @@ class _TimerButton extends StatelessWidget {
         child: GlassContainer(
           borderRadius: 30,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          color: Colors.white.withOpacity(0.1),
-          border: Border.all(color: Colors.white.withOpacity(0.3)),
+          color: Colors.white.withValues(alpha: 0.1),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -915,7 +915,7 @@ class _GoalProgressBar extends StatelessWidget {
     return GlassContainer(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       borderRadius: 12,
-      color: Colors.white.withOpacity(0.05),
+      color: Colors.white.withValues(alpha: 0.05),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -924,7 +924,7 @@ class _GoalProgressBar extends StatelessWidget {
             child: LinearProgressIndicator(
               minHeight: 8,
               value: pct.clamp(0, 1),
-              backgroundColor: Colors.white.withOpacity(0.2),
+              backgroundColor: Colors.white.withValues(alpha: 0.2),
               valueColor: const AlwaysStoppedAnimation(Colors.greenAccent),
             ),
           ),
@@ -932,7 +932,7 @@ class _GoalProgressBar extends StatelessWidget {
           Text(
               AppLocalizations.of(context).goalProgressLabel(done, goalMinutes),
               style:
-                  TextStyle(fontSize: 12, color: Colors.white.withOpacity(0.8)))
+                  TextStyle(fontSize: 12, color: Colors.white.withValues(alpha: 0.8)))
         ],
       ),
     );

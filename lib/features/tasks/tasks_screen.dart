@@ -217,8 +217,8 @@ class _TasksScreenState extends State<TasksScreen> {
                               horizontal: 12, vertical: 6),
                           padding: const EdgeInsets.all(0),
                           color: t.done
-                              ? Colors.white.withOpacity(0.05)
-                              : Colors.white.withOpacity(0.15),
+                              ? Colors.white.withValues(alpha: 0.05)
+                              : Colors.white.withValues(alpha: 0.15),
                           child: ListTile(
                             contentPadding: const EdgeInsets.symmetric(
                                 horizontal: 16, vertical: 8),
@@ -231,7 +231,7 @@ class _TasksScreenState extends State<TasksScreen> {
                                       : t.sessionsCompleted / t.sessions,
                                   strokeWidth: 4,
                                   backgroundColor:
-                                      scheme.primary.withOpacity(0.15),
+                                      scheme.primary.withValues(alpha: 0.15),
                                 ),
                                 Icon(
                                   t.done ? Icons.check : Icons.play_arrow,

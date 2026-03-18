@@ -92,12 +92,12 @@
     },
     {
       "name": "device_calendar",
-      "version": "3.9.0",
+      "version": "4.3.3",
       "dependencies": [
         "collection",
         "flutter",
-        "meta",
-        "sprintf"
+        "sprintf",
+        "timezone"
       ]
     },
     {
@@ -227,9 +227,8 @@
     },
     {
       "name": "timezone",
-      "version": "0.10.1",
+      "version": "0.9.4",
       "dependencies": [
-        "http",
         "path"
       ]
     },
@@ -435,7 +434,7 @@
     },
     {
       "name": "matcher",
-      "version": "0.12.17",
+      "version": "0.12.19",
       "dependencies": [
         "async",
         "meta",
@@ -446,7 +445,7 @@
     },
     {
       "name": "test_api",
-      "version": "0.7.7",
+      "version": "0.7.10",
       "dependencies": [
         "async",
         "boolean_selector",
@@ -531,7 +530,7 @@
     },
     {
       "name": "sprintf",
-      "version": "6.0.2",
+      "version": "7.0.0",
       "dependencies": []
     },
     {
@@ -991,14 +990,14 @@
     },
     {
       "name": "material_color_utilities",
-      "version": "0.11.1",
+      "version": "0.13.0",
       "dependencies": [
         "collection"
       ]
     },
     {
       "name": "characters",
-      "version": "1.4.0",
+      "version": "1.4.1",
       "dependencies": []
     },
     {

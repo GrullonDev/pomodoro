@@ -516,8 +516,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       future: CalendarService.instance.retrieveCalendars(),
                       builder: (context, snap) {
                         if (!snap.hasData) return const Text('Cargando...');
-                        if (snap.data!.isEmpty)
+                        if (snap.data!.isEmpty) {
                           return const Text('No se encontraron calendarios');
+                        }
                         // Find selected name? We store ID but UI might want name.
                         // For now just "Tap to select"
                         return const Text('Toca para seleccionar');

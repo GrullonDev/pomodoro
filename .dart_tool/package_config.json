@@ -177,7 +177,7 @@
     },
     {
       "name": "device_calendar",
-      "rootUri": "file:///C:/Users/jgrullon/AppData/Local/Pub/Cache/hosted/pub.dev/device_calendar-3.9.0",
+      "rootUri": "file:///C:/Users/jgrullon/AppData/Local/Pub/Cache/hosted/pub.dev/device_calendar-4.3.3",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
@@ -633,7 +633,7 @@
     },
     {
       "name": "sprintf",
-      "rootUri": "file:///C:/Users/jgrullon/AppData/Local/Pub/Cache/hosted/pub.dev/sprintf-6.0.2",
+      "rootUri": "file:///C:/Users/jgrullon/AppData/Local/Pub/Cache/hosted/pub.dev/sprintf-7.0.0",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
@@ -675,7 +675,7 @@
     },
     {
       "name": "timezone",
-      "rootUri": "file:///C:/Users/jgrullon/AppData/Local/Pub/Cache/hosted/pub.dev/timezone-0.10.1",
+      "rootUri": "file:///C:/Users/jgrullon/AppData/Local/Pub/Cache/hosted/pub.dev/timezone-0.9.4",
       "packageUri": "lib/",
       "languageVersion": "2.19"
     },

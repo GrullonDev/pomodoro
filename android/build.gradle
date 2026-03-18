@@ -6,7 +6,7 @@ allprojects {
 }
 
 buildscript {
-    ext.kotlin_version = '2.1.0'
+    ext.kotlin_version = '1.9.24'
     
     repositories {
         google()
