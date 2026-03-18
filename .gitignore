@@ -133,8 +133,13 @@ lib/firebase_options.dart
 *.log
 
 ################
-# Fastlane / CI reports (si se introduce fastlane)
+# Archivos solicitados por el usuario
+pepk.jar
+output.zip
+android/app/*.pem
+
 ################
+# Fastlane / CI reports (si se introduce fastlane)
 fastlane/report.xml
 fastlane/Preview.html
 fastlane/screenshots
