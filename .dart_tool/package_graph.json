@@ -5,7 +5,7 @@
   "packages": [
     {
       "name": "pomodoro",
-      "version": "1.0.1",
+      "version": "1.0.3+3",
       "dependencies": [
         "animated_snack_bar",
         "audioplayers",
@@ -34,7 +34,25 @@
       "devDependencies": [
         "flutter_launcher_icons",
         "flutter_lints",
+        "flutter_native_splash",
         "flutter_test"
+      ]
+    },
+    {
+      "name": "flutter_native_splash",
+      "version": "2.4.7",
+      "dependencies": [
+        "ansicolor",
+        "args",
+        "flutter",
+        "flutter_web_plugins",
+        "html",
+        "image",
+        "meta",
+        "path",
+        "universal_io",
+        "xml",
+        "yaml"
       ]
     },
     {
@@ -77,7 +95,7 @@
     },
     {
       "name": "upgrader",
-      "version": "12.3.0",
+      "version": "12.5.0",
       "dependencies": [
         "flutter",
         "html",
@@ -102,7 +120,7 @@
     },
     {
       "name": "local_auth",
-      "version": "3.0.0",
+      "version": "3.0.1",
       "dependencies": [
         "flutter",
         "local_auth_android",
@@ -159,7 +177,7 @@
     },
     {
       "name": "audioplayers",
-      "version": "6.5.1",
+      "version": "6.6.0",
       "dependencies": [
         "audioplayers_android",
         "audioplayers_darwin",
@@ -298,7 +316,7 @@
     },
     {
       "name": "cupertino_icons",
-      "version": "1.0.8",
+      "version": "1.0.9",
       "dependencies": []
     },
     {
@@ -323,6 +341,11 @@
       ]
     },
     {
+      "name": "ansicolor",
+      "version": "2.0.3",
+      "dependencies": []
+    },
+    {
       "name": "yaml",
       "version": "3.1.3",
       "dependencies": [
@@ -332,24 +355,67 @@
       ]
     },
     {
+      "name": "xml",
+      "version": "6.6.1",
+      "dependencies": [
+        "collection",
+        "meta",
+        "petitparser"
+      ]
+    },
+    {
+      "name": "universal_io",
+      "version": "2.3.1",
+      "dependencies": [
+        "collection",
+        "meta",
+        "typed_data"
+      ]
+    },
+    {
       "name": "path",
       "version": "1.9.1",
       "dependencies": []
     },
     {
-      "name": "json_annotation",
-      "version": "4.9.0",
-      "dependencies": [
-        "meta"
-      ]
+      "name": "meta",
+      "version": "1.17.0",
+      "dependencies": []
     },
     {
       "name": "image",
-      "version": "4.7.2",
+      "version": "4.8.0",
       "dependencies": [
         "archive",
         "meta",
         "xml"
+      ]
+    },
+    {
+      "name": "html",
+      "version": "0.15.6",
+      "dependencies": [
+        "csslib",
+        "source_span"
+      ]
+    },
+    {
+      "name": "flutter_web_plugins",
+      "version": "0.0.0",
+      "dependencies": [
+        "flutter"
+      ]
+    },
+    {
+      "name": "args",
+      "version": "2.7.0",
+      "dependencies": []
+    },
+    {
+      "name": "json_annotation",
+      "version": "4.11.0",
+      "dependencies": [
+        "meta"
       ]
     },
     {
@@ -370,13 +436,8 @@
       ]
     },
     {
-      "name": "args",
-      "version": "2.7.0",
-      "dependencies": []
-    },
-    {
       "name": "lints",
-      "version": "6.0.0",
+      "version": "6.1.0",
       "dependencies": []
     },
     {
@@ -385,11 +446,6 @@
       "dependencies": [
         "async"
       ]
-    },
-    {
-      "name": "meta",
-      "version": "1.17.0",
-      "dependencies": []
     },
     {
       "name": "collection",
@@ -459,15 +515,6 @@
       ]
     },
     {
-      "name": "xml",
-      "version": "6.6.1",
-      "dependencies": [
-        "collection",
-        "meta",
-        "petitparser"
-      ]
-    },
-    {
       "name": "version",
       "version": "3.0.2",
       "dependencies": []
@@ -521,14 +568,6 @@
       ]
     },
     {
-      "name": "html",
-      "version": "0.15.6",
-      "dependencies": [
-        "csslib",
-        "source_span"
-      ]
-    },
-    {
       "name": "sprintf",
       "version": "7.0.0",
       "dependencies": []
@@ -551,7 +590,7 @@
     },
     {
       "name": "local_auth_darwin",
-      "version": "2.0.1",
+      "version": "2.0.3",
       "dependencies": [
         "flutter",
         "intl",
@@ -560,7 +599,7 @@
     },
     {
       "name": "local_auth_android",
-      "version": "2.0.4",
+      "version": "2.0.7",
       "dependencies": [
         "flutter",
         "flutter_plugin_android_lifecycle",
@@ -606,7 +645,7 @@
     },
     {
       "name": "firebase_core_platform_interface",
-      "version": "6.0.2",
+      "version": "6.0.3",
       "dependencies": [
         "collection",
         "flutter",
@@ -679,11 +718,10 @@
     },
     {
       "name": "uuid",
-      "version": "4.5.2",
+      "version": "4.5.3",
       "dependencies": [
         "crypto",
-        "fixnum",
-        "meta"
+        "fixnum"
       ]
     },
     {
@@ -701,7 +739,7 @@
     },
     {
       "name": "audioplayers_windows",
-      "version": "4.2.1",
+      "version": "4.3.0",
       "dependencies": [
         "audioplayers_platform_interface",
         "flutter"
@@ -709,7 +747,7 @@
     },
     {
       "name": "audioplayers_web",
-      "version": "5.1.1",
+      "version": "5.2.0",
       "dependencies": [
         "audioplayers_platform_interface",
         "flutter",
@@ -737,7 +775,7 @@
     },
     {
       "name": "audioplayers_darwin",
-      "version": "6.3.0",
+      "version": "6.4.0",
       "dependencies": [
         "audioplayers_platform_interface",
         "flutter"
@@ -783,9 +821,11 @@
     },
     {
       "name": "path_provider_foundation",
-      "version": "2.5.1",
+      "version": "2.6.0",
       "dependencies": [
+        "ffi",
         "flutter",
+        "objective_c",
         "path_provider_platform_interface"
       ]
     },
@@ -811,7 +851,7 @@
     },
     {
       "name": "ffi",
-      "version": "2.1.5",
+      "version": "2.2.0",
       "dependencies": []
     },
     {
@@ -840,7 +880,7 @@
     },
     {
       "name": "url_launcher_web",
-      "version": "2.4.1",
+      "version": "2.4.2",
       "dependencies": [
         "flutter",
         "flutter_web_plugins",
@@ -862,20 +902,13 @@
       ]
     },
     {
-      "name": "flutter_web_plugins",
-      "version": "0.0.0",
-      "dependencies": [
-        "flutter"
-      ]
-    },
-    {
       "name": "mime",
       "version": "2.0.0",
       "dependencies": []
     },
     {
       "name": "cross_file",
-      "version": "0.3.5+1",
+      "version": "0.3.5+2",
       "dependencies": [
         "meta",
         "web"
@@ -953,7 +986,7 @@
     },
     {
       "name": "shared_preferences_android",
-      "version": "2.4.18",
+      "version": "2.4.21",
       "dependencies": [
         "flutter",
         "shared_preferences_platform_interface"
@@ -1009,7 +1042,7 @@
     },
     {
       "name": "source_span",
-      "version": "1.10.1",
+      "version": "1.10.2",
       "dependencies": [
         "collection",
         "path",
@@ -1017,12 +1050,33 @@
       ]
     },
     {
-      "name": "archive",
-      "version": "4.0.7",
+      "name": "petitparser",
+      "version": "7.0.2",
       "dependencies": [
-        "crypto",
+        "collection",
+        "meta"
+      ]
+    },
+    {
+      "name": "typed_data",
+      "version": "1.4.0",
+      "dependencies": [
+        "collection"
+      ]
+    },
+    {
+      "name": "archive",
+      "version": "4.0.9",
+      "dependencies": [
         "path",
         "posix"
+      ]
+    },
+    {
+      "name": "csslib",
+      "version": "1.0.2",
+      "dependencies": [
+        "source_span"
       ]
     },
     {
@@ -1059,14 +1113,6 @@
       ]
     },
     {
-      "name": "petitparser",
-      "version": "7.0.1",
-      "dependencies": [
-        "collection",
-        "meta"
-      ]
-    },
-    {
       "name": "url_launcher_macos",
       "version": "3.2.5",
       "dependencies": [
@@ -1076,7 +1122,7 @@
     },
     {
       "name": "url_launcher_ios",
-      "version": "6.3.6",
+      "version": "6.4.1",
       "dependencies": [
         "flutter",
         "url_launcher_platform_interface"
@@ -1107,13 +1153,6 @@
         "source_span",
         "string_scanner",
         "typed_data"
-      ]
-    },
-    {
-      "name": "csslib",
-      "version": "1.0.2",
-      "dependencies": [
-        "source_span"
       ]
     },
     {
@@ -1175,8 +1214,21 @@
       ]
     },
     {
+      "name": "objective_c",
+      "version": "9.3.0",
+      "dependencies": [
+        "code_assets",
+        "collection",
+        "ffi",
+        "hooks",
+        "logging",
+        "native_toolchain_c",
+        "pub_semver"
+      ]
+    },
+    {
       "name": "dbus",
-      "version": "0.7.11",
+      "version": "0.7.12",
       "dependencies": [
         "args",
         "ffi",
@@ -1193,7 +1245,7 @@
     },
     {
       "name": "posix",
-      "version": "6.0.3",
+      "version": "6.5.0",
       "dependencies": [
         "ffi",
         "meta",
@@ -1206,10 +1258,58 @@
       "dependencies": []
     },
     {
-      "name": "typed_data",
-      "version": "1.4.0",
+      "name": "pub_semver",
+      "version": "2.2.0",
       "dependencies": [
         "collection"
+      ]
+    },
+    {
+      "name": "native_toolchain_c",
+      "version": "0.17.6",
+      "dependencies": [
+        "code_assets",
+        "glob",
+        "hooks",
+        "logging",
+        "meta",
+        "pub_semver"
+      ]
+    },
+    {
+      "name": "logging",
+      "version": "1.3.0",
+      "dependencies": []
+    },
+    {
+      "name": "hooks",
+      "version": "1.0.2",
+      "dependencies": [
+        "collection",
+        "crypto",
+        "logging",
+        "meta",
+        "pub_semver",
+        "yaml"
+      ]
+    },
+    {
+      "name": "code_assets",
+      "version": "1.0.0",
+      "dependencies": [
+        "collection",
+        "hooks"
+      ]
+    },
+    {
+      "name": "glob",
+      "version": "2.1.3",
+      "dependencies": [
+        "async",
+        "collection",
+        "file",
+        "path",
+        "string_scanner"
       ]
     }
   ],
