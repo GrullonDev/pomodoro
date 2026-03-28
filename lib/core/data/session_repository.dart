@@ -33,6 +33,7 @@ class SessionRepository implements ISessionRepository {
   static const _wearableSupportKey = 'wearable_support_enabled';
   static const _biometricEnabledKey = 'biometric_enabled';
   static const _onboardingSeenKey = 'onboarding_seen';
+  static const _focusBlockEnabledKey = 'focus_block_notifications_enabled';
   // Stream for live daily goal remaining updates
   static final SessionRepository _singleton = SessionRepository._internal();
   factory SessionRepository() => _singleton;
@@ -314,6 +315,16 @@ class SessionRepository implements ISessionRepository {
   Future<bool> isBiometricEnabled() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getBool(_biometricEnabledKey) ?? false;
+  }
+
+  Future<void> setFocusBlockEnabled(bool enabled) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_focusBlockEnabledKey, enabled);
+  }
+
+  Future<bool> isFocusBlockEnabled() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_focusBlockEnabledKey) ?? false;
   }
 
   @override

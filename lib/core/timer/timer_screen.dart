@@ -146,7 +146,7 @@ class _TimerView extends StatefulWidget {
 class _TimerViewState extends State<_TimerView>
     with SingleTickerProviderStateMixin {
   int? _previousDndFilter;
-  bool _dndPromptShown = false;
+  bool _focusBlockEnabled = false;
   late final StreamSubscription<String> _actionSub;
   int _lastNotifSecond = -1; // throttling control
   int _lastHapticToggleStamp = 0;
@@ -177,58 +177,10 @@ class _TimerViewState extends State<_TimerView>
     _initPulse();
     // Preload sound assets via AudioService (best-effort)
     AudioService.instance.preload();
-    // Solicitar permisos DND en Android (best-effort). If not granted, show a
-    // friendly dialog offering to open settings or use an app-local silent mode.
-    if (Platform.isAndroid) {
-      Dnd.isPolicyGranted().then((granted) {
-        if (!granted && mounted && !_dndPromptShown) {
-          _dndPromptShown = true;
-          // Show after first frame so context is valid
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (!mounted) return;
-            showDialog<void>(
-              context: context,
-              barrierDismissible: true,
-              builder: (ctx) => AlertDialog(
-                title: const Text('Permiso de No Interrumpir'),
-                content: const Text(
-                    'Para silenciar todo el teléfono durante tus sesiones de trabajo, concede acceso al Modo No Interrumpir. Si prefieres no concederlo, puedes silenciar solo las notificaciones de la app.'),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      // Use app-level silent mode as fallback
-                      // Import NotificationService and set flag
-                      NotificationService.appSilentMode = true;
-                      Navigator.of(ctx).pop();
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                            content:
-                                Text('Modo silencioso de la app activado')),
-                      );
-                    },
-                    child: const Text('Usar modo silencioso de la app'),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(ctx).pop();
-                    },
-                    child: const Text('Recordar después'),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(ctx).pop();
-                      // Abrir ajustes de permiso DND
-                      Dnd.gotoPolicySettings();
-                    },
-                    child: const Text('Abrir ajustes'),
-                  ),
-                ],
-              ),
-            );
-          });
-        }
-      });
-    }
+    // Load focus-block preference; DND activation is gated on this flag.
+    _repo.isFocusBlockEnabled().then((enabled) {
+      if (mounted) _focusBlockEnabled = enabled;
+    });
     _repo.goalRemainingStream.listen((val) {
       if (mounted) setState(() => _todayGoalRemaining = val);
     });
@@ -265,7 +217,10 @@ class _TimerViewState extends State<_TimerView>
     if (Platform.isAndroid && _previousDndFilter != null) {
       Dnd.setInterruptionFilter(_previousDndFilter!);
       _previousDndFilter = null;
+      Dnd.stopForegroundService();
     }
+    // Always reset app-level silent mode on exit
+    NotificationService.appSilentMode = false;
     _actionSub.cancel();
     _pulseController?.dispose();
     _flashTimer?.cancel();
@@ -375,7 +330,8 @@ class _TimerViewState extends State<_TimerView>
                   // Activar DND al iniciar trabajo: capture previous filter once
                   if (state is TimerRunInProgress &&
                       state.phase == TimerPhase.work &&
-                      !state.paused) {
+                      !state.paused &&
+                      _focusBlockEnabled) {
                     if (Platform.isAndroid) {
                       // Only capture previous filter the first time we activate DND
                       if (_previousDndFilter == null) {
@@ -383,85 +339,39 @@ class _TimerViewState extends State<_TimerView>
                           _previousDndFilter = filter;
                           final granted = await Dnd.isPolicyGranted();
                           if (!granted) {
-                            // Can't change system DND without user permission: fallback
+                            // No system DND permission: use app-level silent fallback
                             NotificationService.appSilentMode = true;
-                            debugPrint(
-                                'DND policy not granted -> using appSilentMode fallback');
                             return;
                           }
                           // Set to silent only if not already silent
-                          if (filter != null &&
+                          if (filter == null ||
                               filter != Dnd.interruptionFilterNone) {
                             try {
                               await Dnd.setInterruptionFilter(
                                   Dnd.interruptionFilterNone);
-                              debugPrint(
-                                  'DND set to silent (previous=$filter)');
                             } catch (e) {
-                              debugPrint('Failed to set system DND: $e');
                               NotificationService.appSilentMode = true;
                             }
-                            // Start a minimal foreground service to reduce chance of
-                            // the OS killing the app while a long timer runs.
-                            Dnd.startForegroundService().then((ok) {
-                              if (ok) debugPrint('Foreground service started');
-                            });
-                          } else if (filter == null) {
-                            try {
-                              await Dnd.setInterruptionFilter(
-                                  Dnd.interruptionFilterNone);
-                              debugPrint(
-                                  'DND set to silent (previous unknown)');
-                            } catch (e) {
-                              debugPrint('Failed to set system DND: $e');
-                              NotificationService.appSilentMode = true;
-                            }
-                            // Try to pin the app while work session is active.
-                            Dnd.startLockTask().then((ok) {
-                              if (ok) {
-                                debugPrint('Lock task started');
-                              } else {
-                                debugPrint(
-                                    'Lock task not started or unsupported');
-                              }
-                            });
-                            // Also request a foreground service for persistence.
-                            Dnd.startForegroundService().then((ok) {
-                              if (ok) debugPrint('Foreground service started');
-                            });
-                          } else {
-                            debugPrint('DND already silent, nothing to do');
+                            Dnd.startForegroundService();
                           }
                         });
                       }
-                    } else if (Platform.isIOS) {
-                      // iOS: mostrar mensaje informativo
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                            content: Text(
-                                'Modo DND no soportado automáticamente en iOS.')),
-                      );
                     }
+                    // iOS: DND must be configured by the user via Shortcuts automation.
+                    // No action needed here; the user was guided in Settings.
                   }
                   // Restaurar DND al finalizar sesión
                   if (state is TimerCompleted) {
-                    if (Platform.isAndroid && _previousDndFilter != null) {
-                      Dnd.setInterruptionFilter(_previousDndFilter!).then((_) {
-                        debugPrint(
-                            'DND restored to $_previousDndFilter after completion');
-                      });
-                      _previousDndFilter = null;
-                      // Stop lock task on completion
-                      Dnd.stopLockTask().then((ok) {
-                        if (ok) {
-                          debugPrint('Lock task stopped after completion');
-                        }
-                      });
-                      // Stop foreground service when finished
-                      Dnd.stopForegroundService().then((ok) {
-                        if (ok) debugPrint('Foreground service stopped');
-                      });
+                    if (Platform.isAndroid) {
+                      if (_previousDndFilter != null) {
+                        Dnd.setInterruptionFilter(_previousDndFilter!);
+                        _previousDndFilter = null;
+                        Dnd.stopLockTask();
+                        Dnd.stopForegroundService();
+                      }
                     }
+                    // Reset app-level silent mode so future notifications work normally
+                    NotificationService.appSilentMode = false;
                   }
                   if (state is TimerRunInProgress) {
                     final sec = state.remaining;

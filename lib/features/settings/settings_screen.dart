@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 import 'package:pomodoro/core/data/preset_profile.dart';
@@ -8,6 +10,7 @@ import 'package:pomodoro/core/theme/theme_controller.dart';
 import 'package:pomodoro/core/timer/timer_screen.dart';
 import 'package:pomodoro/l10n/app_localizations.dart';
 import 'package:pomodoro/utils/audio_service.dart';
+import 'package:pomodoro/utils/dnd.dart';
 import 'package:pomodoro/core/auth/biometric_service.dart'; // Add import
 
 import 'package:pomodoro/features/integrations/calendar/calendar_service.dart';
@@ -39,6 +42,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool? _wearable;
   String? _focusTrack;
   bool? _biometricEnabled;
+  bool? _focusBlock;
+  bool _dndGranted = false;
 
   @override
   void initState() {
@@ -65,6 +70,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final kb = await _repo.isKeyboardShortcutsEnabled();
     final wear = await _repo.isWearableSupportEnabled();
     final bio = await _repo.isBiometricEnabled();
+    final focusBlock = await _repo.isFocusBlockEnabled();
+    final dndGranted = Platform.isAndroid ? await Dnd.isPolicyGranted() : false;
     // focus track
     try {
       _focusTrack = await AudioService.instance.getFocusTrack();
@@ -88,6 +95,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _wearable = wear;
         _focusTrack = _focusTrack;
         _biometricEnabled = bio;
+        _focusBlock = focusBlock;
+        _dndGranted = dndGranted;
       });
     }
   }
@@ -594,8 +603,348 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     setState(() => _wearable = v);
                   },
                 ),
+                const Divider(),
+                // ── Sección Concentración ──────────────────────────────────
+                ListTile(
+                  leading: Icon(Icons.do_not_disturb_on_rounded,
+                      color: scheme.primary),
+                  title: Text('Concentración',
+                      style: TextStyle(color: scheme.primary)),
+                  subtitle: Text(
+                    Platform.isAndroid
+                        ? 'Silencia todas las notificaciones del sistema durante las sesiones de trabajo'
+                        : 'Activa el modo Focus de iOS para bloquear distracciones',
+                    style: TextStyle(
+                        color: Theme.of(context)
+                            .textTheme
+                            .bodyMedium
+                            ?.color
+                            ?.withValues(alpha: 0.55),
+                        fontSize: 12),
+                  ),
+                ),
+                if (_focusBlock != null)
+                  SwitchListTile(
+                    secondary: Icon(
+                      Platform.isAndroid
+                          ? Icons.notifications_off_rounded
+                          : Icons.phone_iphone_rounded,
+                      color: (_focusBlock ?? false)
+                          ? scheme.primary
+                          : scheme.onSurface.withValues(alpha: 0.4),
+                    ),
+                    title: Text(
+                      'Bloquear notificaciones al enfocar',
+                      style: TextStyle(
+                          color:
+                              Theme.of(context).textTheme.bodyMedium?.color),
+                    ),
+                    subtitle: Text(
+                      Platform.isAndroid
+                          ? 'Activa el modo No Interrumpir automáticamente'
+                          : 'Configura el modo Focus de iOS vía Atajos',
+                      style: TextStyle(
+                          color: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.color
+                              ?.withValues(alpha: 0.55)),
+                    ),
+                    value: _focusBlock!,
+                    activeColor: scheme.primary,
+                    onChanged: (v) async {
+                      await _repo.setFocusBlockEnabled(v);
+                      setState(() => _focusBlock = v);
+                      if (v && Platform.isAndroid) {
+                        // Si activó y no tiene permiso DND, ofrecer abrirlo
+                        final granted = await Dnd.isPolicyGranted();
+                        setState(() => _dndGranted = granted);
+                        if (!granted && mounted) {
+                          _showAndroidDndPermissionDialog();
+                        }
+                      } else if (v && Platform.isIOS) {
+                        if (mounted) _showIosFocusGuide();
+                      }
+                    },
+                  ),
+                // Android: estado del permiso DND
+                if (Platform.isAndroid && (_focusBlock ?? false))
+                  ListTile(
+                    leading: Icon(
+                      _dndGranted
+                          ? Icons.verified_rounded
+                          : Icons.warning_amber_rounded,
+                      color: _dndGranted ? Colors.green : Colors.orange,
+                    ),
+                    title: Text(
+                      _dndGranted
+                          ? 'Permiso No Interrumpir concedido'
+                          : 'Permiso No Interrumpir requerido',
+                      style: TextStyle(
+                          color:
+                              Theme.of(context).textTheme.bodyMedium?.color),
+                    ),
+                    subtitle: Text(
+                      _dndGranted
+                          ? 'Tu teléfono se silenciará automáticamente al iniciar el timer'
+                          : 'Sin este permiso se usará el modo silencioso de la app',
+                      style: TextStyle(
+                          color: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.color
+                              ?.withValues(alpha: 0.55)),
+                    ),
+                    trailing: _dndGranted
+                        ? null
+                        : TextButton(
+                            onPressed: () async {
+                              await Dnd.gotoPolicySettings();
+                              // Re-check after returning
+                              await Future.delayed(
+                                  const Duration(milliseconds: 500));
+                              final granted = await Dnd.isPolicyGranted();
+                              if (mounted) {
+                                setState(() => _dndGranted = granted);
+                              }
+                            },
+                            child: const Text('Conceder'),
+                          ),
+                  ),
+                // iOS: botón para ver la guía de configuración
+                if (Platform.isIOS && (_focusBlock ?? false))
+                  ListTile(
+                    leading: const Icon(Icons.info_outline_rounded,
+                        color: Colors.blue),
+                    title: Text(
+                      'Cómo configurar el modo Focus',
+                      style: TextStyle(
+                          color:
+                              Theme.of(context).textTheme.bodyMedium?.color),
+                    ),
+                    subtitle: Text(
+                      'iOS no permite activar Focus automáticamente, pero puedes configurarlo con la app Atajos',
+                      style: TextStyle(
+                          color: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.color
+                              ?.withValues(alpha: 0.55)),
+                    ),
+                    trailing: TextButton(
+                      onPressed: _showIosFocusGuide,
+                      child: const Text('Ver guía'),
+                    ),
+                  ),
               ],
             ),
+    );
+  }
+
+  void _showAndroidDndPermissionDialog() {
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Permiso No Interrumpir'),
+        content: const Text(
+          'Para silenciar todas las notificaciones del teléfono durante tus sesiones de trabajo, necesitas conceder acceso al modo No Interrumpir.\n\nSin este permiso, solo se silenciarán las notificaciones de esta app.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Ahora no'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              Navigator.of(ctx).pop();
+              await Dnd.gotoPolicySettings();
+              await Future.delayed(const Duration(milliseconds: 600));
+              final granted = await Dnd.isPolicyGranted();
+              if (mounted) setState(() => _dndGranted = granted);
+            },
+            child: const Text('Abrir ajustes'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showIosFocusGuide() {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => DraggableScrollableSheet(
+        initialChildSize: 0.65,
+        maxChildSize: 0.92,
+        minChildSize: 0.4,
+        expand: false,
+        builder: (_, controller) => ListView(
+          controller: controller,
+          padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 20),
+                decoration: BoxDecoration(
+                  color: Colors.grey.withValues(alpha: 0.4),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const Row(
+              children: [
+                Icon(Icons.do_not_disturb_on_rounded,
+                    color: Colors.purple, size: 28),
+                SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Bloquear distracciones en iOS',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'iOS no permite que las apps activen el modo Focus automáticamente por seguridad. Usa la app Atajos para hacerlo de forma automática.',
+              style: TextStyle(
+                color: Theme.of(ctx)
+                    .textTheme
+                    .bodyMedium
+                    ?.color
+                    ?.withValues(alpha: 0.65),
+              ),
+            ),
+            const SizedBox(height: 24),
+            _iosGuideStep(
+              number: '1',
+              icon: Icons.phone_iphone_rounded,
+              title: 'Activa un modo Focus',
+              description:
+                  'Ve a Ajustes > Focus y crea o activa un modo llamado "Trabajo" o usa "No Molestar".',
+            ),
+            _iosGuideStep(
+              number: '2',
+              icon: Icons.cut_rounded,
+              title: 'Abre la app Atajos',
+              description:
+                  'Busca "Atajos" en tu iPhone. Si no la tienes, descárgala gratis desde el App Store.',
+            ),
+            _iosGuideStep(
+              number: '3',
+              icon: Icons.add_circle_outline_rounded,
+              title: 'Crea un Atajo de Automatización',
+              description:
+                  'Toca "Automatización" → "Nueva automatización" → "App" → selecciona Pomodoro → "Se abre".',
+            ),
+            _iosGuideStep(
+              number: '4',
+              icon: Icons.do_not_disturb_on_outlined,
+              title: 'Añade la acción "Activar Focus"',
+              description:
+                  'Busca la acción "Activar/desactivar modo Focus", elige tu modo (ej: Trabajo) y ponlo en "Activar".',
+            ),
+            _iosGuideStep(
+              number: '5',
+              icon: Icons.close_rounded,
+              title: 'Desactivar al cerrar',
+              description:
+                  'Repite el paso 3 pero elige "Se cierra" y añade la misma acción con "Desactivar".',
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.blue.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.blue.withValues(alpha: 0.3)),
+              ),
+              child: const Row(
+                children: [
+                  Icon(Icons.lightbulb_outline_rounded,
+                      color: Colors.blue, size: 20),
+                  SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'Con esto, cada vez que abras Pomodoro, iOS activará automáticamente tu modo Focus silenciando todas las apps.',
+                      style: TextStyle(fontSize: 13),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+            FilledButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text('Entendido'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _iosGuideStep({
+    required String number,
+    required IconData icon,
+    required String title,
+    required String description,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 32,
+            height: 32,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.15),
+              shape: BoxShape.circle,
+            ),
+            child: Text(number,
+                style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.primary)),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(icon,
+                        size: 16,
+                        color: Theme.of(context).colorScheme.primary),
+                    const SizedBox(width: 6),
+                    Text(title,
+                        style: const TextStyle(fontWeight: FontWeight.w600)),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  description,
+                  style: TextStyle(
+                    color: Theme.of(context)
+                        .textTheme
+                        .bodyMedium
+                        ?.color
+                        ?.withValues(alpha: 0.65),
+                    fontSize: 13,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
