@@ -18,8 +18,8 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Cargar locale guardado (solo se dispara una vez; si ya está cargado no hace nada)
     LocaleController.instance.load();
+    
     ThemeData buildDark() {
       const bg = Color(0xFF0B0B14);
       const surface = Color(0xFF13131F);
@@ -217,59 +217,66 @@ class MyApp extends StatelessWidget {
               upgrader: Upgrader(
                 messages: UpgraderMessages(code: 'es'),
               ),
-              child: FutureBuilder<bool>(
-                future: SessionRepository().isOnboardingSeen(),
-                builder: (context, snap) {
-                  if (!snap.hasData) {
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  }
-
-                  final seen = snap.data ?? false;
-                  if (!seen) {
-                    return AnimatedGradientShell(
-                      child: OnboardingScreen(
-                        onGetStarted: () async {
-                          await SessionRepository().setOnboardingSeen();
-                          // Sign in anonymously (guest mode) — stream will
-                          // rebuild to HomePage automatically.
-                          await AuthService.instance.signInAnonymously();
-                        },
-                        onSkip: () async {
-                          await SessionRepository().setOnboardingSeen();
-                          await AuthService.instance.signInAnonymously();
-                        },
-                      ),
-                    );
-                  }
-
-                  // If onboarding completed, auto-sign in as guest and show
-                  // the dashboard.  LoginScreen is accessed only when the user
-                  // explicitly wants to save / sync their progress.
-                  return StreamBuilder<String?>(
-                    stream: AuthService.instance.uidChanges(),
-                    builder: (context, authSnap) {
-                      final uid = authSnap.data;
-
-                      // No active session → sign in anonymously (guest mode).
-                      if (uid == null) {
-                        AuthService.instance.signInAnonymously();
-                        return const AnimatedGradientShell(
-                          child: _LoadingScreen(),
-                        );
-                      }
-
-                      return const AnimatedGradientShell(
-                        child: HomePage(),
-                      );
-                    },
-                  );
-                },
-              ),
+              child: const _OnboardingWrapper(),
             ),
           ),
         );
+      },
+    );
+  }
+}
+
+class _OnboardingWrapper extends StatefulWidget {
+  const _OnboardingWrapper();
+  @override
+  State<_OnboardingWrapper> createState() => _OnboardingWrapperState();
+}
+
+class _OnboardingWrapperState extends State<_OnboardingWrapper> {
+  bool? _seen;
+
+  @override
+  void initState() {
+    super.initState();
+    _check();
+  }
+
+  Future<void> _check() async {
+    final s = await SessionRepository().isOnboardingSeen();
+    if (mounted) setState(() => _seen = s);
+  }
+
+  Future<void> _complete() async {
+    await SessionRepository().setOnboardingSeen();
+    // Re-check authentication. Anonymous login is needed to enter HomePage.
+    await AuthService.instance.signInAnonymously();
+    if (mounted) setState(() => _seen = true);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_seen == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (!_seen!) {
+      return AnimatedGradientShell(
+        child: OnboardingScreen(
+          onGetStarted: _complete,
+          onSkip: _complete,
+        ),
+      );
+    }
+
+    return StreamBuilder<String?>(
+      stream: AuthService.instance.uidChanges(),
+      builder: (context, authSnap) {
+        final uid = authSnap.data;
+        if (uid == null) {
+          AuthService.instance.signInAnonymously();
+          return const AnimatedGradientShell(child: _LoadingScreen());
+        }
+        return const AnimatedGradientShell(child: HomePage());
       },
     );
   }
@@ -292,7 +299,6 @@ class _AnimatedGradientShellState extends State<AnimatedGradientShell>
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bg = isDark ? const Color(0xFF0B0B14) : const Color(0xFFF5F4FF);
-    // Subtle accent glow color
     const glowColor = Color(0xFF7C6FF7);
 
     return AnimatedBuilder(
@@ -302,7 +308,6 @@ class _AnimatedGradientShellState extends State<AnimatedGradientShell>
           fit: StackFit.expand,
           children: [
             Container(color: bg),
-            // Subtle top-right glow that gently breathes
             IgnorePointer(
               child: Container(
                 decoration: BoxDecoration(
@@ -332,10 +337,8 @@ class _AnimatedGradientShellState extends State<AnimatedGradientShell>
   }
 }
 
-/// Shown briefly while anonymous sign-in is in progress.
 class _LoadingScreen extends StatelessWidget {
   const _LoadingScreen();
-
   @override
   Widget build(BuildContext context) {
     return const Scaffold(

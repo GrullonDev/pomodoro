@@ -57,6 +57,15 @@ flutter_launcher_icons:
   adaptive_icon_foreground: assets/launcher/app_icon.png
   remove_alpha_ios: true
 
+# Splash screen generation config
+flutter_native_splash:
+  color: "#0F1115"
+  image: assets/launcher/splash_logo.png
+  android_12:
+    image: assets/launcher/splash_logo.png
+    color: "#0F1115"
+  fullscreen: true
+
 flutter:
   uses-material-design: true
   generate: true
