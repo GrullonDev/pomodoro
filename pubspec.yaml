@@ -35,6 +35,7 @@ dependencies:
   local_auth: ^3.0.0
   device_calendar: ^4.3.2
   upgrader: ^12.3.0
+  google_fonts: ^6.2.1
 
 
 dev_dependencies:
@@ -50,7 +51,7 @@ flutter_launcher_icons:
   android: true
   ios: true
   image_path: assets/launcher/app_icon.png
-  adaptive_icon_background: "#0F2027" # fallback background color
+  adaptive_icon_background: "#121212" # Matching the charcoal background of the logo
   adaptive_icon_foreground: assets/launcher/app_icon.png
   remove_alpha_ios: true
 
@@ -64,3 +65,5 @@ flutter:
     - assets/sounds/cronometro.mp3
     - assets/sounds/
     - assets/terms_privacy.md
+    - assets/onboarding/
+    - assets/launcher/app_icon.png

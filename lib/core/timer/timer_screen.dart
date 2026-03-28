@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 
 // ignore_for_file: use_build_context_synchronously
 import 'package:flutter/material.dart';
@@ -7,21 +8,21 @@ import 'package:flutter/services.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:pomodoro/core/data/preset_profile.dart';
 import 'package:pomodoro/core/data/session_repository.dart';
 import 'package:pomodoro/core/data/task_repository.dart';
-import 'package:pomodoro/core/di/service_locator.dart';
 import 'package:pomodoro/core/domain/entities/task.dart';
 import 'package:pomodoro/core/timer/ticker.dart';
 import 'package:pomodoro/core/timer/timer_action_bus.dart';
 import 'package:pomodoro/core/timer/timer_bloc.dart';
+import 'package:pomodoro/features/breaks/break_activity.dart';
+import 'package:pomodoro/features/focus_modes/focus_mode.dart';
+import 'package:pomodoro/features/momentum/momentum_service.dart';
 import 'package:pomodoro/features/summary/session_summary_screen.dart';
 import 'package:pomodoro/l10n/app_localizations.dart';
 // audio handled by AudioService singleton
 import 'package:pomodoro/utils/audio_service.dart';
 import 'package:pomodoro/utils/dnd.dart';
 import 'package:pomodoro/utils/notifications/notifications.dart';
-import 'package:pomodoro/utils/glass_container.dart';
 import 'package:pomodoro/utils/app.dart';
 import 'package:pomodoro/features/gamification/gamification_service.dart';
 import 'package:pomodoro/features/integrations/calendar/calendar_service.dart';
@@ -30,57 +31,48 @@ class TimerScreen extends StatelessWidget {
   final int workMinutes;
   final int breakMinutes;
   final int sessions;
-  final TaskItem? task; // tarea asociada (opcional)
-  const TimerScreen(
-      {super.key,
-      required this.workMinutes,
-      required this.breakMinutes,
-      required this.sessions,
-      this.task});
+  final TaskItem? task;
+  final FocusMode? focusMode;
+
+  const TimerScreen({
+    super.key,
+    required this.workMinutes,
+    required this.breakMinutes,
+    required this.sessions,
+    this.task,
+    this.focusMode,
+  });
 
   @override
   Widget build(BuildContext context) {
-    // Resolve selected preset asynchronously and fall back to provided values
-    return FutureBuilder<String?>(
-      future: ServiceLocator.I.settingsRepository.getSelectedPreset(),
-      builder: (ctx, snap) {
-        int work = workMinutes;
-        int br = breakMinutes;
-        if (snap.hasData && snap.data != null) {
-          final key = snap.data!;
-          if (key != 'custom') {
-            final p = PresetProfile.defaults().firstWhere((e) => e.key == key,
-                orElse: () => PresetProfile.custom);
-            work = p.workMinutes;
-            br = p.shortBreakMinutes;
-          }
-        }
-        final workSeconds = work * 60;
-        final breakSeconds = br * 60;
-        return BlocProvider(
-          create: (_) => TimerBloc(
-            ticker: const Ticker(),
-            repository: SessionRepository(),
-            onTaskCycleCompleted: task == null
-                ? null
-                : () async {
-                    final repo = TaskRepository();
-                    if (task!.id.isNotEmpty) {
-                      // marcar completada (ya terminó todas sus sesiones)
-                      await repo.markDone(task!.id);
-                    }
-                  },
-          )..add(TimerStarted(
-              phase: TimerPhase.work,
-              duration: workSeconds,
-              workDuration: workSeconds,
-              breakDuration: breakSeconds,
-              session: 1,
-              totalSessions: task?.sessions ?? sessions,
-            )),
-          child: const _TimerView(),
-        );
-      },
+    final effectiveMode = focusMode ?? FocusMode.sprint;
+    final workSeconds = workMinutes * 60;
+    final breakSeconds = breakMinutes * 60;
+
+    return BlocProvider(
+      create: (_) => TimerBloc(
+        ticker: const Ticker(),
+        repository: SessionRepository(),
+        onTaskCycleCompleted: task == null
+            ? null
+            : () async {
+                final repo = TaskRepository();
+                if (task!.id.isNotEmpty) {
+                  await repo.markDone(task!.id);
+                }
+              },
+      )..add(TimerStarted(
+          phase: TimerPhase.work,
+          duration: workSeconds,
+          workDuration: workSeconds,
+          breakDuration: breakSeconds,
+          session: 1,
+          totalSessions: task?.sessions ?? sessions,
+        )),
+      child: _TimerView(
+        focusMode: effectiveMode,
+        taskTitle: task?.title,
+      ),
     );
   }
 }
@@ -142,7 +134,11 @@ class TaskFlowStarter {
 }
 
 class _TimerView extends StatefulWidget {
-  const _TimerView();
+  final FocusMode focusMode;
+  final String? taskTitle;
+
+  const _TimerView({required this.focusMode, this.taskTitle});
+
   @override
   State<_TimerView> createState() => _TimerViewState();
 }
@@ -324,11 +320,11 @@ class _TimerViewState extends State<_TimerView>
 
   @override
   Widget build(BuildContext context) {
-    // Flash overlay logic
+    final phaseColor = widget.focusMode.color;
     final flashOverlay = _flashing
         ? IgnorePointer(
             child: Container(
-            color: Colors.greenAccent.withValues(alpha: 0.15),
+            color: phaseColor.withValues(alpha: 0.12),
           ))
         : const SizedBox.shrink();
 
@@ -338,23 +334,33 @@ class _TimerViewState extends State<_TimerView>
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
-          title: Text(AppLocalizations.of(context).appTitle,
-              style: TextStyle(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .onSurface
-                      .withValues(alpha: 0.9),
-                  fontWeight: FontWeight.bold,
-                  fontSize: 22)),
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back_ios_new_rounded,
+                size: 18,
+                color: Theme.of(context)
+                    .colorScheme
+                    .onSurface
+                    .withValues(alpha: 0.6)),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          title: Text(
+            widget.focusMode.name,
+            style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface,
+                fontWeight: FontWeight.w700,
+                fontSize: 16),
+          ),
           centerTitle: true,
           actions: [
             IconButton(
-              icon: Icon(Icons.refresh,
+              icon: Icon(Icons.refresh_rounded,
+                  size: 20,
                   color: Theme.of(context)
                       .colorScheme
                       .onSurface
-                      .withValues(alpha: 0.7)),
+                      .withValues(alpha: 0.5)),
               onPressed: () => context.read<TimerBloc>().add(TimerReset()),
+              tooltip: 'Reiniciar',
             )
           ],
         ),
@@ -520,18 +526,18 @@ class _TimerViewState extends State<_TimerView>
                     _stopTicking();
                     final totalSessions = state.totalSessions;
                     final workDur = state.workDuration;
+                    final xpEarned = (workDur / 60 * state.session).round();
+                    GamificationService.instance.awardXP(xpEarned);
+                    MomentumService.instance.recordSessionToday();
                     Navigator.of(context).pushReplacement(
                       MaterialPageRoute(
                         builder: (_) => SessionSummaryScreen(
                           totalSessions: totalSessions,
                           workMinutesPerSession: workDur ~/ 60,
-                          earnedXP: (workDur / 60 * state.session).round(),
+                          earnedXP: xpEarned,
                         ),
                       ),
                     );
-                    final xpEarned = (workDur / 60 * state.session)
-                        .round(); // Minimal simple XP logic
-                    GamificationService.instance.awardXP(xpEarned);
 
                     // Calendar Export Integration
                     final endTime = DateTime.now();
@@ -585,210 +591,152 @@ class _TimerViewState extends State<_TimerView>
                         ? state.remaining / state.workDuration
                         : state.remaining / state.breakDuration;
                     final remaining = state.remaining;
-                    final phaseText = isWork
-                        ? loc.workPhase(state.session, state.totalSessions)
-                        : loc.breakPhase;
+                    final phaseLabel = isWork
+                        ? '${widget.focusMode.emoji}  ${widget.focusMode.name}'
+                        : '☕  Descanso';
+                    final sessionLabel =
+                        'Sesión ${state.session} de ${state.totalSessions}';
 
-                    return OrientationBuilder(builder: (context, orientation) {
-                      // Colors for glassmorphism
-                      const accentBase = Colors.greenAccent;
-                      final alertColor = isWork
-                          ? Color.lerp(accentBase, Colors.orangeAccent,
-                              (1 - percent).clamp(0, 1))!
-                          : accentBase;
+                    final phaseColor = isWork
+                        ? widget.focusMode.color
+                        : const Color(0xFF4ECDC4);
 
-                      _initPulse(); // ensure after hot reload
-                      final pulseVal = _pulseController?.value ?? 0.0;
-                      Widget ring = _ProgressRing(
-                        percent: percent,
-                        color: alertColor,
-                        pulseFactor: isWork ? pulseVal : 0.0,
-                      );
+                    _initPulse();
+                    final pulseVal = _pulseController?.value ?? 0.0;
 
-                      Widget timeCol = Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Hero(
-                            tag: 'timerHero',
-                            child: AnimatedSwitcher(
-                              duration: const Duration(milliseconds: 350),
-                              transitionBuilder: (child, anim) =>
-                                  FadeTransition(
-                                opacity: anim,
-                                child: ScaleTransition(
-                                    scale: Tween(begin: 0.95, end: 1.0)
-                                        .animate(anim),
-                                    child: child),
-                              ),
-                              child: Text(
-                                _format(remaining),
-                                key: ValueKey(remaining),
-                                style: TextStyle(
-                                    fontSize:
-                                        orientation == Orientation.portrait
-                                            ? 80
-                                            : 72, // Larger font
-                                    color:
-                                        Theme.of(context).colorScheme.onSurface,
-                                    fontWeight:
-                                        FontWeight.w200, // Thinner, modern look
-                                    letterSpacing: -2,
-                                    shadows: [
-                                      Shadow(
-                                          blurRadius: 10,
-                                          color: alertColor.withValues(alpha: 0.5))
-                                    ]),
-                              ),
+                    return Column(
+                      children: [
+                        const SizedBox(height: 8),
+
+                        // Phase header pill
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 7),
+                          decoration: BoxDecoration(
+                            color: phaseColor.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                                color: phaseColor.withValues(alpha: 0.4),
+                                width: 1),
+                          ),
+                          child: AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 300),
+                            child: Text(
+                              phaseLabel,
+                              key: ValueKey(state.phase),
+                              style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w700,
+                                  color: phaseColor,
+                                  letterSpacing: 0.3),
                             ),
                           ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(sessionLabel,
+                            style: TextStyle(
+                                fontSize: 12,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurface
+                                    .withValues(alpha: 0.4))),
+
+                        // Orb + time
+                        Expanded(
+                          child: Center(
+                            child: _FocusOrb(
+                              percent: percent,
+                              timeText: _format(remaining),
+                              color: phaseColor,
+                              pulseFactor: pulseVal,
+                              paused: state.paused,
+                            ),
+                          ),
+                        ),
+
+                        // Goal progress
+                        if (_todayGoalRemaining >= 0 && _dailyGoalMinutes > 0)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 24),
+                            child: _GoalProgressBar(
+                              goalMinutes: _dailyGoalMinutes,
+                              remaining: _todayGoalRemaining,
+                              color: phaseColor,
+                            ),
+                          ),
+
+                        // Task title (if assigned)
+                        if (widget.taskTitle != null) ...[
                           const SizedBox(height: 8),
-                          GlassContainer(
-                            // Glass pill for phase
-                            borderRadius: 20,
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 6),
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onSurface
-                                .withValues(alpha: 0.1),
-                            child: AnimatedSwitcher(
-                              duration: const Duration(milliseconds: 300),
-                              child: Text(
-                                phaseText,
-                                key: ValueKey(state.phase.toString() +
-                                    state.session.toString()),
-                                style: TextStyle(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onSurface
-                                        .withValues(alpha: 0.9),
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w500,
-                                    letterSpacing: 0.5),
-                              ),
+                          Text(
+                            widget.taskTitle!,
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurface
+                                  .withValues(alpha: 0.5),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+
+                        const SizedBox(height: 20),
+
+                        // Break activity suggestion
+                        if (!isWork)
+                          Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 24),
+                            child: _BreakActivityCard(
+                              activity: BreakActivity.forBreakMinutes(
+                                  state.breakDuration ~/ 60),
+                              color: phaseColor,
                             ),
                           ),
-                          const SizedBox(height: 20),
-                          if (_todayGoalRemaining >= 0 && _dailyGoalMinutes > 0)
-                            _GoalProgressBar(
-                                goalMinutes: _dailyGoalMinutes,
-                                remaining: _todayGoalRemaining),
-                        ],
-                      );
 
-                      final buttons = Wrap(
-                        spacing: 20,
-                        runSpacing: 16,
-                        alignment: WrapAlignment.center,
-                        children: [
-                          _TimerButton(
-                            icon: state.paused
-                                ? Icons.play_arrow_rounded
-                                : Icons.pause_rounded,
-                            label: state.paused ? loc.resume : loc.pause,
-                            onTap: () => context.read<TimerBloc>().add(
-                                state.paused ? TimerResumed() : TimerPaused()),
-                            color: alertColor,
-                          ),
-                          _TimerButton(
-                            icon: Icons.skip_next_rounded,
-                            label: loc.skip,
-                            onTap: () => context
-                                .read<TimerBloc>()
-                                .add(TimerPhaseCompleted()),
-                            color:
-                                alertColor, // secondary button style could be different
-                          ),
-                        ],
-                      );
+                        const SizedBox(height: 20),
 
-                      if (orientation == Orientation.portrait) {
-                        return Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Expanded(
-                                flex: 5,
-                                child: Center(
-                                    child: Stack(
-                                  alignment: Alignment.center,
-                                  children: [
-                                    // Glow behind
-                                    Container(
-                                      width: 200,
-                                      height: 200,
-                                      decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          boxShadow: [
-                                            BoxShadow(
-                                                color:
-                                                    alertColor.withValues(alpha: 0.2),
-                                                blurRadius: 60,
-                                                spreadRadius: 10)
-                                          ]),
-                                    ),
-                                    ring
-                                  ],
-                                ))),
-                            Expanded(flex: 4, child: timeCol),
-                            Expanded(flex: 3, child: buttons),
-                          ],
-                        );
-                      } else {
-                        // Landscape
-                        return Padding(
+                        // Buttons
+                        Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 32),
                           child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Expanded(child: Center(child: ring)),
                               Expanded(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    timeCol,
-                                    const SizedBox(height: 30),
-                                    buttons,
-                                  ],
+                                child: _ActionButton(
+                                  icon: state.paused
+                                      ? Icons.play_arrow_rounded
+                                      : Icons.pause_rounded,
+                                  label: state.paused
+                                      ? loc.resume
+                                      : loc.pause,
+                                  color: phaseColor,
+                                  primary: true,
+                                  onTap: () => context.read<TimerBloc>().add(
+                                      state.paused
+                                          ? TimerResumed()
+                                          : TimerPaused()),
                                 ),
+                              ),
+                              const SizedBox(width: 12),
+                              _ActionButton(
+                                icon: Icons.skip_next_rounded,
+                                label: loc.skip,
+                                color: phaseColor,
+                                primary: false,
+                                onTap: () => context
+                                    .read<TimerBloc>()
+                                    .add(TimerPhaseCompleted()),
                               ),
                             ],
                           ),
-                        );
-                      }
-                    });
-                  } else if (state is TimerCompleted) {
-                    return Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.celebration_rounded,
-                            color: Theme.of(context).colorScheme.onSurface,
-                            size: 80),
+                        ),
                         const SizedBox(height: 24),
-                        Text(
-                            '¡Listo! Tiempo total ${(state.workDuration / 60 * state.totalSessions).round()}m',
-                            style: TextStyle(
-                                color: Theme.of(context).colorScheme.onSurface,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold)),
-                        const SizedBox(height: 40),
-                        GlassContainer(
-                          borderRadius: 30,
-                          child: TextButton(
-                            onPressed: () => Navigator.of(context).pop(),
-                            child: Padding(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 24, vertical: 8),
-                              child: Text('Terminar',
-                                  style: TextStyle(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onSurface,
-                                      fontSize: 16)),
-                            ),
-                          ),
-                        )
                       ],
                     );
+                  } else if (state is TimerCompleted) {
+                    return const SizedBox(); // navegamos via listener
                   }
                   return const SizedBox();
                 },
@@ -817,122 +765,313 @@ class _TimerViewState extends State<_TimerView>
   }
 }
 
-class _TimerButton extends StatelessWidget {
+// ─────────────────────────────────────────────────────────────────────────────
+// New visual widgets
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _FocusOrb extends StatelessWidget {
+  final double percent;
+  final String timeText;
+  final Color color;
+  final double pulseFactor;
+  final bool paused;
+
+  const _FocusOrb({
+    required this.percent,
+    required this.timeText,
+    required this.color,
+    required this.pulseFactor,
+    required this.paused,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : const Color(0xFF1A1A2E);
+    final pulse = paused ? 1.0 : (0.96 + pulseFactor * 0.04);
+    final orbSize = 220.0 * pulse;
+
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        // Outer glow
+        Container(
+          width: orbSize + 40,
+          height: orbSize + 40,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: color.withValues(alpha: paused ? 0.08 : 0.18),
+                blurRadius: 60,
+                spreadRadius: 20,
+              ),
+            ],
+          ),
+        ),
+        // Progress arc
+        SizedBox(
+          width: orbSize,
+          height: orbSize,
+          child: CustomPaint(
+            painter: _OrbPainter(
+              percent: percent,
+              color: color,
+              isDark: isDark,
+            ),
+          ),
+        ),
+        // Time text
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              transitionBuilder: (child, anim) => FadeTransition(
+                opacity: anim,
+                child: ScaleTransition(
+                  scale:
+                      Tween(begin: 0.92, end: 1.0).animate(anim),
+                  child: child,
+                ),
+              ),
+              child: Text(
+                timeText,
+                key: ValueKey(timeText),
+                style: TextStyle(
+                  fontSize: 60,
+                  fontWeight: FontWeight.w300,
+                  color: textColor,
+                  letterSpacing: -2,
+                ),
+              ),
+            ),
+            if (paused) ...[
+              const SizedBox(height: 4),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text('PAUSADO',
+                    style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                        color: color,
+                        letterSpacing: 1.5)),
+              ),
+            ]
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _OrbPainter extends CustomPainter {
+  final double percent;
+  final Color color;
+  final bool isDark;
+
+  _OrbPainter({
+    required this.percent,
+    required this.color,
+    required this.isDark,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = (size.width / 2) - 8;
+
+    // Track
+    final trackPaint = Paint()
+      ..color = color.withValues(alpha: isDark ? 0.1 : 0.08)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 6
+      ..strokeCap = StrokeCap.round;
+    canvas.drawCircle(center, radius, trackPaint);
+
+    // Progress arc
+    final arcPaint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 6
+      ..strokeCap = StrokeCap.round;
+
+    final sweep = 2 * pi * percent;
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: radius),
+      -pi / 2,
+      sweep,
+      false,
+      arcPaint,
+    );
+
+    // Inner subtle fill
+    final fillPaint = Paint()
+      ..color = color.withValues(alpha: isDark ? 0.06 : 0.04)
+      ..style = PaintingStyle.fill;
+    canvas.drawCircle(center, radius - 3, fillPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _OrbPainter old) =>
+      old.percent != percent || old.color != color;
+}
+
+class _ActionButton extends StatelessWidget {
   final IconData icon;
   final String label;
   final VoidCallback onTap;
   final Color color;
-  const _TimerButton(
-      {required this.icon,
-      required this.label,
-      required this.onTap,
-      required this.color});
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-        onTap: onTap,
-        child: GlassContainer(
-          borderRadius: 30,
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          color: Colors.white.withValues(alpha: 0.1),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, color: Colors.white, size: 22),
-              const SizedBox(width: 12),
-              Text(label.toUpperCase(),
-                  style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1.2,
-                      fontSize: 14))
-            ],
-          ),
-        ));
-  }
-}
+  final bool primary;
 
-class _ProgressRing extends StatelessWidget {
-  final double percent;
-  final Color color;
-  final double pulseFactor; // 0..1 (value of controller)
-  const _ProgressRing(
-      {required this.percent, required this.color, required this.pulseFactor});
+  const _ActionButton({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    required this.color,
+    required this.primary,
+  });
+
   @override
   Widget build(BuildContext context) {
-    final pulse = pulseFactor > 0 ? (0.95 + (pulseFactor * 0.05)) : 1.0;
-    final size = 200.0 * pulse;
-    return SizedBox(
-      width: size,
-      height: size,
-      child: CustomPaint(
-        painter: _RingPainter(percent: percent, color: color),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bg = primary
+        ? color
+        : (isDark
+            ? color.withValues(alpha: 0.12)
+            : color.withValues(alpha: 0.08));
+    final fgColor = primary ? Colors.white : color;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 52,
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: BorderRadius.circular(14),
+          border: primary
+              ? null
+              : Border.all(color: color.withValues(alpha: 0.3)),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: fgColor, size: 20),
+            const SizedBox(width: 8),
+            Text(
+              label.toUpperCase(),
+              style: TextStyle(
+                  color: fgColor,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 12,
+                  letterSpacing: 1.0),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
-class _RingPainter extends CustomPainter {
-  final double percent;
-  final Color color;
-  _RingPainter({required this.percent, required this.color});
-  @override
-  void paint(Canvas canvas, Size size) {
-    final stroke = size.width * 0.06;
-    final rect = Offset.zero & size;
-    final c = rect.center;
-    final radius = (size.width - stroke) / 2;
-    final bg = Paint()
-      ..color = color.withValues(alpha: 0.12)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = stroke;
-    final fg = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round
-      ..strokeWidth = stroke;
-    canvas.drawCircle(c, radius, bg);
-    final sweep = 2 * 3.141592653589793 * percent;
-    canvas.drawArc(Rect.fromCircle(center: c, radius: radius),
-        -3.141592653589793 / 2, sweep, false, fg);
-  }
-
-  @override
-  bool shouldRepaint(covariant _RingPainter old) =>
-      old.percent != percent || old.color != color;
-}
-
 class _GoalProgressBar extends StatelessWidget {
   final int goalMinutes;
   final int remaining;
-  const _GoalProgressBar({required this.goalMinutes, required this.remaining});
+  final Color color;
+
+  const _GoalProgressBar({
+    required this.goalMinutes,
+    required this.remaining,
+    required this.color,
+  });
+
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final done = (goalMinutes - remaining).clamp(0, goalMinutes);
     final pct = goalMinutes == 0 ? 0.0 : done / goalMinutes;
+    final subColor =
+        isDark ? const Color(0xFF8A8AB0) : const Color(0xFF6B6B8A);
 
-    return GlassContainer(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      borderRadius: 12,
-      color: Colors.white.withValues(alpha: 0.05),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
+    return Column(
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(4),
+          child: LinearProgressIndicator(
+            minHeight: 4,
+            value: pct.clamp(0.0, 1.0),
+            backgroundColor: color.withValues(alpha: 0.12),
+            valueColor: AlwaysStoppedAnimation(color),
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          AppLocalizations.of(context).goalProgressLabel(done, goalMinutes),
+          style: TextStyle(fontSize: 11, color: subColor),
+        ),
+      ],
+    );
+  }
+}
+
+class _BreakActivityCard extends StatelessWidget {
+  final BreakActivity activity;
+  final Color color;
+
+  const _BreakActivityCard({required this.activity, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBg = isDark ? const Color(0xFF1C1C2E) : Colors.white;
+    final borderColor =
+        isDark ? const Color(0xFF2E2E4A) : const Color(0xFFE0E0F0);
+    final textColor =
+        isDark ? const Color(0xFFEEEEF6) : const Color(0xFF1A1A2E);
+    final subColor =
+        isDark ? const Color(0xFF8A8AB0) : const Color(0xFF6B6B8A);
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: borderColor),
+      ),
+      child: Row(
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: LinearProgressIndicator(
-              minHeight: 8,
-              value: pct.clamp(0, 1),
-              backgroundColor: Colors.white.withValues(alpha: 0.2),
-              valueColor: const AlwaysStoppedAnimation(Colors.greenAccent),
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Center(
+                child: Text(activity.emoji,
+                    style: const TextStyle(fontSize: 22))),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(activity.title,
+                    style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: textColor)),
+                const SizedBox(height: 2),
+                Text(activity.description,
+                    style: TextStyle(fontSize: 12, color: subColor),
+                    maxLines: 2),
+              ],
             ),
           ),
-          const SizedBox(height: 6),
-          Text(
-              AppLocalizations.of(context).goalProgressLabel(done, goalMinutes),
-              style:
-                  TextStyle(fontSize: 12, color: Colors.white.withValues(alpha: 0.8)))
         ],
       ),
     );

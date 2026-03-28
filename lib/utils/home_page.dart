@@ -3,14 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:pomodoro/core/auth/auth_service.dart';
 import 'package:pomodoro/features/auth/login_screen.dart';
 import 'package:pomodoro/features/auth/screens/profile_screen.dart';
-import 'package:pomodoro/features/habit/habit.dart';
-
+import 'package:pomodoro/features/flow_home/flow_home_screen.dart';
 import 'package:pomodoro/features/settings/settings_screen.dart';
 import 'package:pomodoro/features/tasks/tasks_screen.dart';
 import 'package:pomodoro/l10n/app_localizations.dart';
 import 'package:pomodoro/utils/app.dart';
 import 'package:pomodoro/features/gamification/gamification_service.dart';
-
 import 'package:pomodoro/features/gamification/presentation/screens/achievements_screen.dart';
 import 'package:pomodoro/features/audio/presentation/audio_mixer_sheet.dart';
 import 'package:pomodoro/features/analytics/presentation/screens/analytics_screen.dart';
@@ -27,7 +25,7 @@ class _HomePageState extends State<HomePage> {
   Widget _pageFor(int i) {
     switch (i) {
       case 0:
-        return const Habit();
+        return const FlowHomeScreen();
       case 1:
         return const TasksScreen();
       case 2:
@@ -38,144 +36,188 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  static const _tabTitles = ['Inicio', 'Tareas', 'Métricas', 'Ajustes'];
+
   @override
   Widget build(BuildContext context) {
-    final t = AppLocalizations.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final scheme = Theme.of(context).colorScheme;
+    final textColor = isDark ? const Color(0xFFEEEEF6) : const Color(0xFF1A1A2E);
+    final subColor = isDark ? const Color(0xFF8A8AB0) : const Color(0xFF6B6B8A);
+    final surfaceBg = isDark ? const Color(0xFF13131F) : Colors.white;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
-        // Remove hardcoded backgroundColor so it uses the theme (transparent)
-        elevation: 0,
         automaticallyImplyLeading: false,
-        title: Text(t.appTitle),
-        actions: [
-          // Audio Mixer Button
-          IconButton(
-            icon: const Icon(Icons.queue_music),
-            tooltip: 'Sonidos Ambientales',
-            onPressed: () {
-              showModalBottomSheet(
-                  context: context,
-                  backgroundColor: Colors.transparent,
-                  builder: (ctx) => const AudioMixerSheet());
-            },
-            color:
-                Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+        title: Text(
+          _tabTitles[_index],
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w700,
+            color: textColor,
           ),
-          // Level Indicator
-          Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: ValueListenableBuilder<int>(
-              valueListenable: GamificationService.instance.currentLevel,
-              builder: (context, level, _) {
-                return GestureDetector(
-                  onTap: () {
-                    Navigator.of(context).push(MaterialPageRoute(
-                        builder: (_) => const AchievementsScreen()));
-                  },
-                  child: Chip(
-                    avatar:
-                        const Icon(Icons.star, size: 16, color: Colors.amber),
-                    label: Text('Lvl $level',
-                        style: TextStyle(
-                            fontSize: 12,
-                            color: Theme.of(context).colorScheme.onSurface)),
-                    backgroundColor: Theme.of(context)
-                        .colorScheme
-                        .surface
-                        .withValues(alpha: 0.2),
-                    side: BorderSide.none,
-                  ),
-                );
-              },
+        ),
+        actions: [
+          // Ambient audio
+          IconButton(
+            icon: Icon(Icons.waves_rounded, size: 22, color: subColor),
+            tooltip: 'Sonidos ambientales',
+            onPressed: () => showModalBottomSheet(
+              context: context,
+              backgroundColor: Colors.transparent,
+              isScrollControlled: true,
+              builder: (_) => const AudioMixerSheet(),
             ),
           ),
+          // Level chip
+          ValueListenableBuilder<int>(
+            valueListenable: GamificationService.instance.currentLevel,
+            builder: (_, level, __) => GestureDetector(
+              onTap: () => Navigator.push(context,
+                  MaterialPageRoute(builder: (_) => const AchievementsScreen())),
+              child: Container(
+                margin: const EdgeInsets.only(right: 4),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF7C6FF7).withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                      color: const Color(0xFF7C6FF7).withValues(alpha: 0.3)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text('✦',
+                        style: TextStyle(
+                            fontSize: 11, color: Color(0xFF7C6FF7))),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Nv $level',
+                      style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF7C6FF7)),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          // Profile
           FutureBuilder<Map<String, String?>>(
             future: AuthService.instance.currentProfile(),
             builder: (context, snap) {
               final profile = snap.data;
               final name = profile?['name'];
-              final uid = profile?['uid'];
-              final t = AppLocalizations.of(context);
               return PopupMenuButton<int>(
-                icon: const Icon(Icons.account_circle),
-                itemBuilder: (ctx) => [
+                icon: CircleAvatar(
+                  radius: 16,
+                  backgroundColor:
+                      const Color(0xFF7C6FF7).withValues(alpha: 0.15),
+                  child: Text(
+                    name?.isNotEmpty == true
+                        ? name!.substring(0, 1).toUpperCase()
+                        : '?',
+                    style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF7C6FF7)),
+                  ),
+                ),
+                itemBuilder: (_) => [
                   PopupMenuItem<int>(
                     value: 0,
-                    child: Text(
-                      name?.isNotEmpty == true ? name! : t.profileMenu,
-                    ),
-                  ),
-                  PopupMenuItem<int>(
-                    value: 2,
-                    child: Text(
-                      uid ?? t.idUnavailable,
-                      style: const TextStyle(fontSize: 12),
-                    ),
+                    child: Row(children: [
+                      const Icon(Icons.person_outline_rounded, size: 18),
+                      const SizedBox(width: 10),
+                      Text(name?.isNotEmpty == true ? name! : 'Perfil'),
+                    ]),
                   ),
                   PopupMenuItem<int>(
                     value: 1,
-                    child: Text(t.signOut),
+                    child: Row(children: [
+                      const Icon(Icons.logout_rounded, size: 18),
+                      const SizedBox(width: 10),
+                      Text(AppLocalizations.of(context).signOut),
+                    ]),
                   ),
                 ],
                 onSelected: (v) async {
                   if (v == 0) {
-                    if (!mounted) return;
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => const ProfileScreen(),
-                      ),
-                    );
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (_) => const ProfileScreen()));
                   } else if (v == 1) {
                     await AuthService.instance.signOut();
                     if (!mounted) return;
-                    Navigator.of(context).pushAndRemoveUntil(
+                    Navigator.pushAndRemoveUntil(
+                      context,
                       MaterialPageRoute(
-                        builder: (_) =>
-                            const AnimatedGradientShell(child: LoginScreen()),
-                      ),
-                      (route) => false,
+                          builder: (_) =>
+                              const AnimatedGradientShell(child: LoginScreen())),
+                      (r) => false,
                     );
                   }
                 },
               );
             },
-          )
+          ),
         ],
       ),
       body: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 300),
-        child: _pageFor(_index),
+        duration: const Duration(milliseconds: 250),
+        switchInCurve: Curves.easeOut,
+        child: KeyedSubtree(
+          key: ValueKey(_index),
+          child: _pageFor(_index),
+        ),
       ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _index,
-        backgroundColor: scheme.surface,
-        indicatorColor: scheme.primary.withValues(alpha: 0.15),
-        onDestinationSelected: (i) => setState(() => _index = i),
-        destinations: [
-          NavigationDestination(
-            icon: const Icon(Icons.timer_outlined),
-            selectedIcon: const Icon(Icons.timer),
-            label: t.configure,
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: surfaceBg,
+          border: Border(
+            top: BorderSide(
+              color: isDark
+                  ? const Color(0xFF2E2E4A)
+                  : const Color(0xFFE0E0F0),
+              width: 1,
+            ),
           ),
-          NavigationDestination(
-            icon: Icon(Icons.task_outlined),
-            selectedIcon: Icon(Icons.task),
-            label: t.tasksTitle,
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.history_outlined),
-            selectedIcon: const Icon(Icons.history),
-            label: t.history,
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.settings_outlined),
-            selectedIcon: const Icon(Icons.settings),
-            label: t.settings,
-          ),
-        ],
+        ),
+        child: NavigationBar(
+          selectedIndex: _index,
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          indicatorColor: scheme.primary.withValues(alpha: 0.15),
+          onDestinationSelected: (i) => setState(() => _index = i),
+          labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+          destinations: [
+            NavigationDestination(
+              icon: Icon(Icons.home_outlined, color: subColor),
+              selectedIcon:
+                  Icon(Icons.home_rounded, color: scheme.primary),
+              label: 'Inicio',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.check_box_outlined, color: subColor),
+              selectedIcon:
+                  Icon(Icons.check_box_rounded, color: scheme.primary),
+              label: 'Tareas',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.bar_chart_outlined, color: subColor),
+              selectedIcon:
+                  Icon(Icons.bar_chart_rounded, color: scheme.primary),
+              label: 'Métricas',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.tune_outlined, color: subColor),
+              selectedIcon: Icon(Icons.tune_rounded, color: scheme.primary),
+              label: 'Ajustes',
+            ),
+          ],
+        ),
       ),
     );
   }

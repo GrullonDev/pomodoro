@@ -75,6 +75,14 @@ class TaskRepository implements ITaskRepository {
     }
   }
 
+  Future<void> delete(String id) async {
+    final tasks = await load();
+    tasks.removeWhere((e) => e.id == id);
+    await _save(tasks);
+  }
+
+  Future<void> saveAll(List<TaskItem> tasks) => _save(tasks);
+
   @override
   Future<List<TaskItem>> all() => load();
 }
