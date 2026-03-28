@@ -7,7 +7,6 @@ import 'package:pomodoro/core/data/session_repository.dart';
 import 'package:pomodoro/core/theme/locale_controller.dart';
 import 'package:pomodoro/core/theme/theme_controller.dart';
 import 'package:pomodoro/features/auth/screens/onboarding_screen.dart';
-import 'package:pomodoro/features/auth/login_screen.dart';
 import 'package:pomodoro/core/auth/auth_service.dart';
 import 'package:pomodoro/l10n/app_localizations.dart';
 import 'package:pomodoro/utils/home_page.dart';
@@ -233,46 +232,31 @@ class MyApp extends StatelessWidget {
                       child: OnboardingScreen(
                         onGetStarted: () async {
                           await SessionRepository().setOnboardingSeen();
-                          if (navigatorKey.currentState?.mounted ?? false) {
-                            navigatorKey.currentState!.pushReplacement(
-                              MaterialPageRoute(
-                                builder: (_) => AnimatedGradientShell(
-                                  child: LoginScreen(),
-                                ),
-                              ),
-                            );
-                          }
+                          // Sign in anonymously (guest mode) — stream will
+                          // rebuild to HomePage automatically.
+                          await AuthService.instance.signInAnonymously();
                         },
                         onSkip: () async {
                           await SessionRepository().setOnboardingSeen();
-                          if (navigatorKey.currentState?.mounted ?? false) {
-                            navigatorKey.currentState!.pushReplacement(
-                              MaterialPageRoute(
-                                builder: (_) => AnimatedGradientShell(
-                                  child: LoginScreen(),
-                                ),
-                              ),
-                            );
-                          }
+                          await AuthService.instance.signInAnonymously();
                         },
                       ),
                     );
                   }
 
-                  // If onboarding completed, show Home or Login depending on auth state.
+                  // If onboarding completed, auto-sign in as guest and show
+                  // the dashboard.  LoginScreen is accessed only when the user
+                  // explicitly wants to save / sync their progress.
                   return StreamBuilder<String?>(
                     stream: AuthService.instance.uidChanges(),
                     builder: (context, authSnap) {
                       final uid = authSnap.data;
-                      if (authSnap.connectionState == ConnectionState.waiting) {
-                        return const Center(
-                          child: CircularProgressIndicator(),
-                        );
-                      }
 
+                      // No active session → sign in anonymously (guest mode).
                       if (uid == null) {
+                        AuthService.instance.signInAnonymously();
                         return const AnimatedGradientShell(
-                          child: LoginScreen(),
+                          child: _LoadingScreen(),
                         );
                       }
 
@@ -345,5 +329,23 @@ class _AnimatedGradientShellState extends State<AnimatedGradientShell>
   void dispose() {
     _c.dispose();
     super.dispose();
+  }
+}
+
+/// Shown briefly while anonymous sign-in is in progress.
+class _LoadingScreen extends StatelessWidget {
+  const _LoadingScreen();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      backgroundColor: Colors.transparent,
+      body: Center(
+        child: CircularProgressIndicator(
+          color: Color(0xFF7C6FF7),
+          strokeWidth: 2,
+        ),
+      ),
+    );
   }
 }

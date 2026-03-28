@@ -6,14 +6,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pomodoro/core/domain/entities/pomodoro_session.dart';
 import 'package:pomodoro/core/domain/repositories/session_repository.dart';
 import 'package:pomodoro/core/auth/auth_service.dart';
-// Firebase usage temporarily disabled. To re-enable, restore these imports
-// and ensure firebase_core is initialized in `main.dart`.
-// TODO: To re-enable Firestore/auth sync:
-// 1) Uncomment the imports for `cloud_firestore` and `firebase_auth`.
-// 2) Restore calls to `FirebaseAuth.instance.currentUser?.uid` and the Firestore upload.
-// 3) Consider making Firestore sync a best-effort background job with retries.
-// import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class SessionRepository implements ISessionRepository {
   static const _key = 'sessions_json'; // legacy (guest / pre-auth)
@@ -87,10 +81,22 @@ class SessionRepository implements ISessionRepository {
     current.add(session);
     await prefs.setString(
         _userKey(uid), jsonEncode(current.map((e) => e.toMap()).toList()));
-    // Firestore sync (best effort)
-    // Firestore sync disabled while Firebase is not configured.
-    // TODO: restore Firestore best-effort sync here using `FirebaseFirestore.instance`
-    scheduleMicrotask(() => refreshGoalRemaining());
+    // Best-effort Firestore sync for authenticated (non-guest) users only.
+    scheduleMicrotask(() async {
+      final fbUser = FirebaseAuth.instance.currentUser;
+      if (fbUser != null && !fbUser.isAnonymous) {
+        try {
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(fbUser.uid)
+              .collection('sessions')
+              .add(session.toMap());
+        } catch (_) {
+          // Network errors are silent — local data is the source of truth.
+        }
+      }
+      refreshGoalRemaining();
+    });
   }
 
   Future<Map<String, int>> workSecondsByDayLast7() async {

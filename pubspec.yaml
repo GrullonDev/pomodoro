@@ -32,6 +32,8 @@ dependencies:
   firebase_auth: ^5.1.2
   cloud_firestore: ^5.5.0
   google_sign_in: ^6.2.0
+  sign_in_with_apple: ^6.1.0
+  crypto: ^3.0.3
   local_auth: ^3.0.0
   device_calendar: ^4.3.2
   upgrader: ^12.3.0

@@ -153,35 +153,41 @@ class _TasksScreenState extends State<TasksScreen> {
                       Text('Modo:',
                           style: TextStyle(fontSize: 12, color: subColor)),
                       const SizedBox(width: 8),
-                      ...FocusMode.all().map((m) {
-                        final sel = m.id == _selectedMode.id;
-                        return GestureDetector(
-                          onTap: () => setState(() => _selectedMode = m),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 150),
-                            margin: const EdgeInsets.only(right: 6),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 5),
-                            decoration: BoxDecoration(
-                              color: sel
-                                  ? m.color.withValues(alpha: 0.15)
-                                  : Colors.transparent,
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(
-                                  color: sel
-                                      ? m.color
-                                      : borderColor),
-                            ),
-                            child: Text(
-                              '${m.emoji} ${m.name}',
-                              style: TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
-                                  color: sel ? m.color : subColor),
-                            ),
+                      Expanded(
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          physics: const BouncingScrollPhysics(),
+                          child: Row(
+                            children: FocusMode.all().map((m) {
+                              final sel = m.id == _selectedMode.id;
+                              return GestureDetector(
+                                onTap: () => setState(() => _selectedMode = m),
+                                child: AnimatedContainer(
+                                  duration: const Duration(milliseconds: 150),
+                                  margin: const EdgeInsets.only(right: 6),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10, vertical: 5),
+                                  decoration: BoxDecoration(
+                                    color: sel
+                                        ? m.color.withValues(alpha: 0.15)
+                                        : Colors.transparent,
+                                    borderRadius: BorderRadius.circular(20),
+                                    border: Border.all(
+                                        color: sel ? m.color : borderColor),
+                                  ),
+                                  child: Text(
+                                    '${m.emoji} ${m.name}',
+                                    style: TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
+                                        color: sel ? m.color : subColor),
+                                  ),
+                                ),
+                              );
+                            }).toList(),
                           ),
-                        );
-                      }),
+                        ),
+                      ),
                     ],
                   ),
                 ),

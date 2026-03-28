@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:pomodoro/core/auth/auth_service.dart';
 import 'package:pomodoro/features/auth/login_screen.dart';
 import 'package:pomodoro/features/auth/screens/profile_screen.dart';
+import 'package:pomodoro/utils/app.dart';
 import 'package:pomodoro/features/flow_home/flow_home_screen.dart';
 import 'package:pomodoro/features/settings/settings_screen.dart';
 import 'package:pomodoro/features/tasks/tasks_screen.dart';
 import 'package:pomodoro/l10n/app_localizations.dart';
-import 'package:pomodoro/utils/app.dart';
 import 'package:pomodoro/features/gamification/gamification_service.dart';
 import 'package:pomodoro/features/gamification/presentation/screens/achievements_screen.dart';
 import 'package:pomodoro/features/audio/presentation/audio_mixer_sheet.dart';
@@ -105,58 +105,116 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
           ),
-          // Profile
+          // Profile / guest badge
           FutureBuilder<Map<String, String?>>(
             future: AuthService.instance.currentProfile(),
             builder: (context, snap) {
               final profile = snap.data;
               final name = profile?['name'];
+              final isGuest = profile?['isGuest'] == 'true';
+              final initial = name?.isNotEmpty == true
+                  ? name!.substring(0, 1).toUpperCase()
+                  : (isGuest ? '?' : '?');
+
               return PopupMenuButton<int>(
-                icon: CircleAvatar(
-                  radius: 16,
-                  backgroundColor:
-                      const Color(0xFF7C6FF7).withValues(alpha: 0.15),
-                  child: Text(
-                    name?.isNotEmpty == true
-                        ? name!.substring(0, 1).toUpperCase()
-                        : '?',
-                    style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF7C6FF7)),
-                  ),
+                icon: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    CircleAvatar(
+                      radius: 16,
+                      backgroundColor: isGuest
+                          ? const Color(0xFF7C6FF7).withValues(alpha: 0.08)
+                          : const Color(0xFF7C6FF7).withValues(alpha: 0.15),
+                      child: Icon(
+                        isGuest ? Icons.person_outline_rounded : null,
+                        size: isGuest ? 18 : 0,
+                        color: const Color(0xFF7C6FF7),
+                        semanticLabel: isGuest ? initial : null,
+                      ),
+                    ),
+                    if (!isGuest)
+                      Positioned.fill(
+                        child: Center(
+                          child: Text(
+                            initial,
+                            style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFF7C6FF7)),
+                          ),
+                        ),
+                      ),
+                    // Small cloud badge for guests
+                    if (isGuest)
+                      Positioned(
+                        right: -2,
+                        bottom: -2,
+                        child: Container(
+                          width: 13,
+                          height: 13,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFBBC05),
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                                color: Theme.of(context).scaffoldBackgroundColor,
+                                width: 1.5),
+                          ),
+                          child: const Icon(Icons.cloud_off_rounded,
+                              size: 7, color: Colors.white),
+                        ),
+                      ),
+                  ],
                 ),
-                itemBuilder: (_) => [
-                  PopupMenuItem<int>(
-                    value: 0,
-                    child: Row(children: [
-                      const Icon(Icons.person_outline_rounded, size: 18),
-                      const SizedBox(width: 10),
-                      Text(name?.isNotEmpty == true ? name! : 'Perfil'),
-                    ]),
-                  ),
-                  PopupMenuItem<int>(
-                    value: 1,
-                    child: Row(children: [
-                      const Icon(Icons.logout_rounded, size: 18),
-                      const SizedBox(width: 10),
-                      Text(AppLocalizations.of(context).signOut),
-                    ]),
-                  ),
-                ],
+                itemBuilder: (_) => isGuest
+                    ? [
+                        const PopupMenuItem<int>(
+                          value: 2,
+                          child: Row(children: [
+                            Icon(Icons.cloud_upload_outlined,
+                                size: 18, color: Color(0xFF7C6FF7)),
+                            SizedBox(width: 10),
+                            Text('Guardar mi progreso',
+                                style: TextStyle(
+                                    color: Color(0xFF7C6FF7),
+                                    fontWeight: FontWeight.w600)),
+                          ]),
+                        ),
+                      ]
+                    : [
+                        PopupMenuItem<int>(
+                          value: 0,
+                          child: Row(children: [
+                            const Icon(Icons.person_outline_rounded, size: 18),
+                            const SizedBox(width: 10),
+                            Text(name?.isNotEmpty == true ? name! : 'Perfil'),
+                          ]),
+                        ),
+                        PopupMenuItem<int>(
+                          value: 1,
+                          child: Row(children: [
+                            const Icon(Icons.logout_rounded, size: 18),
+                            const SizedBox(width: 10),
+                            Text(AppLocalizations.of(context).signOut),
+                          ]),
+                        ),
+                      ],
                 onSelected: (v) async {
                   if (v == 0) {
                     Navigator.push(context,
                         MaterialPageRoute(builder: (_) => const ProfileScreen()));
                   } else if (v == 1) {
+                    // Authenticated sign-out: re-sign in anonymously automatically
                     await AuthService.instance.signOut();
-                    if (!mounted) return;
-                    Navigator.pushAndRemoveUntil(
+                    // Stream will detect null uid → auto anonymous sign-in → stays on HomePage
+                  } else if (v == 2) {
+                    // Guest: push LoginScreen to save progress
+                    await Navigator.push<bool>(
                       context,
                       MaterialPageRoute(
-                          builder: (_) =>
-                              const AnimatedGradientShell(child: LoginScreen())),
-                      (r) => false,
+                        builder: (_) =>
+                            const AnimatedGradientShell(child: LoginScreen()),
+                        fullscreenDialog: true,
+                      ),
                     );
                   }
                 },
