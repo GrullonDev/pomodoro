@@ -57,6 +57,9 @@ class AudioService {
     // List only assets that are actually bundled (see pubspec.yaml). Add more when you include them.
     return [
       'sounds/cronometro.mp3',
+      'sounds/tick_wood.wav',
+      'sounds/tick_digital.wav',
+      'sounds/tick_pulse.wav',
     ];
   }
 
@@ -69,10 +72,11 @@ class AudioService {
   Future<String> getFocusTrack() async {
     if (_cachedFocusTrack != null) return _cachedFocusTrack!;
     final prefs = await SharedPreferences.getInstance();
-  final saved = prefs.getString(_focusTrackKey);
-  final allowed = await availableFocusTracks();
-  _cachedFocusTrack =
-    (saved != null && allowed.contains(saved)) ? saved : 'sounds/cronometro.mp3';
+    final saved = prefs.getString(_focusTrackKey);
+    final allowed = await availableFocusTracks();
+    _cachedFocusTrack = (saved != null && allowed.contains(saved))
+        ? saved
+        : 'sounds/cronometro.mp3';
     return _cachedFocusTrack!;
   }
 
@@ -100,7 +104,7 @@ class AudioService {
   Future<void> stopTicking() async {
     try {
       await _tickPlayer.stop();
-  _tickingActive = false;
+      _tickingActive = false;
     } catch (_) {}
   }
 
