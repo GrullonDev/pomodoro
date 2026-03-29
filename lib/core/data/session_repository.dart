@@ -84,17 +84,21 @@ class SessionRepository implements ISessionRepository {
         _userKey(uid), jsonEncode(current.map((e) => e.toMap()).toList()));
     // Best-effort Firestore sync for authenticated (non-guest) users only.
     scheduleMicrotask(() async {
-      final fbUser = FirebaseAuth.instance.currentUser;
-      if (fbUser != null && !fbUser.isAnonymous) {
-        try {
-          await FirebaseFirestore.instance
-              .collection('users')
-              .doc(fbUser.uid)
-              .collection('sessions')
-              .add(session.toMap());
-        } catch (_) {
-          // Network errors are silent — local data is the source of truth.
+      try {
+        final fbUser = FirebaseAuth.instance.currentUser;
+        if (fbUser != null && !fbUser.isAnonymous) {
+          try {
+            await FirebaseFirestore.instance
+                .collection('users')
+                .doc(fbUser.uid)
+                .collection('sessions')
+                .add(session.toMap());
+          } catch (_) {
+            // Network errors are silent — local data is the source of truth.
+          }
         }
+      } catch (_) {
+        // Firebase not yet initialized (e.g. test environment) — skip sync.
       }
       refreshGoalRemaining();
     });

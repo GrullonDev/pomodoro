@@ -26,8 +26,14 @@ class AuthService {
   Stream<String?> uidChanges() =>
       _auth.authStateChanges().map((u) => u?.uid);
 
-  /// Current uid, or null if not signed in.
-  Future<String?> currentUid() async => _auth.currentUser?.uid;
+  /// Current uid, or null if not signed in / not yet initialized.
+  Future<String?> currentUid() async {
+    try {
+      return _auth.currentUser?.uid;
+    } catch (_) {
+      return null;
+    }
+  }
 
   /// True when the current user is an anonymous (guest) account.
   bool get isGuest => _auth.currentUser?.isAnonymous ?? true;
