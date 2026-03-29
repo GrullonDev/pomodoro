@@ -7,7 +7,6 @@ import 'package:pomodoro/core/data/session_repository.dart';
 import 'package:pomodoro/core/theme/locale_controller.dart';
 import 'package:pomodoro/core/theme/theme_controller.dart';
 import 'package:pomodoro/features/auth/screens/onboarding_screen.dart';
-import 'package:pomodoro/features/auth/login_screen.dart';
 import 'package:pomodoro/core/auth/auth_service.dart';
 import 'package:pomodoro/l10n/app_localizations.dart';
 import 'package:pomodoro/utils/home_page.dart';
@@ -19,65 +18,191 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Cargar locale guardado (solo se dispara una vez; si ya está cargado no hace nada)
     LocaleController.instance.load();
+    
     ThemeData buildDark() {
-      final base = ThemeData.dark(useMaterial3: true);
-      final scheme = base.colorScheme.copyWith(
-        primary: Colors.greenAccent.shade400,
-        secondary: Colors.greenAccent.shade400,
+      const bg = Color(0xFF0B0B14);
+      const surface = Color(0xFF13131F);
+      const card = Color(0xFF1C1C2E);
+      const primary = Color(0xFF7C6FF7);
+      const onPrimary = Colors.white;
+      const textPrimary = Color(0xFFEEEEF6);
+      const textSecondary = Color(0xFF8A8AB0);
+
+      final scheme = ColorScheme.dark(
+        primary: primary,
+        onPrimary: onPrimary,
+        secondary: const Color(0xFF4ECDC4),
+        onSecondary: Colors.black,
+        surface: surface,
+        onSurface: textPrimary,
+        surfaceContainerHighest: card,
+        outline: const Color(0xFF2E2E4A),
+        error: const Color(0xFFE17055),
       );
-      return base.copyWith(
+
+      return ThemeData.dark(useMaterial3: true).copyWith(
         colorScheme: scheme,
-        scaffoldBackgroundColor: const Color(0xFF0D0F11),
-        textTheme: base.textTheme.apply(fontFamily: 'Arial'),
+        scaffoldBackgroundColor: bg,
+        cardColor: card,
+        dividerColor: const Color(0xFF2E2E4A),
+        textTheme: ThemeData.dark().textTheme.apply(
+              bodyColor: textPrimary,
+              displayColor: textPrimary,
+            ).copyWith(
+              bodySmall: const TextStyle(color: textSecondary),
+              labelSmall: const TextStyle(color: textSecondary),
+            ),
         appBarTheme: const AppBarTheme(
-            backgroundColor: Colors.transparent, elevation: 0),
+          backgroundColor: bg,
+          elevation: 0,
+          iconTheme: IconThemeData(color: textPrimary),
+          titleTextStyle: TextStyle(
+            color: textPrimary,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        navigationBarTheme: NavigationBarThemeData(
+          backgroundColor: surface,
+          indicatorColor: primary.withValues(alpha: 0.2),
+          labelTextStyle: WidgetStateProperty.all(
+            const TextStyle(fontSize: 11, color: textSecondary),
+          ),
+        ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            backgroundColor: scheme.primary,
-            foregroundColor: Colors.black,
-            textStyle: const TextStyle(fontWeight: FontWeight.bold),
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+            backgroundColor: primary,
+            foregroundColor: onPrimary,
+            elevation: 0,
+            textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
           ),
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: card,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Color(0xFF2E2E4A)),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Color(0xFF2E2E4A)),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: primary, width: 1.5),
+          ),
+          labelStyle: const TextStyle(color: textSecondary),
+          hintStyle: const TextStyle(color: Color(0xFF4A4A6A)),
+        ),
+        chipTheme: ChipThemeData(
+          backgroundColor: card,
+          selectedColor: primary.withValues(alpha: 0.2),
+          side: const BorderSide(color: Color(0xFF2E2E4A)),
+          labelStyle: const TextStyle(color: textPrimary),
         ),
       );
     }
 
     ThemeData buildLight() {
-      final base = ThemeData.light(useMaterial3: true);
-      final scheme = base.colorScheme.copyWith(
-        primary: const Color(0xFF00B86B),
-        secondary: const Color(0xFF00B86B),
+      const bg = Color(0xFFF5F4FF);
+      const surface = Color(0xFFFFFFFF);
+      const card = Color(0xFFFFFFFF);
+      const primary = Color(0xFF7C6FF7);
+      const onPrimary = Colors.white;
+      const textPrimary = Color(0xFF1A1A2E);
+      const textSecondary = Color(0xFF6B6B8A);
+
+      final scheme = ColorScheme.light(
+        primary: primary,
+        onPrimary: onPrimary,
+        secondary: const Color(0xFF4ECDC4),
+        onSecondary: Colors.white,
+        surface: surface,
+        onSurface: textPrimary,
+        surfaceContainerHighest: card,
+        outline: const Color(0xFFE0E0F0),
+        error: const Color(0xFFE17055),
       );
-      return base.copyWith(
+
+      return ThemeData.light(useMaterial3: true).copyWith(
         colorScheme: scheme,
-        scaffoldBackgroundColor: const Color(0xFFF8F6FB),
-        textTheme: base.textTheme.apply(fontFamily: 'Arial'),
+        scaffoldBackgroundColor: bg,
+        cardColor: card,
+        dividerColor: const Color(0xFFE0E0F0),
+        textTheme: ThemeData.light().textTheme.apply(
+              bodyColor: textPrimary,
+              displayColor: textPrimary,
+            ).copyWith(
+              bodySmall: const TextStyle(color: textSecondary),
+              labelSmall: const TextStyle(color: textSecondary),
+            ),
         appBarTheme: const AppBarTheme(
-            backgroundColor: Colors.transparent, elevation: 0),
+          backgroundColor: bg,
+          elevation: 0,
+          iconTheme: IconThemeData(color: textPrimary),
+          titleTextStyle: TextStyle(
+            color: textPrimary,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        navigationBarTheme: NavigationBarThemeData(
+          backgroundColor: surface,
+          indicatorColor: primary.withValues(alpha: 0.15),
+          labelTextStyle: WidgetStateProperty.all(
+            const TextStyle(fontSize: 11, color: textSecondary),
+          ),
+        ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            backgroundColor: scheme.primary,
-            foregroundColor: Colors.white,
-            textStyle: const TextStyle(fontWeight: FontWeight.bold),
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+            backgroundColor: primary,
+            foregroundColor: onPrimary,
+            elevation: 0,
+            textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
           ),
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: card,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Color(0xFFE0E0F0)),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Color(0xFFE0E0F0)),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: primary, width: 1.5),
+          ),
+          labelStyle: const TextStyle(color: textSecondary),
+          hintStyle: const TextStyle(color: Color(0xFFAAAAAA)),
+        ),
+        chipTheme: ChipThemeData(
+          backgroundColor: const Color(0xFFF0EFF9),
+          selectedColor: primary.withValues(alpha: 0.15),
+          side: const BorderSide(color: Color(0xFFE0E0F0)),
+          labelStyle: const TextStyle(color: textPrimary),
         ),
       );
     }
 
-    return ValueListenableBuilder<bool>(
-      valueListenable: ThemeController.instance.isDark,
-      builder: (_, isDark, __) {
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: ThemeController.instance.themeMode,
+      builder: (_, mode, __) {
         return ValueListenableBuilder<Locale?>(
           valueListenable: LocaleController.instance.locale,
           builder: (_, loc, ___) => MaterialApp(
             navigatorKey: navigatorKey,
             debugShowCheckedModeBanner: false,
-            theme: isDark ? buildDark() : buildLight(),
+            theme: buildLight(),
+            darkTheme: buildDark(),
+            themeMode: mode,
             localizationsDelegates: const [
               AppLocalizations.delegate,
               GlobalMaterialLocalizations.delegate,
@@ -94,74 +219,66 @@ class MyApp extends StatelessWidget {
               upgrader: Upgrader(
                 messages: UpgraderMessages(code: 'es'),
               ),
-              child: FutureBuilder<bool>(
-                future: SessionRepository().isOnboardingSeen(),
-                builder: (context, snap) {
-                  if (!snap.hasData) {
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  }
-
-                  final seen = snap.data ?? false;
-                  if (!seen) {
-                    return AnimatedGradientShell(
-                      child: OnboardingScreen(
-                        onGetStarted: () async {
-                          await SessionRepository().setOnboardingSeen();
-                          if (navigatorKey.currentState?.mounted ?? false) {
-                            navigatorKey.currentState!.pushReplacement(
-                              MaterialPageRoute(
-                                builder: (_) => AnimatedGradientShell(
-                                  child: LoginScreen(),
-                                ),
-                              ),
-                            );
-                          }
-                        },
-                        onSkip: () async {
-                          await SessionRepository().setOnboardingSeen();
-                          if (navigatorKey.currentState?.mounted ?? false) {
-                            navigatorKey.currentState!.pushReplacement(
-                              MaterialPageRoute(
-                                builder: (_) => AnimatedGradientShell(
-                                  child: LoginScreen(),
-                                ),
-                              ),
-                            );
-                          }
-                        },
-                      ),
-                    );
-                  }
-
-                  // If onboarding completed, show Home or Login depending on auth state.
-                  return StreamBuilder<String?>(
-                    stream: AuthService.instance.uidChanges(),
-                    builder: (context, authSnap) {
-                      final uid = authSnap.data;
-                      if (authSnap.connectionState == ConnectionState.waiting) {
-                        return const Center(
-                          child: CircularProgressIndicator(),
-                        );
-                      }
-
-                      if (uid == null) {
-                        return const AnimatedGradientShell(
-                          child: LoginScreen(),
-                        );
-                      }
-
-                      return const AnimatedGradientShell(
-                        child: HomePage(),
-                      );
-                    },
-                  );
-                },
-              ),
+              child: const _OnboardingWrapper(),
             ),
           ),
         );
+      },
+    );
+  }
+}
+
+class _OnboardingWrapper extends StatefulWidget {
+  const _OnboardingWrapper();
+  @override
+  State<_OnboardingWrapper> createState() => _OnboardingWrapperState();
+}
+
+class _OnboardingWrapperState extends State<_OnboardingWrapper> {
+  bool? _seen;
+
+  @override
+  void initState() {
+    super.initState();
+    _check();
+  }
+
+  Future<void> _check() async {
+    final s = await SessionRepository().isOnboardingSeen();
+    if (mounted) setState(() => _seen = s);
+  }
+
+  Future<void> _complete() async {
+    await SessionRepository().setOnboardingSeen();
+    // Re-check authentication. Anonymous login is needed to enter HomePage.
+    await AuthService.instance.signInAnonymously();
+    if (mounted) setState(() => _seen = true);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_seen == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (!_seen!) {
+      return AnimatedGradientShell(
+        child: OnboardingScreen(
+          onGetStarted: _complete,
+          onSkip: _complete,
+        ),
+      );
+    }
+
+    return StreamBuilder<String?>(
+      stream: AuthService.instance.uidChanges(),
+      builder: (context, authSnap) {
+        final uid = authSnap.data;
+        if (uid == null) {
+          AuthService.instance.signInAnonymously();
+          return const AnimatedGradientShell(child: _LoadingScreen());
+        }
+        return const AnimatedGradientShell(child: HomePage());
       },
     );
   }
@@ -177,75 +294,37 @@ class AnimatedGradientShell extends StatefulWidget {
 class _AnimatedGradientShellState extends State<AnimatedGradientShell>
     with SingleTickerProviderStateMixin {
   late final AnimationController _c =
-      AnimationController(vsync: this, duration: const Duration(seconds: 12))
+      AnimationController(vsync: this, duration: const Duration(seconds: 8))
         ..repeat(reverse: true);
+
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bg = isDark ? const Color(0xFF0B0B14) : const Color(0xFFF5F4FF);
+    const glowColor = Color(0xFF7C6FF7);
+
     return AnimatedBuilder(
       animation: _c,
       builder: (context, _) {
-        // We use a rich dark gradient by default to make the glassmorphism pop,
-        // regardless of the system light/dark mode for this shell.
-
-        final isDark = Theme.of(context).brightness == Brightness.dark;
-
-        // Dark palette
-        const darkC1 = Color(0xFF0F2027);
-        const darkC2 = Color(0xFF203A43);
-        const darkC3 = Color(0xFF2C5364);
-        const darkA1 = Color(0xFF134E5E);
-        const darkA2 = Color(0xFF71B280);
-
-        // Light palette (Fresh/Mental/Nature feel)
-        const lightC1 = Color(0xFFFFFFFF);
-        const lightC2 = Color(0xFFF0F4C3); // Lime 100
-        const lightC3 = Color(0xFFDCEDC8); // Light Green 100
-        const lightA1 = Color(0xFFC5E1A5); // Light Green 200
-        const lightA2 = Color(0xFF81C784); // Green 300
-
-        final c1 = isDark ? darkC1 : lightC1;
-        final c2 = isDark ? darkC2 : lightC2;
-        final c3 = isDark ? darkC3 : lightC3;
-        final a1 = isDark ? darkA1 : lightA1;
-        final a2 = isDark ? darkA2 : lightA2;
-
-        final animT = _c.value;
-
-        // Animate between the deep palette and a slightly more vibrant one
-        final g1 = Color.lerp(c1, a1, animT * 0.5)!;
-        final g2 = Color.lerp(c2, c1, animT * 0.3)!;
-        final g3 = Color.lerp(c3, a2, animT * 0.4)!;
-
         return Stack(
           fit: StackFit.expand,
           children: [
-            Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [g1, g2, g3],
-                  stops: const [0.0, 0.5, 1.0],
-                ),
-              ),
-            ),
-            // Radial accent glow (animated subtle pulse)
+            Container(color: bg),
             IgnorePointer(
               child: Container(
                 decoration: BoxDecoration(
                   gradient: RadialGradient(
-                    center: const Alignment(0.8, -0.6),
-                    radius: 1.5,
+                    center: const Alignment(0.9, -0.8),
+                    radius: 1.2,
                     colors: [
-                      Colors.greenAccent.withValues(alpha: 0.1 + (animT * 0.05)),
+                      glowColor.withValues(alpha: 0.06 + (_c.value * 0.04)),
                       Colors.transparent,
                     ],
-                    stops: const [0, 1],
+                    stops: const [0.0, 1.0],
                   ),
                 ),
               ),
             ),
-            // Content
             widget.child,
           ],
         );
@@ -257,5 +336,21 @@ class _AnimatedGradientShellState extends State<AnimatedGradientShell>
   void dispose() {
     _c.dispose();
     super.dispose();
+  }
+}
+
+class _LoadingScreen extends StatelessWidget {
+  const _LoadingScreen();
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      backgroundColor: Colors.transparent,
+      body: Center(
+        child: CircularProgressIndicator(
+          color: Color(0xFF7C6FF7),
+          strokeWidth: 2,
+        ),
+      ),
+    );
   }
 }

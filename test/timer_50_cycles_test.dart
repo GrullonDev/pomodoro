@@ -1,13 +1,16 @@
 import 'dart:async';
 
-import 'package:flutter_test/flutter_test.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:pomodoro/core/timer/ticker.dart';
 import 'package:pomodoro/core/timer/timer_bloc.dart';
 import 'package:pomodoro/core/data/session_repository.dart';
 import 'package:pomodoro/utils/notifications/notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'helpers/firebase_test_helpers.dart';
 
 // Mocks
 class _FakeTicker implements Ticker {
@@ -21,6 +24,11 @@ class _FakeTicker implements Ticker {
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  setUpAll(() async {
+    setupAllFirebaseMocks();
+    await Firebase.initializeApp();
+  });
 
   group('50 cycle simulation', () {
     test('simulate 50 cycles 25/5 and validate behavior', () async {

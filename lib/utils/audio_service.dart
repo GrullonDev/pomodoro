@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Simple singleton AudioService to centralize audio players and reduce
@@ -54,9 +56,22 @@ class AudioService {
   }
 
   Future<List<String>> availableFocusTracks() async {
-    // List only assets that are actually bundled (see pubspec.yaml). Add more when you include them.
+    try {
+      final manifestContent = await rootBundle.loadString('AssetManifest.json');
+      final manifestMap = json.decode(manifestContent) as Map<String, dynamic>;
+      final sounds = manifestMap.keys
+          .where((key) =>
+              key.startsWith('assets/sounds/') || key.startsWith('sounds/'))
+          .toList();
+      if (sounds.isNotEmpty) return sounds;
+    } catch (_) {}
     return [
       'sounds/cronometro.mp3',
+      'sounds/tick_wood.wav',
+      'sounds/tick_digital.wav',
+      'sounds/tick_pulse.wav',
+      'sounds/last5.mp3',
+      'sounds/last5.wav',
     ];
   }
 
@@ -69,10 +84,11 @@ class AudioService {
   Future<String> getFocusTrack() async {
     if (_cachedFocusTrack != null) return _cachedFocusTrack!;
     final prefs = await SharedPreferences.getInstance();
-  final saved = prefs.getString(_focusTrackKey);
-  final allowed = await availableFocusTracks();
-  _cachedFocusTrack =
-    (saved != null && allowed.contains(saved)) ? saved : 'sounds/cronometro.mp3';
+    final saved = prefs.getString(_focusTrackKey);
+    final allowed = await availableFocusTracks();
+    _cachedFocusTrack = (saved != null && allowed.contains(saved))
+        ? saved
+        : 'sounds/cronometro.mp3';
     return _cachedFocusTrack!;
   }
 
@@ -100,7 +116,7 @@ class AudioService {
   Future<void> stopTicking() async {
     try {
       await _tickPlayer.stop();
-  _tickingActive = false;
+      _tickingActive = false;
     } catch (_) {}
   }
 

@@ -4,9 +4,14 @@
     <!-- Allow querying/changing Do Not Disturb (notification policy) when the user grants access -->
     <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <!-- Foreground service permission used to keep the app alive during long timers -->
-    <!-- Optional: exact alarm (Android 14+) only if really needed -->
-    <!-- Removed USE_EXACT_ALARM to avoid permission denial crash; using inexact scheduling fallback -->
+    <!-- Required on Android 14+ (API 34) for foreground services of type mediaPlayback -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    <!-- Keep CPU awake during active timer session -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <!-- Vibrate phone and trigger haptic feedback on paired watch -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <!-- Receive device boot to survive reboots if needed -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <application
         android:label="pomodoro"
         android:name="${applicationName}"
@@ -48,6 +53,10 @@
           android:name=".ForegroundService"
           android:exported="false"
           android:foregroundServiceType="mediaPlayback" />
+        <!-- Receives PendingIntent broadcasts from Wear OS watch notification actions -->
+        <receiver
+            android:name=".TimerControlReceiver"
+            android:exported="false" />
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and

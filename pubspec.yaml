@@ -32,9 +32,12 @@ dependencies:
   firebase_auth: ^5.1.2
   cloud_firestore: ^5.5.0
   google_sign_in: ^6.2.0
+  sign_in_with_apple: ^6.1.0
+  crypto: ^3.0.3
   local_auth: ^3.0.0
   device_calendar: ^4.3.2
   upgrader: ^12.3.0
+  google_fonts: ^6.2.1
 
 
 dev_dependencies:
@@ -42,6 +45,7 @@ dev_dependencies:
     sdk: flutter
 
   flutter_lints: ^6.0.0
+  firebase_core_platform_interface: ^6.0.0
   flutter_launcher_icons: ^0.14.1
   flutter_native_splash: ^2.4.1
 
@@ -50,9 +54,18 @@ flutter_launcher_icons:
   android: true
   ios: true
   image_path: assets/launcher/app_icon.png
-  adaptive_icon_background: "#0F2027" # fallback background color
+  adaptive_icon_background: "#121212" # Matching the charcoal background of the logo
   adaptive_icon_foreground: assets/launcher/app_icon.png
   remove_alpha_ios: true
+
+# Splash screen generation config
+flutter_native_splash:
+  color: "#0F1115"
+  image: assets/launcher/splash_logo.png
+  android_12:
+    image: assets/launcher/splash_logo.png
+    color: "#0F1115"
+  fullscreen: true
 
 flutter:
   uses-material-design: true
@@ -64,3 +77,5 @@ flutter:
     - assets/sounds/cronometro.mp3
     - assets/sounds/
     - assets/terms_privacy.md
+    - assets/onboarding/
+    - assets/launcher/app_icon.png

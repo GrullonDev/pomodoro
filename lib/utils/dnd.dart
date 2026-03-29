@@ -90,10 +90,20 @@ class Dnd {
   }
 
   /// Start a minimal Android foreground service (best-effort).
-  static Future<bool> startForegroundService() async {
+  /// Pass [remainingSeconds] and [title] so the native service can run its own
+  /// countdown when the Dart isolate is suspended in the background.
+  static Future<bool> startForegroundService({
+    int remainingSeconds = 0,
+    bool paused = false,
+    String title = 'Pomodoro',
+  }) async {
     if (!Platform.isAndroid) return false;
     try {
-      final res = await _channel.invokeMethod<bool>('startForegroundService');
+      final res = await _channel.invokeMethod<bool>('startForegroundService', {
+        'remainingSeconds': remainingSeconds,
+        'paused': paused,
+        'title': title,
+      });
       return res ?? false;
     } on PlatformException {
       return false;
@@ -133,5 +143,72 @@ class Dnd {
     } on PlatformException {
       return false;
     }
+  }
+
+  /// Extended variant of [updateForegroundNotification] that includes
+  /// session / phase context so [WearNotificationHelper] can build a
+  /// richer Wear OS notification with session progress and phase label.
+  static Future<bool> updateForegroundNotificationWithWear({
+    required int remainingSeconds,
+    required bool paused,
+    required bool isWork,
+    required String title,
+    required int session,
+    required int totalSessions,
+  }) async {
+    if (!Platform.isAndroid) return false;
+    try {
+      final res =
+          await _channel.invokeMethod<bool>('updateForegroundNotification', {
+        'remainingSeconds': remainingSeconds,
+        'paused': paused,
+        'isWork': isWork,
+        'title': title,
+        'session': session,
+        'totalSessions': totalSessions,
+        'phase': isWork ? 'work' : 'break',
+      });
+      return res ?? false;
+    } on PlatformException {
+      return false;
+    }
+  }
+
+  /// Sends a haptic / alert event to the ForegroundService which posts a
+  /// HIGH-importance notification that buzzes the paired Wear OS watch.
+  ///
+  /// [event] must be one of: 'work_to_break', 'break_to_work', 'completed'
+  static Future<bool> triggerWearHaptic({
+    required String event,
+    String title = 'Pomodoro',
+  }) async {
+    if (!Platform.isAndroid) return false;
+    try {
+      final res = await _channel.invokeMethod<bool>('triggerWearHaptic', {
+        'event': event,
+        'title': title,
+      });
+      return res ?? false;
+    } on PlatformException {
+      return false;
+    }
+  }
+
+  /// Registers a Dart callback that is invoked when the user taps a
+  /// Pause/Resume or Skip button on the Wear OS watch notification card.
+  ///
+  /// [handler] receives either 'toggle' (pause/resume) or 'skip'.
+  /// The handler routes directly to [TimerActionBus] so the same logic
+  /// that handles notification actions also handles watch actions.
+  static void setWatchActionHandler(void Function(String action) handler) {
+    if (!Platform.isAndroid) return;
+    _channel.setMethodCallHandler((call) async {
+      if (call.method == 'onWatchAction') {
+        final action = (call.arguments as Map?)?.entries
+            .firstWhere((e) => e.key == 'action', orElse: () => const MapEntry('action', null))
+            .value as String?;
+        if (action != null) handler(action);
+      }
+    });
   }
 }

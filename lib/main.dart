@@ -8,6 +8,7 @@ import 'package:pomodoro/core/theme/theme_controller.dart';
 import 'package:pomodoro/utils/app.dart';
 import 'package:pomodoro/utils/notifications/notifications.dart';
 import 'package:pomodoro/features/gamification/gamification_service.dart';
+import 'package:pomodoro/features/momentum/momentum_service.dart';
 
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:pomodoro/features/integrations/calendar/calendar_service.dart';
@@ -39,6 +40,7 @@ void main() async {
   // Cargar preferencia de tema (oscuro por defecto si no existe)
   await ThemeController.instance.load();
   await GamificationService.instance.init();
+  await MomentumService.instance.init();
 
   tz.initializeTimeZones();
   await CalendarService.instance.init();
