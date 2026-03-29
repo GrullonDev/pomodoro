@@ -1,6 +1,6 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'package:pomodoro/core/data/preset_profile.dart';
 import 'package:pomodoro/core/data/session_repository.dart'; // retains other timer related settings
@@ -30,7 +30,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool? _last5Flash;
   final _repo = SessionRepository();
   String? _presetKey;
-  bool? _dark;
+  String? _themeMode;
   double? _tickVol;
   bool? _vibration;
   bool? _haptic;
@@ -59,7 +59,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     var preset = await ServiceLocator.I.settingsRepository.getSelectedPreset();
     // Si aún no hay un preset seleccionado, usar por defecto 'work'
     preset ??= PresetProfile.work.key;
-    final dark = await ServiceLocator.I.settingsRepository.isThemeDarkEnabled();
+    final tm = await ServiceLocator.I.settingsRepository.getThemeMode();
     final vol = await _repo.getTickingVolume();
     final vib = await _repo.isVibrationEnabled();
     final hap = await _repo.isHapticEnabled();
@@ -83,7 +83,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _last5Sound = l5s;
         _last5Flash = l5f;
         _presetKey = preset;
-        _dark = dark;
+        _themeMode = tm;
         _tickVol = vol;
         _vibration = vib;
         _haptic = hap;
@@ -111,7 +111,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           automaticallyImplyLeading: false,
           backgroundColor: Colors.transparent,
           title: Text(t.settings, style: TextStyle(color: scheme.primary))),
-      body: _persistent == null || _presetKey == null || _dark == null
+      body: _persistent == null || _presetKey == null || _themeMode == null
           ? const Center(child: CircularProgressIndicator())
           : ListView(
               children: [
@@ -261,15 +261,52 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
 
                 const Divider(),
-                SwitchListTile(
-                  title: Text('Modo oscuro',
-                      style: TextStyle(color: scheme.primary)),
-                  value: _dark!,
-                  onChanged: (v) async {
-                    await ThemeController.instance.setDark(v);
-                    setState(() => _dark = v);
+                ListTile(
+                  title: Text('Tema visual',
+                      style: TextStyle(
+                          color:
+                              Theme.of(context).textTheme.bodyMedium?.color)),
+                  subtitle: ValueListenableBuilder<ThemeMode>(
+                      valueListenable: ThemeController.instance.themeMode,
+                      builder: (_, themeMode, __) {
+                        String name = 'Sistema';
+                        if (themeMode == ThemeMode.light) name = 'Claro';
+                        if (themeMode == ThemeMode.dark) name = 'Oscuro';
+                        return Text(name,
+                          style: TextStyle(
+                              color: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.color
+                                  ?.withValues(alpha: 0.65)));
+                      }),
+                  onTap: () async {
+                    final selected = await showModalBottomSheet<ThemeMode>(
+                        context: context,
+                        builder: (ctx) => SafeArea(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  ListTile(
+                                    title: const Text('Sistema'),
+                                    onTap: () => Navigator.pop(ctx, ThemeMode.system),
+                                  ),
+                                  ListTile(
+                                    title: const Text('Claro'),
+                                    onTap: () => Navigator.pop(ctx, ThemeMode.light),
+                                  ),
+                                  ListTile(
+                                    title: const Text('Oscuro'),
+                                    onTap: () => Navigator.pop(ctx, ThemeMode.dark),
+                                  ),
+                                ],
+                              ),
+                            ));
+                    if (selected != null) {
+                      await ThemeController.instance.setMode(selected);
+                      if (mounted) setState(() => _themeMode = selected.name);
+                    }
                   },
-                  activeColor: scheme.primary,
                 ),
                 ListTile(
                   title: const Text('Primary Color'),

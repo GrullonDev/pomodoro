@@ -192,15 +192,17 @@ class MyApp extends StatelessWidget {
       );
     }
 
-    return ValueListenableBuilder<bool>(
-      valueListenable: ThemeController.instance.isDark,
-      builder: (_, isDark, __) {
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: ThemeController.instance.themeMode,
+      builder: (_, mode, __) {
         return ValueListenableBuilder<Locale?>(
           valueListenable: LocaleController.instance.locale,
           builder: (_, loc, ___) => MaterialApp(
             navigatorKey: navigatorKey,
             debugShowCheckedModeBanner: false,
-            theme: isDark ? buildDark() : buildLight(),
+            theme: buildLight(),
+            darkTheme: buildDark(),
+            themeMode: mode,
             localizationsDelegates: const [
               AppLocalizations.delegate,
               GlobalMaterialLocalizations.delegate,

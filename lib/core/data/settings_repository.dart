@@ -3,20 +3,20 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pomodoro/core/domain/repositories/settings_repository.dart';
 
 class SettingsRepository implements ISettingsRepository {
-  static const _themeDarkKey = 'theme_dark_enabled';
+  static const _themeModeKey = 'theme_mode_pref';
   static const _primaryColorKey = 'theme_primary_color';
   static const _presetKey = 'preset_profile_key';
 
   @override
-  Future<void> setThemeDarkEnabled(bool enabled) async {
+  Future<void> setThemeMode(String mode) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_themeDarkKey, enabled);
+    await prefs.setString(_themeModeKey, mode);
   }
 
   @override
-  Future<bool> isThemeDarkEnabled() async {
+  Future<String> getThemeMode() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(_themeDarkKey) ?? false;
+    return prefs.getString(_themeModeKey) ?? 'system';
   }
 
   @override

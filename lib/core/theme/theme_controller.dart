@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
 import 'package:pomodoro/core/di/service_locator.dart';
 
@@ -8,16 +8,22 @@ class ThemeController {
   ThemeController._();
   static final ThemeController instance = ThemeController._();
 
-  final ValueNotifier<bool> isDark =
-      ValueNotifier<bool>(true); // default oscuro
+  final ValueNotifier<ThemeMode> themeMode =
+      ValueNotifier<ThemeMode>(ThemeMode.system); // default system
 
   Future<void> load() async {
-    isDark.value =
-        await ServiceLocator.I.settingsRepository.isThemeDarkEnabled();
+    final modeStr = await ServiceLocator.I.settingsRepository.getThemeMode();
+    themeMode.value = _parseStr(modeStr);
   }
 
-  Future<void> setDark(bool value) async {
-    isDark.value = value;
-    await ServiceLocator.I.settingsRepository.setThemeDarkEnabled(value);
+  Future<void> setMode(ThemeMode mode) async {
+    themeMode.value = mode;
+    await ServiceLocator.I.settingsRepository.setThemeMode(mode.name);
+  }
+
+  ThemeMode _parseStr(String str) {
+    if (str == 'light') return ThemeMode.light;
+    if (str == 'dark') return ThemeMode.dark;
+    return ThemeMode.system;
   }
 }
