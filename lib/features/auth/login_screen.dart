@@ -58,7 +58,9 @@ class _LoginScreenState extends State<LoginScreen>
       if (mounted) Navigator.of(context).pop(true);
     } on FirebaseAuthException catch (e) {
       setState(() => _error = _friendlyError(e.code));
-    } catch (e) {
+    } catch (e, st) {
+      debugPrint('⚠️ Auth error [${e.runtimeType}]: $e');
+      debugPrint('$st');
       var msg = e.toString();
       if (e is PlatformException && e.message != null) msg = e.message!;
       setState(() => _error = _friendlyError(msg));
@@ -98,6 +100,9 @@ class _LoginScreenState extends State<LoginScreen>
       default:
         if (code.contains('cancelled') || code.contains('canceled')) {
           return 'Inicio de sesión cancelado.';
+        }
+        if (code.contains('ApiException: 10') || code.contains('Api10')) {
+          return 'Error de configuración de Google. Verifica tu conexión e intenta de nuevo.';
         }
         return code
             .replaceAll('Exception: ', '')

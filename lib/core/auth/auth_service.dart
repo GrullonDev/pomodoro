@@ -90,7 +90,16 @@ class AuthService {
   /// Links the anonymous account when the current session is a guest, so the
   /// uid and all existing data are preserved.
   Future<UserCredential> signInWithGoogle() async {
-    final googleUser = await GoogleSignIn().signIn();
+    // Let the plugin auto-detect serverClientId from google-services.json
+    // (via the generated default_web_client_id string resource).
+    final googleSignIn = GoogleSignIn(scopes: ['email']);
+
+    // Ensure any stale session is cleared before attempting sign-in
+    try {
+      await googleSignIn.signOut();
+    } catch (_) {}
+
+    final googleUser = await googleSignIn.signIn();
     if (googleUser == null) throw StateError('Google sign-in cancelled');
 
     final googleAuth = await googleUser.authentication;
