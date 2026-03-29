@@ -147,6 +147,7 @@ class _TimerViewState extends State<_TimerView>
     with SingleTickerProviderStateMixin {
   int? _previousDndFilter;
   bool _focusBlockEnabled = false;
+  bool _fgServiceStarted = false; // tracks whether the Android foreground service is running
   late final StreamSubscription<String> _actionSub;
   int _lastNotifSecond = -1; // throttling control
   int _lastHapticToggleStamp = 0;
@@ -217,7 +218,10 @@ class _TimerViewState extends State<_TimerView>
     if (Platform.isAndroid && _previousDndFilter != null) {
       Dnd.setInterruptionFilter(_previousDndFilter!);
       _previousDndFilter = null;
+    }
+    if (Platform.isAndroid && _fgServiceStarted) {
       Dnd.stopForegroundService();
+      _fgServiceStarted = false;
     }
     // Always reset app-level silent mode on exit
     NotificationService.appSilentMode = false;
@@ -352,7 +356,12 @@ class _TimerViewState extends State<_TimerView>
                             } catch (e) {
                               NotificationService.appSilentMode = true;
                             }
-                            Dnd.startForegroundService();
+                            Dnd.startForegroundService(
+                              remainingSeconds: state.remaining,
+                              paused: state.paused,
+                              title: loc.phaseWorkTitle,
+                            );
+                            _fgServiceStarted = true;
                           }
                         });
                       }
@@ -367,7 +376,10 @@ class _TimerViewState extends State<_TimerView>
                         Dnd.setInterruptionFilter(_previousDndFilter!);
                         _previousDndFilter = null;
                         Dnd.stopLockTask();
+                      }
+                      if (_fgServiceStarted) {
                         Dnd.stopForegroundService();
+                        _fgServiceStarted = false;
                       }
                     }
                     // Reset app-level silent mode so future notifications work normally
@@ -391,16 +403,27 @@ class _TimerViewState extends State<_TimerView>
                           .isPersistentNotificationEnabled()
                           .then((enabled) {
                         if (enabled) {
-                          // Send a tiny update to the native foreground service
-                          // to avoid rebuilding complex notification objects every second.
-                          Dnd.updateForegroundNotification(
-                            remainingSeconds: state.remaining,
-                            paused: state.paused,
-                            isWork: state.phase == TimerPhase.work,
-                            title: state.phase == TimerPhase.work
-                                ? loc.phaseWorkTitle
-                                : loc.phaseBreakTitle,
-                          );
+                          final phaseTitle = state.phase == TimerPhase.work
+                              ? loc.phaseWorkTitle
+                              : loc.phaseBreakTitle;
+                          // Ensure the foreground service is running even when
+                          // focusBlock is disabled (e.g. only persistent notif enabled).
+                          if (!_fgServiceStarted && Platform.isAndroid) {
+                            Dnd.startForegroundService(
+                              remainingSeconds: state.remaining,
+                              paused: state.paused,
+                              title: phaseTitle,
+                            );
+                            _fgServiceStarted = true;
+                          } else {
+                            // Send a sync broadcast — works from background on Android 12+
+                            Dnd.updateForegroundNotification(
+                              remainingSeconds: state.remaining,
+                              paused: state.paused,
+                              isWork: state.phase == TimerPhase.work,
+                              title: phaseTitle,
+                            );
+                          }
                         }
                       });
                     }
@@ -468,21 +491,24 @@ class _TimerViewState extends State<_TimerView>
                     );
                   } else if (state is TimerInitial) {
                     // Restore DND if user reset/cancelled
-                    if (Platform.isAndroid && _previousDndFilter != null) {
-                      Dnd.setInterruptionFilter(_previousDndFilter!);
-                      debugPrint(
-                          'DND restored to $_previousDndFilter on initial/reset');
-                      _previousDndFilter = null;
-                      // Stop any active lock task when user resets
-                      Dnd.stopLockTask().then((ok) {
-                        if (ok) debugPrint('Lock task stopped on reset');
-                      });
-                      // Ensure foreground service stopped on reset
-                      Dnd.stopForegroundService().then((ok) {
-                        if (ok) {
-                          debugPrint('Foreground service stopped on reset');
-                        }
-                      });
+                    if (Platform.isAndroid) {
+                      if (_previousDndFilter != null) {
+                        Dnd.setInterruptionFilter(_previousDndFilter!);
+                        debugPrint(
+                            'DND restored to $_previousDndFilter on initial/reset');
+                        _previousDndFilter = null;
+                        Dnd.stopLockTask().then((ok) {
+                          if (ok) debugPrint('Lock task stopped on reset');
+                        });
+                      }
+                      if (_fgServiceStarted) {
+                        Dnd.stopForegroundService().then((ok) {
+                          if (ok) {
+                            debugPrint('Foreground service stopped on reset');
+                          }
+                        });
+                        _fgServiceStarted = false;
+                      }
                     }
                   }
                 },

@@ -90,10 +90,20 @@ class Dnd {
   }
 
   /// Start a minimal Android foreground service (best-effort).
-  static Future<bool> startForegroundService() async {
+  /// Pass [remainingSeconds] and [title] so the native service can run its own
+  /// countdown when the Dart isolate is suspended in the background.
+  static Future<bool> startForegroundService({
+    int remainingSeconds = 0,
+    bool paused = false,
+    String title = 'Pomodoro',
+  }) async {
     if (!Platform.isAndroid) return false;
     try {
-      final res = await _channel.invokeMethod<bool>('startForegroundService');
+      final res = await _channel.invokeMethod<bool>('startForegroundService', {
+        'remainingSeconds': remainingSeconds,
+        'paused': paused,
+        'title': title,
+      });
       return res ?? false;
     } on PlatformException {
       return false;

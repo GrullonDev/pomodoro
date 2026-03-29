@@ -110,7 +110,19 @@ class MainActivity : FlutterFragmentActivity() {
 
 				"startForegroundService" -> {
 					try {
-						val intent = Intent(this@MainActivity, ForegroundService::class.java)
+						@Suppress("UNCHECKED_CAST")
+						val args = call.arguments as? Map<String, Any>
+						val intent = Intent(this@MainActivity, ForegroundService::class.java).apply {
+							action = "START"
+							if (args != null) {
+								putExtra(ForegroundService.EXTRA_REMAINING,
+									(args["remainingSeconds"] as? Number)?.toLong() ?: 0L)
+								putExtra(ForegroundService.EXTRA_PAUSED,
+									(args["paused"] as? Boolean) ?: false)
+								putExtra(ForegroundService.EXTRA_TITLE,
+									(args["title"] as? String) ?: "Pomodoro")
+							}
+						}
 						if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 							this@MainActivity.startForegroundService(intent)
 						} else {
@@ -139,19 +151,17 @@ class MainActivity : FlutterFragmentActivity() {
 						if (args != null) {
 							val remaining = (args["remainingSeconds"] as? Number)?.toLong() ?: 0L
 							val paused = (args["paused"] as? Boolean) ?: false
-							val isWork = (args["isWork"] as? Boolean) ?: true
 							val title = (args["title"] as? String) ?: "Pomodoro"
-							val intent = Intent(this@MainActivity, ForegroundService::class.java)
-							intent.action = "UPDATE_NOTIFICATION"
-							intent.putExtra("remainingSeconds", remaining)
-							intent.putExtra("paused", paused)
-							intent.putExtra("isWork", isWork)
-							intent.putExtra("title", title)
-							if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-								this@MainActivity.startForegroundService(intent)
-							} else {
-								this@MainActivity.startService(intent)
+							// Use sendBroadcast instead of startForegroundService so that
+							// updates are delivered even when the app is in the background
+							// (Android 12+ blocks startForegroundService from background).
+							val broadcast = Intent(ForegroundService.ACTION_SYNC).apply {
+								setPackage(packageName)
+								putExtra(ForegroundService.EXTRA_REMAINING, remaining)
+								putExtra(ForegroundService.EXTRA_PAUSED, paused)
+								putExtra(ForegroundService.EXTRA_TITLE, title)
 							}
+							sendBroadcast(broadcast)
 							result.success(true)
 						} else {
 							result.error("INVALID_ARGS", "Expected map arguments", null)
