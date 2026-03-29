@@ -1,4 +1,4 @@
-import 'dart:io' show Platform;
+// import 'dart:io' show Platform; // TODO: Re-enable for Google/Apple sign-in
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -75,13 +75,14 @@ class _LoginScreenState extends State<LoginScreen>
         AuthService.instance.signInWithEmail(_email.text.trim(), _password.text));
   }
 
-  Future<void> _signInWithGoogle() async {
-    await _withLoading(AuthService.instance.signInWithGoogle);
-  }
+  // TODO: Re-enable for Google/Apple sign-in
+  // Future<void> _signInWithGoogle() async {
+  //   await _withLoading(AuthService.instance.signInWithGoogle);
+  // }
 
-  Future<void> _signInWithApple() async {
-    await _withLoading(AuthService.instance.signInWithApple);
-  }
+  // Future<void> _signInWithApple() async {
+  //   await _withLoading(AuthService.instance.signInWithApple);
+  // }
 
   String _friendlyError(String code) {
     switch (code) {
@@ -205,36 +206,37 @@ class _LoginScreenState extends State<LoginScreen>
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            // ── Google button ─────────────────────────────
-                            _SocialButton(
-                              onPressed: _loading ? null : _signInWithGoogle,
-                              loading: _loading,
-                              icon: _GoogleIcon(),
-                              label: 'Continuar con Google',
-                              isDark: isDark,
-                            ),
-                            const SizedBox(height: 12),
+                            // ── Google button (disabled for v1 release) ──
+                            // TODO: Re-enable when OAuth consent screen is configured
+                            // _SocialButton(
+                            //   onPressed: _loading ? null : _signInWithGoogle,
+                            //   loading: _loading,
+                            //   icon: _GoogleIcon(),
+                            //   label: 'Continuar con Google',
+                            //   isDark: isDark,
+                            // ),
+                            // const SizedBox(height: 12),
 
-                            // ── Apple button (iOS / macOS only) ───────────
-                            if (Platform.isIOS || Platform.isMacOS) ...[
-                              _SocialButton(
-                                onPressed: _loading ? null : _signInWithApple,
-                                loading: _loading,
-                                icon: Icon(
-                                  Icons.apple_rounded,
-                                  size: 22,
-                                  color: isDark ? Colors.white : Colors.black,
-                                ),
-                                label: 'Continuar con Apple',
-                                isDark: isDark,
-                                isApple: true,
-                              ),
-                              const SizedBox(height: 12),
-                            ],
+                            // ── Apple button (disabled for v1 release) ────
+                            // if (Platform.isIOS || Platform.isMacOS) ...[
+                            //   _SocialButton(
+                            //     onPressed: _loading ? null : _signInWithApple,
+                            //     loading: _loading,
+                            //     icon: Icon(
+                            //       Icons.apple_rounded,
+                            //       size: 22,
+                            //       color: isDark ? Colors.white : Colors.black,
+                            //     ),
+                            //     label: 'Continuar con Apple',
+                            //     isDark: isDark,
+                            //     isApple: true,
+                            //   ),
+                            //   const SizedBox(height: 12),
+                            // ],
 
                             // ── Divider ───────────────────────────────────
-                            _Divider(color: borderColor, subColor: subColor),
-                            const SizedBox(height: 12),
+                            // _Divider(color: borderColor, subColor: subColor),
+                            // const SizedBox(height: 12),
 
                             // ── Email toggle button ───────────────────────
                             OutlinedButton.icon(
@@ -448,156 +450,153 @@ class _LoginScreenState extends State<LoginScreen>
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
-// Helper widgets
+// Helper widgets — commented out for v1 release (no Google/Apple sign-in)
+// TODO: Re-enable when social sign-in is configured
 // ──────────────────────────────────────────────────────────────────────────────
 
-class _SocialButton extends StatelessWidget {
-  final VoidCallback? onPressed;
-  final bool loading;
-  final Widget icon;
-  final String label;
-  final bool isDark;
-  final bool isApple;
+// class _SocialButton extends StatelessWidget {
+//   final VoidCallback? onPressed;
+//   final bool loading;
+//   final Widget icon;
+//   final String label;
+//   final bool isDark;
+//   final bool isApple;
+//
+//   const _SocialButton({
+//     required this.onPressed,
+//     required this.loading,
+//     required this.icon,
+//     required this.label,
+//     required this.isDark,
+//     this.isApple = false,
+//   });
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     final bgColor = isApple
+//         ? (isDark ? Colors.white : Colors.black)
+//         : (isDark ? const Color(0xFF1E1E30) : Colors.white);
+//     final textColor = isApple
+//         ? (isDark ? Colors.black : Colors.white)
+//         : (isDark ? const Color(0xFFEEEEF6) : const Color(0xFF1A1A2E));
+//     final borderColor =
+//         isDark ? const Color(0xFF2E2E4A) : const Color(0xFFE0E0F0);
+//
+//     return SizedBox(
+//       height: 52,
+//       child: OutlinedButton(
+//         onPressed: onPressed,
+//         style: OutlinedButton.styleFrom(
+//           backgroundColor: bgColor,
+//           side: BorderSide(color: borderColor),
+//           padding: const EdgeInsets.symmetric(horizontal: 16),
+//           shape:
+//               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+//         ),
+//         child: loading
+//             ? SizedBox(
+//                 height: 18,
+//                 width: 18,
+//                 child: CircularProgressIndicator(
+//                     strokeWidth: 2,
+//                     color: textColor.withValues(alpha: 0.7)),
+//               )
+//             : Row(
+//                 mainAxisAlignment: MainAxisAlignment.center,
+//                 children: [
+//                   icon,
+//                   const SizedBox(width: 10),
+//                   Text(
+//                     label,
+//                     style: TextStyle(
+//                         color: textColor,
+//                         fontWeight: FontWeight.w500,
+//                         fontSize: 15),
+//                   ),
+//                 ],
+//               ),
+//       ),
+//     );
+//   }
+// }
 
-  const _SocialButton({
-    required this.onPressed,
-    required this.loading,
-    required this.icon,
-    required this.label,
-    required this.isDark,
-    this.isApple = false,
-  });
+// class _GoogleIcon extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     return SizedBox(
+//       width: 22,
+//       height: 22,
+//       child: Stack(
+//         alignment: Alignment.center,
+//         children: [
+//           CustomPaint(size: const Size(22, 22), painter: _GoogleArcPainter()),
+//         ],
+//       ),
+//     );
+//   }
+// }
 
-  @override
-  Widget build(BuildContext context) {
-    final bgColor = isApple
-        ? (isDark ? Colors.white : Colors.black)
-        : (isDark ? const Color(0xFF1E1E30) : Colors.white);
-    final textColor = isApple
-        ? (isDark ? Colors.black : Colors.white)
-        : (isDark ? const Color(0xFFEEEEF6) : const Color(0xFF1A1A2E));
-    final borderColor =
-        isDark ? const Color(0xFF2E2E4A) : const Color(0xFFE0E0F0);
+// class _GoogleArcPainter extends CustomPainter {
+//   @override
+//   void paint(Canvas canvas, Size size) {
+//     final center = Offset(size.width / 2, size.height / 2);
+//     final radius = size.width / 2 - 1.5;
+//     final strokeW = size.width * 0.22;
+//
+//     void arc(Color color, double start, double sweep) {
+//       canvas.drawArc(
+//         Rect.fromCircle(center: center, radius: radius),
+//         start,
+//         sweep,
+//         false,
+//         Paint()
+//           ..color = color
+//           ..style = PaintingStyle.stroke
+//           ..strokeWidth = strokeW
+//           ..strokeCap = StrokeCap.butt,
+//       );
+//     }
+//
+//     arc(const Color(0xFF4285F4), -0.25, 1.55);
+//     arc(const Color(0xFF34A853), 1.30, 1.55);
+//     arc(const Color(0xFFFBBC05), 2.85, 0.78);
+//     arc(const Color(0xFFEA4335), 3.63, 0.77);
+//
+//     canvas.drawRect(
+//       Rect.fromLTWH(
+//           center.dx - 0.5,
+//           center.dy - size.height * 0.14,
+//           size.width * 0.5,
+//           size.height * 0.27),
+//       Paint()..color = Colors.white,
+//     );
+//   }
+//
+//   @override
+//   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+// }
 
-    return SizedBox(
-      height: 52,
-      child: OutlinedButton(
-        onPressed: onPressed,
-        style: OutlinedButton.styleFrom(
-          backgroundColor: bgColor,
-          side: BorderSide(color: borderColor),
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        ),
-        child: loading
-            ? SizedBox(
-                height: 18,
-                width: 18,
-                child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: textColor.withValues(alpha: 0.7)),
-              )
-            : Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  icon,
-                  const SizedBox(width: 10),
-                  Text(
-                    label,
-                    style: TextStyle(
-                        color: textColor,
-                        fontWeight: FontWeight.w500,
-                        fontSize: 15),
-                  ),
-                ],
-              ),
-      ),
-    );
-  }
-}
-
-/// A simple Google "G" rendered with the brand's four colors.
-class _GoogleIcon extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 22,
-      height: 22,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          // Outer circle split into four colored arcs
-          CustomPaint(size: const Size(22, 22), painter: _GoogleArcPainter()),
-        ],
-      ),
-    );
-  }
-}
-
-class _GoogleArcPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2);
-    final radius = size.width / 2 - 1.5;
-    final strokeW = size.width * 0.22;
-
-    void arc(Color color, double start, double sweep) {
-      canvas.drawArc(
-        Rect.fromCircle(center: center, radius: radius),
-        start,
-        sweep,
-        false,
-        Paint()
-          ..color = color
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = strokeW
-          ..strokeCap = StrokeCap.butt,
-      );
-    }
-
-    // Clockwise from right: blue → green → yellow → red
-    arc(const Color(0xFF4285F4), -0.25, 1.55);   // blue (right)
-    arc(const Color(0xFF34A853), 1.30, 1.55);    // green (bottom)
-    arc(const Color(0xFFFBBC05), 2.85, 0.78);    // yellow (lower-left)
-    arc(const Color(0xFFEA4335), 3.63, 0.77);    // red (upper-left)
-
-    // Horizontal white bar forming the right part of the "G"
-    canvas.drawRect(
-      Rect.fromLTWH(
-          center.dx - 0.5,
-          center.dy - size.height * 0.14,
-          size.width * 0.5,
-          size.height * 0.27),
-      Paint()..color = Colors.white,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-class _Divider extends StatelessWidget {
-  final Color color;
-  final Color subColor;
-
-  const _Divider({required this.color, required this.subColor});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(child: Divider(color: color, thickness: 1)),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          child: Text(
-            'o usa tu correo',
-            style: TextStyle(color: subColor, fontSize: 12),
-          ),
-        ),
-        Expanded(child: Divider(color: color, thickness: 1)),
-      ],
-    );
-  }
-}
+// class _Divider extends StatelessWidget {
+//   final Color color;
+//   final Color subColor;
+//
+//   const _Divider({required this.color, required this.subColor});
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return Row(
+//       children: [
+//         Expanded(child: Divider(color: color, thickness: 1)),
+//         Padding(
+//           padding: const EdgeInsets.symmetric(horizontal: 12),
+//           child: Text(
+//             'o usa tu correo',
+//             style: TextStyle(color: subColor, fontSize: 12),
+//           ),
+//         ),
+//         Expanded(child: Divider(color: color, thickness: 1)),
+//       ],
+//     );
+//   }
+// }
 
