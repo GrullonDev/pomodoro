@@ -8,6 +8,8 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
     <!-- Keep CPU awake during active timer session -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <!-- Vibrate phone and trigger haptic feedback on paired watch -->
+    <uses-permission android:name="android.permission.VIBRATE" />
     <!-- Receive device boot to survive reboots if needed -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <application
@@ -51,6 +53,10 @@
           android:name=".ForegroundService"
           android:exported="false"
           android:foregroundServiceType="mediaPlayback" />
+        <!-- Receives PendingIntent broadcasts from Wear OS watch notification actions -->
+        <receiver
+            android:name=".TimerControlReceiver"
+            android:exported="false" />
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and

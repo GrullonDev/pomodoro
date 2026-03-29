@@ -17,25 +17,38 @@ import android.os.PowerManager
 import androidx.core.app.NotificationCompat
 
 class ForegroundService : Service() {
+
     companion object {
         const val CHANNEL_ID = "pomodoro_fg_channel"
-        const val NOTIF_ID = 9100
+        const val NOTIF_ID   = 9100
 
-        // Broadcast action for Dart→Service sync updates (works from background on all API levels)
-        const val ACTION_SYNC = "com.grullondev.pomodoro.TIMER_SYNC"
-        const val EXTRA_REMAINING = "remainingSeconds"
-        const val EXTRA_PAUSED = "paused"
-        const val EXTRA_TITLE = "title"
+        // Broadcast: Dart → Service sync (timer state each second)
+        const val ACTION_SYNC        = "com.grullondev.pomodoro.TIMER_SYNC"
+        // Broadcast: Dart → Service haptic event (phase transition / completion)
+        const val ACTION_WEAR_HAPTIC = "com.grullondev.pomodoro.WEAR_HAPTIC"
+
+        // Intent extras — shared with MainActivity
+        const val EXTRA_REMAINING      = "remainingSeconds"
+        const val EXTRA_PAUSED         = "paused"
+        const val EXTRA_TITLE          = "title"
+        const val EXTRA_SESSION        = "session"
+        const val EXTRA_TOTAL_SESSIONS = "totalSessions"
+        const val EXTRA_PHASE          = "phase"        // "work" | "break"
+        const val EXTRA_WEAR_EVENT     = "wearEvent"    // "work_to_break" | "break_to_work" | "completed"
     }
 
-    private var remainingSeconds = 0L
-    private var paused = false
-    private var sessionTitle = "Pomodoro"
+    // ── Timer state ───────────────────────────────────────────────────────────
 
-    // Native countdown so the notification keeps updating even when Dart is suspended
+    private var remainingSeconds = 0L
+    private var paused           = false
+    private var sessionTitle     = "Pomodoro"
+    private var currentSession   = 1
+    private var totalSessions    = 1
+    private var phase            = "work"   // "work" | "break"
+
+    // ── Native countdown (runs even when Dart is suspended) ───────────────────
+
     private val handler = Handler(Looper.getMainLooper())
-    private var wakeLock: PowerManager.WakeLock? = null
-    private var syncReceiver: BroadcastReceiver? = null
 
     private val tickRunnable = object : Runnable {
         override fun run() {
@@ -43,43 +56,49 @@ class ForegroundService : Service() {
                 remainingSeconds--
                 postNotification()
             }
-            // Keep scheduling as long as there is time left (stopped via stopSelf / onDestroy)
             if (remainingSeconds > 0) {
                 handler.postDelayed(this, 1_000L)
             }
         }
     }
 
-    // ── Lifecycle ────────────────────────────────────────────────────────────
+    // ── Resources ─────────────────────────────────────────────────────────────
+
+    private var wakeLock: PowerManager.WakeLock? = null
+    private var syncReceiver: BroadcastReceiver?      = null
+    private var wearHapticReceiver: BroadcastReceiver? = null
+
+    // ── Lifecycle ─────────────────────────────────────────────────────────────
 
     override fun onCreate() {
         super.onCreate()
         createNotificationChannel()
         acquireWakeLock()
         registerSyncReceiver()
+        registerWearHapticReceiver()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val action = intent?.action ?: "START"
-
-        // Sync state from intent extras when present
+        // Sync state from intent when provided
         if (intent != null) {
             val rem = intent.getLongExtra(EXTRA_REMAINING, -1L)
             if (rem >= 0) remainingSeconds = rem
             paused = intent.getBooleanExtra(EXTRA_PAUSED, paused)
             intent.getStringExtra(EXTRA_TITLE)?.let { sessionTitle = it }
+            val sess = intent.getIntExtra(EXTRA_SESSION, -1)
+            if (sess > 0) currentSession = sess
+            val total = intent.getIntExtra(EXTRA_TOTAL_SESSIONS, -1)
+            if (total > 0) totalSessions = total
+            intent.getStringExtra(EXTRA_PHASE)?.let { phase = it }
         }
 
-        // Promote to foreground immediately — required before 5 s timeout on Android 8+
+        // Must call startForeground before the 5-second ANR timeout (Android 8+)
         startForegroundCompat()
 
-        if (action == "START" || action == "UPDATE_NOTIFICATION") {
-            // Restart the native tick only when we are not paused and have time left
-            if (!paused && remainingSeconds > 0) {
-                rescheduleNativeTick()
-            } else {
-                handler.removeCallbacks(tickRunnable)
-            }
+        if (!paused && remainingSeconds > 0) {
+            rescheduleNativeTick()
+        } else {
+            handler.removeCallbacks(tickRunnable)
         }
 
         return START_STICKY
@@ -89,39 +108,35 @@ class ForegroundService : Service() {
 
     override fun onDestroy() {
         handler.removeCallbacks(tickRunnable)
-        unregisterSyncReceiverSafely()
+        unregisterReceiverSafely(syncReceiver)
+        unregisterReceiverSafely(wearHapticReceiver)
+        syncReceiver      = null
+        wearHapticReceiver = null
         releaseWakeLock()
-        @Suppress("DEPRECATION")
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             stopForeground(STOP_FOREGROUND_REMOVE)
         } else {
+            @Suppress("DEPRECATION")
             stopForeground(true)
         }
         super.onDestroy()
     }
 
-    // ── Foreground / notification helpers ────────────────────────────────────
+    // ── Foreground / notification ─────────────────────────────────────────────
 
     private fun startForegroundCompat() {
         val notif = buildNotification()
         try {
-            // API 34 (Android 14) requires explicit foreground service type in startForeground()
+            // Android 14 (API 34) requires explicit service type in startForeground()
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                startForeground(
-                    NOTIF_ID, notif,
-                    ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
-                )
+                startForeground(NOTIF_ID, notif, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK)
             } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                // API 29+ also accepts the type param
-                startForeground(
-                    NOTIF_ID, notif,
-                    ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
-                )
+                startForeground(NOTIF_ID, notif, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK)
             } else {
                 startForeground(NOTIF_ID, notif)
             }
         } catch (e: Exception) {
-            // Fallback: try without type if the typed variant fails
+            // Fallback: try without type parameter
             try { startForeground(NOTIF_ID, notif) } catch (_: Exception) {}
         }
     }
@@ -133,30 +148,29 @@ class ForegroundService : Service() {
         } catch (_: Exception) {}
     }
 
-    private fun buildNotification(): android.app.Notification {
-        // Tap notification → reopen app
-        val tapPi = PendingIntent.getActivity(
-            this, 0,
-            Intent(this, MainActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
-            },
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
+    /**
+     * Delegates to WearNotificationHelper which builds the full Wear OS-extended
+     * notification with action buttons and session progress page.
+     */
+    private fun buildNotification() = WearNotificationHelper.buildWearableNotification(
+        context        = this,
+        channelId      = CHANNEL_ID,
+        title          = sessionTitle,
+        remainingSeconds = remainingSeconds,
+        paused         = paused,
+        session        = currentSession,
+        totalSessions  = totalSessions,
+        phase          = phase,
+        tapIntent      = buildTapIntent(),
+    )
 
-        val timeText = formatRemaining(remainingSeconds)
-        val contentText = if (paused) "⏸ $timeText" else timeText
-
-        return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle(sessionTitle)
-            .setContentText(contentText)
-            .setSmallIcon(R.drawable.ic_stat_pomodoro)
-            .setOngoing(true)
-            .setContentIntent(tapPi)
-            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            // Show notification immediately without batching delay (Android 12+ behaviour)
-            .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
-            .build()
-    }
+    private fun buildTapIntent(): PendingIntent = PendingIntent.getActivity(
+        this, 0,
+        Intent(this, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        },
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+    )
 
     // ── Native countdown ──────────────────────────────────────────────────────
 
@@ -165,50 +179,75 @@ class ForegroundService : Service() {
         handler.postDelayed(tickRunnable, 1_000L)
     }
 
-    // ── BroadcastReceiver for Dart sync ───────────────────────────────────────
+    // ── Broadcast receivers ───────────────────────────────────────────────────
 
     /**
-     * Dart sends a broadcast (not startForegroundService) for every second update.
-     * Broadcasts are delivered even when the app is in the background, and there are
-     * no background-start restrictions that apply to foreground services.
+     * Receives timer state sync from Dart every second via sendBroadcast().
+     * Uses broadcast instead of startForegroundService to avoid Android 12+ background
+     * start restrictions that prevent updating notifications when the app is backgrounded.
      */
     private fun registerSyncReceiver() {
         syncReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 intent ?: return
+
                 val rem = intent.getLongExtra(EXTRA_REMAINING, -1L)
                 if (rem >= 0) remainingSeconds = rem
+
                 val newPaused = intent.getBooleanExtra(EXTRA_PAUSED, paused)
                 intent.getStringExtra(EXTRA_TITLE)?.let { sessionTitle = it }
+                val sess = intent.getIntExtra(EXTRA_SESSION, -1)
+                if (sess > 0) currentSession = sess
+                val total = intent.getIntExtra(EXTRA_TOTAL_SESSIONS, -1)
+                if (total > 0) totalSessions = total
+                intent.getStringExtra(EXTRA_PHASE)?.let { phase = it }
 
                 val wasPaused = paused
                 paused = newPaused
 
                 postNotification()
 
-                // If just resumed, restart the native tick
+                // Restart native tick on resume
                 if (wasPaused && !paused && remainingSeconds > 0) {
                     rescheduleNativeTick()
                 }
-                // If just paused, stop the native tick
+                // Stop native tick on pause
                 if (!wasPaused && paused) {
                     handler.removeCallbacks(tickRunnable)
                 }
             }
         }
+        registerReceiverCompat(syncReceiver!!, IntentFilter(ACTION_SYNC))
+    }
 
-        val filter = IntentFilter(ACTION_SYNC)
+    /**
+     * Receives haptic event requests from Dart (phase transition / completion).
+     * Delegates to WearNotificationHelper which posts a HIGH-importance alert
+     * notification that buzzes the paired Wear OS watch.
+     */
+    private fun registerWearHapticReceiver() {
+        wearHapticReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                intent ?: return
+                val event = intent.getStringExtra(EXTRA_WEAR_EVENT) ?: return
+                WearNotificationHelper.postTransitionAlert(
+                    this@ForegroundService, event, sessionTitle
+                )
+            }
+        }
+        registerReceiverCompat(wearHapticReceiver!!, IntentFilter(ACTION_WEAR_HAPTIC))
+    }
+
+    private fun registerReceiverCompat(receiver: BroadcastReceiver, filter: IntentFilter) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            // Android 13+: must declare RECEIVER_NOT_EXPORTED for internal broadcasts
-            registerReceiver(syncReceiver, filter, RECEIVER_NOT_EXPORTED)
+            registerReceiver(receiver, filter, RECEIVER_NOT_EXPORTED)
         } else {
-            registerReceiver(syncReceiver, filter)
+            registerReceiver(receiver, filter)
         }
     }
 
-    private fun unregisterSyncReceiverSafely() {
-        try { syncReceiver?.let { unregisterReceiver(it) } } catch (_: Exception) {}
-        syncReceiver = null
+    private fun unregisterReceiverSafely(receiver: BroadcastReceiver?) {
+        try { receiver?.let { unregisterReceiver(it) } } catch (_: Exception) {}
     }
 
     // ── WakeLock ──────────────────────────────────────────────────────────────
@@ -220,44 +259,33 @@ class ForegroundService : Service() {
                 PowerManager.PARTIAL_WAKE_LOCK,
                 "pomodoro::TimerWakeLock"
             ).also {
-                // Hold for up to 6 hours (longest realistic Pomodoro session)
-                it.acquire(6 * 60 * 60 * 1_000L)
+                it.acquire(6 * 60 * 60 * 1_000L)   // max 6 hours
             }
         } catch (_: Exception) {}
     }
 
     private fun releaseWakeLock() {
-        try {
-            if (wakeLock?.isHeld == true) wakeLock?.release()
-        } catch (_: Exception) {}
+        try { if (wakeLock?.isHeld == true) wakeLock?.release() } catch (_: Exception) {}
         wakeLock = null
     }
 
-    // ── Channel / channel creation ────────────────────────────────────────────
+    // ── Notification channel ──────────────────────────────────────────────────
 
     private fun createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            val channel = NotificationChannel(
-                CHANNEL_ID,
-                "Pomodoro Timer",
-                NotificationManager.IMPORTANCE_LOW
-            ).apply {
-                description = "Shows the active Pomodoro timer"
-                setShowBadge(false)
-                enableVibration(false)
-                enableLights(false)
-            }
-            nm.createNotificationChannel(channel)
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+        val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        if (nm.getNotificationChannel(CHANNEL_ID) != null) return
+
+        val channel = NotificationChannel(
+            CHANNEL_ID,
+            "Pomodoro Timer",
+            NotificationManager.IMPORTANCE_LOW
+        ).apply {
+            description = "Shows the active Pomodoro timer countdown"
+            setShowBadge(false)
+            enableVibration(false)
+            enableLights(false)
         }
-    }
-
-    // ── Utilities ─────────────────────────────────────────────────────────────
-
-    private fun formatRemaining(sec: Long): String {
-        val s = (sec % 60).toString().padStart(2, '0')
-        val m = ((sec / 60) % 60).toString().padStart(2, '0')
-        val h = sec / 3600
-        return if (h > 0) "%02d:%s:%s".format(h, m, s) else "$m:$s"
+        nm.createNotificationChannel(channel)
     }
 }

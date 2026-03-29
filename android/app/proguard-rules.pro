@@ -25,3 +25,7 @@
 -keep class com.google.android.play.core.splitcompat.** { *; }
 -keep class com.google.android.play.core.splitinstall.** { *; }
 -keep class com.google.android.play.core.tasks.** { *; }
+
+# Wear OS notification extensions (androidx.core — no extra dependency needed)
+-keep class androidx.core.app.NotificationCompat$WearableExtender { *; }
+-keep class androidx.core.app.NotificationCompat$Action { *; }

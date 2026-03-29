@@ -23,6 +23,7 @@ import 'package:pomodoro/l10n/app_localizations.dart';
 import 'package:pomodoro/utils/audio_service.dart';
 import 'package:pomodoro/utils/dnd.dart';
 import 'package:pomodoro/utils/notifications/notifications.dart';
+import 'package:pomodoro/utils/wearable_service.dart';
 import 'package:pomodoro/utils/app.dart';
 import 'package:pomodoro/features/gamification/gamification_service.dart';
 import 'package:pomodoro/features/integrations/calendar/calendar_service.dart';
@@ -148,6 +149,9 @@ class _TimerViewState extends State<_TimerView>
   int? _previousDndFilter;
   bool _focusBlockEnabled = false;
   bool _fgServiceStarted = false; // tracks whether the Android foreground service is running
+  // Phase/session tracking for watch transition alerts
+  TimerPhase? _previousPhase;
+  int? _previousSession;
   late final StreamSubscription<String> _actionSub;
   int _lastNotifSecond = -1; // throttling control
   int _lastHapticToggleStamp = 0;
@@ -207,6 +211,16 @@ class _TimerViewState extends State<_TimerView>
         } else if (action == 'skip') {
           bloc.add(TimerPhaseCompleted());
         }
+      }
+    });
+    // Initialize wearable service and register watch action handler (Android only).
+    // Watch actions (Pause/Skip buttons on Wear OS notification) are forwarded
+    // to TimerActionBus via the same path as phone notification actions.
+    WearableService.instance.initialize().then((_) {
+      if (Platform.isAndroid && mounted) {
+        Dnd.setWatchActionHandler((action) {
+          if (mounted) TimerActionBus.instance.add(action);
+        });
       }
     });
     _loadGoalRemaining();
@@ -382,6 +396,13 @@ class _TimerViewState extends State<_TimerView>
                         _fgServiceStarted = false;
                       }
                     }
+                    // Notify watch: session complete (one long haptic pulse)
+                    WearableService.instance.onSessionCompleted(
+                      totalSessions: state.totalSessions,
+                      workMinutes: state.workDuration ~/ 60,
+                    );
+                    _previousPhase   = null;
+                    _previousSession = null;
                     // Reset app-level silent mode so future notifications work normally
                     NotificationService.appSilentMode = false;
                   }
@@ -416,16 +437,37 @@ class _TimerViewState extends State<_TimerView>
                             );
                             _fgServiceStarted = true;
                           } else {
-                            // Send a sync broadcast — works from background on Android 12+
-                            Dnd.updateForegroundNotification(
+                            // WearableService decides whether to send the standard
+                            // or the Wear OS-enriched broadcast (with session/phase).
+                            WearableService.instance.onTimerTick(
                               remainingSeconds: state.remaining,
                               paused: state.paused,
                               isWork: state.phase == TimerPhase.work,
                               title: phaseTitle,
+                              session: state.session,
+                              totalSessions: state.totalSessions,
                             );
                           }
                         }
                       });
+                    // Detect phase or session change → alert the watch
+                    final phaseChanged = _previousPhase != null &&
+                        _previousPhase != state.phase;
+                    final sessionChanged = _previousSession != null &&
+                        _previousSession != state.session;
+                    if (phaseChanged || sessionChanged) {
+                      WearableService.instance.onPhaseTransition(
+                        fromPhase: _previousPhase ?? state.phase,
+                        toPhase: state.phase,
+                        session: state.session,
+                        totalSessions: state.totalSessions,
+                        phaseTitle: state.phase == TimerPhase.work
+                            ? loc.phaseWorkTitle
+                            : loc.phaseBreakTitle,
+                      );
+                    }
+                    _previousPhase   = state.phase;
+                    _previousSession = state.session;
                     }
                     // Haptic feedback on pause/resume toggle (only when change detected)
                     if (state.paused) {
@@ -510,6 +552,8 @@ class _TimerViewState extends State<_TimerView>
                         _fgServiceStarted = false;
                       }
                     }
+                    _previousPhase   = null;
+                    _previousSession = null;
                   }
                 },
                 builder: (context, state) {

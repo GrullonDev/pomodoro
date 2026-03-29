@@ -2,27 +2,38 @@ package com.grullondev.pomodoro
 
 import android.Manifest
 import android.app.NotificationManager
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import androidx.annotation.NonNull
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import io.flutter.embedding.android.FlutterActivity
+import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 
-import io.flutter.embedding.android.FlutterFragmentActivity
-
 class MainActivity : FlutterFragmentActivity() {
+
 	private val CHANNEL = "pomodoro/dnd"
+
+	// Dynamic receiver that picks up watch action relay from TimerControlReceiver
+	// and forwards it to Dart via MethodChannel.invokeMethod("onWatchAction").
+	private var watchActionReceiver: BroadcastReceiver? = null
+	private var watchActionChannel: MethodChannel?      = null
 
 	override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
 		super.configureFlutterEngine(flutterEngine)
-		MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
+
+		val channel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL)
+		watchActionChannel = channel
+
+		channel.setMethodCallHandler { call, result ->
 			when (call.method) {
+
 				"isPolicyGranted" -> {
 					val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 					result.success(if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) nm.isNotificationPolicyAccessGranted else true)
@@ -70,7 +81,6 @@ class MainActivity : FlutterFragmentActivity() {
 							} catch (se: SecurityException) {
 								result.error("PERMISSION_DENIED", "Notification policy access denied", null)
 							} catch (iae: IllegalArgumentException) {
-								// Some OEM firmwares may reject values; fall back to ALL instead of crashing
 								try { nm.setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_ALL) } catch (_: Exception) {}
 								result.error("INVALID_FILTER", "Invalid interruption filter $filter", null)
 							}
@@ -121,6 +131,12 @@ class MainActivity : FlutterFragmentActivity() {
 									(args["paused"] as? Boolean) ?: false)
 								putExtra(ForegroundService.EXTRA_TITLE,
 									(args["title"] as? String) ?: "Pomodoro")
+								// Wear OS context (optional — passed when wearable support is ON)
+								val sess = (args["session"] as? Number)?.toInt()
+								if (sess != null) putExtra(ForegroundService.EXTRA_SESSION, sess)
+								val total = (args["totalSessions"] as? Number)?.toInt()
+								if (total != null) putExtra(ForegroundService.EXTRA_TOTAL_SESSIONS, total)
+								(args["phase"] as? String)?.let { putExtra(ForegroundService.EXTRA_PHASE, it) }
 							}
 						}
 						if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -150,16 +166,22 @@ class MainActivity : FlutterFragmentActivity() {
 						val args = call.arguments as? Map<String, Any>
 						if (args != null) {
 							val remaining = (args["remainingSeconds"] as? Number)?.toLong() ?: 0L
-							val paused = (args["paused"] as? Boolean) ?: false
-							val title = (args["title"] as? String) ?: "Pomodoro"
-							// Use sendBroadcast instead of startForegroundService so that
-							// updates are delivered even when the app is in the background
-							// (Android 12+ blocks startForegroundService from background).
+							val paused    = (args["paused"] as? Boolean) ?: false
+							val title     = (args["title"] as? String) ?: "Pomodoro"
+
+							// Use sendBroadcast — works from background on all Android versions.
+							// startForegroundService from background is blocked on Android 12+.
 							val broadcast = Intent(ForegroundService.ACTION_SYNC).apply {
 								setPackage(packageName)
 								putExtra(ForegroundService.EXTRA_REMAINING, remaining)
 								putExtra(ForegroundService.EXTRA_PAUSED, paused)
 								putExtra(ForegroundService.EXTRA_TITLE, title)
+								// Wear OS extras (present when wearable support is ON)
+								val sess = (args["session"] as? Number)?.toInt()
+								if (sess != null) putExtra(ForegroundService.EXTRA_SESSION, sess)
+								val total = (args["totalSessions"] as? Number)?.toInt()
+								if (total != null) putExtra(ForegroundService.EXTRA_TOTAL_SESSIONS, total)
+								(args["phase"] as? String)?.let { putExtra(ForegroundService.EXTRA_PHASE, it) }
 							}
 							sendBroadcast(broadcast)
 							result.success(true)
@@ -168,6 +190,24 @@ class MainActivity : FlutterFragmentActivity() {
 						}
 					} catch (e: Exception) {
 						result.error("UPDATE_FAILED", e.message, null)
+					}
+				}
+
+				"triggerWearHaptic" -> {
+					try {
+						@Suppress("UNCHECKED_CAST")
+						val args = call.arguments as? Map<String, Any>
+						val event = (args?.get("event") as? String) ?: return@setMethodCallHandler result.error("INVALID_ARGS", "event required", null)
+						val title = (args["title"] as? String) ?: "Pomodoro"
+						val broadcast = Intent(ForegroundService.ACTION_WEAR_HAPTIC).apply {
+							setPackage(packageName)
+							putExtra(ForegroundService.EXTRA_WEAR_EVENT, event)
+							putExtra(ForegroundService.EXTRA_TITLE, title)
+						}
+						sendBroadcast(broadcast)
+						result.success(true)
+					} catch (e: Exception) {
+						result.error("WEAR_HAPTIC_FAILED", e.message, null)
 					}
 				}
 
@@ -190,5 +230,32 @@ class MainActivity : FlutterFragmentActivity() {
 				else -> result.notImplemented()
 			}
 		}
+
+		// Register dynamic receiver for watch action relay from TimerControlReceiver.
+		// This is dynamic (not in Manifest) because it needs the live MethodChannel reference.
+		registerWatchActionReceiver()
+	}
+
+	private fun registerWatchActionReceiver() {
+		watchActionReceiver = object : BroadcastReceiver() {
+			override fun onReceive(ctx: Context?, intent: Intent?) {
+				val action = intent?.getStringExtra(TimerControlReceiver.EXTRA_WATCH_ACTION) ?: return
+				// Forward watch action to Dart so TimerActionBus can dispatch it to TimerBloc
+				watchActionChannel?.invokeMethod("onWatchAction", mapOf("action" to action))
+			}
+		}
+		val filter = IntentFilter(TimerControlReceiver.ACTION_WATCH_ACTION)
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+			registerReceiver(watchActionReceiver, filter, RECEIVER_NOT_EXPORTED)
+		} else {
+			registerReceiver(watchActionReceiver, filter)
+		}
+	}
+
+	override fun onDestroy() {
+		try { watchActionReceiver?.let { unregisterReceiver(it) } } catch (_: Exception) {}
+		watchActionReceiver = null
+		watchActionChannel  = null
+		super.onDestroy()
 	}
 }

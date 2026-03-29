@@ -24,7 +24,10 @@ class NotificationService {
         // Use dedicated status bar icon (monochrome / flat) for better contrast.
         AndroidInitializationSettings('@drawable/ic_stat_pomodoro');
 
-    // iOS initialization
+    // iOS initialization — two categories:
+    //  · FOCUS_TIMER: ongoing timer with pause/skip actions (mirrored to Apple Watch)
+    //  · TIMER_COMPLETE: session end / phase transitions with .allowAnnouncement
+    //    so Siri on Apple Watch can announce the alert.
     final pauseResumeAction = DarwinNotificationAction.plain(
       'pause_resume',
       'Pause/Resume',
@@ -41,11 +44,28 @@ class NotificationService {
       options: <DarwinNotificationCategoryOption>{},
     );
 
+    // TIMER_COMPLETE category: used for phase-transition and completion alerts.
+    // .allowAnnouncement → Siri reads it aloud on Apple Watch.
+    // .hiddenPreviewShowTitle → watch shows title even when preview is hidden.
+    final completeCategory = DarwinNotificationCategory(
+      'TIMER_COMPLETE',
+      actions: <DarwinNotificationAction>[
+        DarwinNotificationAction.plain('view_summary', 'Ver resumen'),
+      ],
+      options: <DarwinNotificationCategoryOption>{
+        DarwinNotificationCategoryOption.allowAnnouncement,
+        DarwinNotificationCategoryOption.hiddenPreviewShowTitle,
+      },
+    );
+
     final iosSettings = DarwinInitializationSettings(
       requestAlertPermission: true,
       requestBadgePermission: true,
       requestSoundPermission: true,
-      notificationCategories: <DarwinNotificationCategory>[focusCategory],
+      notificationCategories: <DarwinNotificationCategory>[
+        focusCategory,
+        completeCategory,
+      ],
     );
 
     // Initialization settings for both platforms
@@ -115,6 +135,7 @@ class NotificationService {
       presentAlert: true,
       presentBadge: true,
       presentSound: !appSilentMode,
+      threadIdentifier: 'pomodoro_timer',
     );
 
     final platformDetails =
@@ -151,11 +172,6 @@ class NotificationService {
     required String body,
   }) async {
     if (testMode) return;
-    // Usamos el sonido por defecto del sistema para evitar el crash
-    // (PlatformException invalid_sound) mientras no exista el recurso
-    // raw "timer_end" (android/app/src/main/res/raw/timer_end.*) y el
-    // archivo iOS (ios/Runner/timer_end.aiff). Cuando agregues los
-    // archivos, puedes restaurar la propiedad 'sound'.
     final androidDetails = AndroidNotificationDetails(
       'pomodoro_timer_finished_channel',
       'Pomodoro Timer Finished',
@@ -167,11 +183,15 @@ class NotificationService {
       playSound: !appSilentMode,
       icon: '@drawable/ic_stat_pomodoro',
     );
+    // threadIdentifier groups this notification with all Pomodoro notifications
+    // on Apple Watch, ensuring a clean single-thread experience on the wrist.
     final iosDetails = DarwinNotificationDetails(
       presentAlert: true,
       presentBadge: true,
-      presentSound:
-          !appSilentMode, // Usa sonido por defecto si no estamos en appSilentMode
+      presentSound: !appSilentMode,
+      categoryIdentifier: 'TIMER_COMPLETE',
+      threadIdentifier: 'pomodoro_timer',
+      subtitle: 'Sesión completada',
     );
 
     try {
@@ -203,7 +223,10 @@ class NotificationService {
       priority: appSilentMode ? Priority.low : Priority.high,
       playSound: !appSilentMode,
     );
-    final ios = DarwinNotificationDetails(presentSound: !appSilentMode);
+    final ios = DarwinNotificationDetails(
+      presentSound: !appSilentMode,
+      threadIdentifier: 'pomodoro_timer',
+    );
     try {
       await _notificationsPlugin.zonedSchedule(500, title, body, scheduled,
           NotificationDetails(android: androidDetails, iOS: ios),
@@ -262,11 +285,14 @@ class NotificationService {
       usesChronometer: true,
       chronometerCountDown: true,
     );
+    // threadIdentifier groups all Pomodoro notifications on Apple Watch
     final ios = DarwinNotificationDetails(
-        presentAlert: false,
-        presentSound: !appSilentMode,
-        presentBadge: false,
-        categoryIdentifier: 'FOCUS_TIMER');
+      presentAlert: false,
+      presentSound: !appSilentMode,
+      presentBadge: false,
+      categoryIdentifier: 'FOCUS_TIMER',
+      threadIdentifier: 'pomodoro_timer',
+    );
     await _notificationsPlugin.show(
       persistentId,
       title,
@@ -315,10 +341,12 @@ class NotificationService {
       ],
     );
     final ios = DarwinNotificationDetails(
-        presentAlert: false,
-        presentSound: !appSilentMode,
-        presentBadge: false,
-        categoryIdentifier: 'FOCUS_TIMER');
+      presentAlert: false,
+      presentSound: !appSilentMode,
+      presentBadge: false,
+      categoryIdentifier: 'FOCUS_TIMER',
+      threadIdentifier: 'pomodoro_timer',
+    );
     await _notificationsPlugin.show(
       persistentId,
       phaseTitle,
@@ -326,6 +354,64 @@ class NotificationService {
       NotificationDetails(android: androidDetails, iOS: ios),
       payload: 'persistent',
     );
+  }
+
+  /// Posts a brief high-importance notification for a Pomodoro phase transition.
+  ///
+  /// On Android: buzzes the phone with a pattern specific to the phase.
+  ///   Channel 'pomodoro_phase_transition' is IMPORTANCE_HIGH so Wear OS mirrors
+  ///   it to the paired watch with haptic feedback.
+  ///
+  /// On iOS/Apple Watch: uses the TIMER_COMPLETE category with .allowAnnouncement
+  ///   so Siri reads it on Apple Watch; threadIdentifier keeps the watch tidy.
+  static Future<void> showPhaseTransitionAlert({
+    required String title,
+    required String body,
+    required bool isWorkPhase,
+  }) async {
+    if (testMode) return;
+
+    const int transitionId = 9101;
+
+    // Vibration patterns: break→work uses two short taps; work→break uses triple pulse
+    final vibrationPattern = isWorkPhase
+        ? Int64List.fromList([0, 80, 60, 80])
+        : Int64List.fromList([0, 180, 100, 180, 100, 180]);
+
+    final androidDetails = AndroidNotificationDetails(
+      'pomodoro_phase_transition',
+      'Phase Transitions',
+      channelDescription: 'Alerts when a Pomodoro phase starts or ends',
+      importance: appSilentMode ? Importance.low : Importance.high,
+      priority: appSilentMode ? Priority.low : Priority.high,
+      enableVibration: !appSilentMode,
+      vibrationPattern: vibrationPattern,
+      playSound: !appSilentMode,
+      icon: '@drawable/ic_stat_pomodoro',
+      ticker: isWorkPhase ? 'focus' : 'break',
+      autoCancel: true,
+      timeoutAfter: 8000,
+    );
+
+    final iosDetails = DarwinNotificationDetails(
+      presentAlert: true,
+      presentSound: !appSilentMode,
+      categoryIdentifier: 'TIMER_COMPLETE',
+      threadIdentifier: 'pomodoro_timer',
+      subtitle: isWorkPhase ? 'Sesión de trabajo iniciada' : 'Descanso iniciado',
+    );
+
+    try {
+      await _notificationsPlugin.show(
+        transitionId,
+        title,
+        body,
+        NotificationDetails(android: androidDetails, iOS: iosDetails),
+        payload: 'phase_transition',
+      );
+    } catch (e) {
+      debugPrint('Phase transition notification failed: $e');
+    }
   }
 
   static String _formatDuration(Duration d) {
