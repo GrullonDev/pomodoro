@@ -6,6 +6,10 @@ import 'package:flutter/services.dart';
 class Dnd {
   static const MethodChannel _channel = MethodChannel('pomodoro/dnd');
 
+  /// Dedicated channel for Apple Watch (WatchConnectivity) communication.
+  /// Handled by WatchSessionManager in AppDelegate.swift.
+  static const MethodChannel _watchChannel = MethodChannel('pomodoro/watch');
+
   // Android interruption filter constants (mirror of NotificationManager)
   static const int interruptionFilterNone = 0; // silent
   static const int interruptionFilterAll = 1;
@@ -194,15 +198,41 @@ class Dnd {
     }
   }
 
+  /// Sends current timer state to a paired Apple Watch via WatchConnectivity.
+  /// No-op on Android (Wear OS uses the ForegroundService notification path).
+  static Future<void> sendWatchState({
+    required int remainingSeconds,
+    required bool paused,
+    required bool isWork,
+    required String title,
+    required int session,
+    required int totalSessions,
+  }) async {
+    if (!Platform.isIOS) return;
+    try {
+      await _watchChannel.invokeMethod('syncState', {
+        'remaining': remainingSeconds,
+        'paused': paused,
+        'isWork': isWork,
+        'title': title,
+        'session': session,
+        'totalSessions': totalSessions,
+      });
+    } on PlatformException {
+      // ignore — watch may not be paired
+    }
+  }
+
   /// Registers a Dart callback that is invoked when the user taps a
-  /// Pause/Resume or Skip button on the Wear OS watch notification card.
+  /// Pause/Resume or Skip button on the watch (Wear OS notification card or
+  /// Apple Watch app).
   ///
   /// [handler] receives either 'toggle' (pause/resume) or 'skip'.
   /// The handler routes directly to [TimerActionBus] so the same logic
   /// that handles notification actions also handles watch actions.
   static void setWatchActionHandler(void Function(String action) handler) {
-    if (!Platform.isAndroid) return;
-    _channel.setMethodCallHandler((call) async {
+    final channel = Platform.isIOS ? _watchChannel : _channel;
+    channel.setMethodCallHandler((call) async {
       if (call.method == 'onWatchAction') {
         final action = (call.arguments as Map?)?.entries
             .firstWhere((e) => e.key == 'action', orElse: () => const MapEntry('action', null))

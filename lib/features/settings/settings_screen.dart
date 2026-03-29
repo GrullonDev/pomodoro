@@ -12,6 +12,7 @@ import 'package:pomodoro/core/timer/timer_screen.dart';
 import 'package:pomodoro/l10n/app_localizations.dart';
 import 'package:pomodoro/utils/audio_service.dart';
 import 'package:pomodoro/utils/dnd.dart';
+import 'package:pomodoro/utils/wearable_service.dart';
 // import 'package:pomodoro/core/auth/biometric_service.dart'; // TODO: Re-enable for Biometrics
 import 'package:pomodoro/features/integrations/calendar/calendar_service.dart';
 
@@ -38,7 +39,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   // bool? _widgetEnabled; // TODO: Re-enable
   // bool? _notifActions; // TODO: Re-enable
   // bool? _kbShortcuts; // TODO: Re-enable
-  // bool? _wearable; // TODO: Re-enable
+  bool? _wearable;
   String? _focusTrack;
   // bool? _biometricEnabled; // TODO: Re-enable
   bool? _focusBlock;
@@ -67,7 +68,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     // final widget = await _repo.isHomeWidgetEnabled(); // TODO: Re-enable
     // final notifActions = await _repo.isNotificationActionsEnabled(); // TODO: Re-enable
     // final kb = await _repo.isKeyboardShortcutsEnabled(); // TODO: Re-enable
-    // final wear = await _repo.isWearableSupportEnabled(); // TODO: Re-enable
+    final wear = await _repo.isWearableSupportEnabled();
     // final bio = await _repo.isBiometricEnabled(); // TODO: Re-enable
     final focusBlock = await _repo.isFocusBlockEnabled();
     final dndGranted = Platform.isAndroid ? await Dnd.isPolicyGranted() : false;
@@ -91,7 +92,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         // _widgetEnabled = widget; // TODO: Re-enable
         // _notifActions = notifActions; // TODO: Re-enable
         // _kbShortcuts = kb; // TODO: Re-enable
-        // _wearable = wear; // TODO: Re-enable
+        _wearable = wear;
         _focusTrack = _focusTrack;
         // _biometricEnabled = bio; // TODO: Re-enable
         _focusBlock = focusBlock;
@@ -492,20 +493,37 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     setState(() => _alarmDur = next);
                   },
                 ),
-                // ────────────────────────────────────────────────────────────
-                // TODO: Re-enable the following sections when ready
-                // ────────────────────────────────────────────────────────────
-
-                // ── Seguridad / Biometría ──
-                // const Divider(),
-                // ListTile(title: Text('Seguridad', style: TextStyle(color: scheme.primary))),
-                // SwitchListTile(title: Text('Habilitar Biometría'), ...),
-
-                // ── Widgets / Notificaciones / Atajos / Wearable ──
-                // SwitchListTile(title: Text('Home Widget Enabled'), ...),
-                // SwitchListTile(title: Text('Notification Actions'), ...),
-                // SwitchListTile(title: Text('Keyboard Shortcuts'), ...),
-                // SwitchListTile(title: Text('Wearable Support'), ...),
+                // ── Smartwatch ──────────────────────────────────────────────
+                const Divider(),
+                ListTile(
+                    title: Text('Smartwatch',
+                        style: TextStyle(color: scheme.primary))),
+                if (_wearable != null)
+                  SwitchListTile(
+                    title: Text('Reloj inteligente',
+                        style: TextStyle(
+                            color: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.color)),
+                    subtitle: Text(
+                        Platform.isAndroid
+                            ? 'Wear OS: control desde la muñeca (Samsung Galaxy Watch, Pixel Watch, Fossil…)'
+                            : 'Apple Watch: sincronización en tiempo real y control desde la muñeca',
+                        style: TextStyle(
+                            color: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.color
+                                ?.withValues(alpha: 0.55))),
+                    value: _wearable!,
+                    activeColor: scheme.primary,
+                    onChanged: (v) async {
+                      await _repo.setWearableSupportEnabled(v);
+                      await WearableService.instance.refresh();
+                      setState(() => _wearable = v);
+                    },
+                  ),
 
                 // ────────────────────────────────────────────────────────────
                 // Sección: Integraciones (Calendario)

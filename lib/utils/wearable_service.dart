@@ -64,23 +64,34 @@ class WearableService {
     required int session,
     required int totalSessions,
   }) {
-    if (!Platform.isAndroid) return;
-
-    if (_enabled) {
-      Dnd.updateForegroundNotificationWithWear(
+    if (Platform.isAndroid) {
+      if (_enabled) {
+        Dnd.updateForegroundNotificationWithWear(
+          remainingSeconds: remainingSeconds,
+          paused: paused,
+          isWork: isWork,
+          title: title,
+          session: session,
+          totalSessions: totalSessions,
+        );
+      } else {
+        Dnd.updateForegroundNotification(
+          remainingSeconds: remainingSeconds,
+          paused: paused,
+          isWork: isWork,
+          title: title,
+        );
+      }
+    } else if (Platform.isIOS && _enabled) {
+      // Send real-time state to Apple Watch via WatchConnectivity.
+      // Degrades silently when no watch is paired.
+      Dnd.sendWatchState(
         remainingSeconds: remainingSeconds,
         paused: paused,
         isWork: isWork,
         title: title,
         session: session,
         totalSessions: totalSessions,
-      );
-    } else {
-      Dnd.updateForegroundNotification(
-        remainingSeconds: remainingSeconds,
-        paused: paused,
-        isWork: isWork,
-        title: title,
       );
     }
   }

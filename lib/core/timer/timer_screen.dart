@@ -217,7 +217,7 @@ class _TimerViewState extends State<_TimerView>
     // Watch actions (Pause/Skip buttons on Wear OS notification) are forwarded
     // to TimerActionBus via the same path as phone notification actions.
     WearableService.instance.initialize().then((_) {
-      if (Platform.isAndroid && mounted) {
+      if ((Platform.isAndroid || Platform.isIOS) && mounted) {
         Dnd.setWatchActionHandler((action) {
           if (mounted) TimerActionBus.instance.add(action);
         });

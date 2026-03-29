@@ -298,7 +298,7 @@ class SessionRepository implements ISessionRepository {
 
   Future<bool> isWearableSupportEnabled() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(_wearableSupportKey) ?? false;
+    return prefs.getBool(_wearableSupportKey) ?? true;
   }
 
   Future<void> setOnboardingSeen() async {
