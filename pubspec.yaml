@@ -38,6 +38,7 @@ dependencies:
   device_calendar: ^4.3.2
   upgrader: ^12.3.0
   google_fonts: ^6.2.1
+  url_launcher: ^6.3.2
 
 
 dev_dependencies:

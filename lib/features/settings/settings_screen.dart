@@ -1,9 +1,10 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:pomodoro/core/data/preset_profile.dart';
-import 'package:pomodoro/core/data/session_repository.dart'; // retains other timer related settings
+import 'package:pomodoro/core/data/session_repository.dart';
 import 'package:pomodoro/core/di/service_locator.dart';
 import 'package:pomodoro/core/theme/locale_controller.dart';
 import 'package:pomodoro/core/theme/theme_controller.dart';
@@ -11,10 +12,8 @@ import 'package:pomodoro/core/timer/timer_screen.dart';
 import 'package:pomodoro/l10n/app_localizations.dart';
 import 'package:pomodoro/utils/audio_service.dart';
 import 'package:pomodoro/utils/dnd.dart';
-import 'package:pomodoro/core/auth/biometric_service.dart'; // Add import
-
+// import 'package:pomodoro/core/auth/biometric_service.dart'; // TODO: Re-enable for Biometrics
 import 'package:pomodoro/features/integrations/calendar/calendar_service.dart';
-import 'package:device_calendar/device_calendar.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -34,14 +33,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
   double? _tickVol;
   bool? _vibration;
   bool? _haptic;
-  String? _alarm;
+  // String? _alarm; // TODO: Re-enable for Alarm Sound selector
   int? _alarmDur;
-  bool? _widgetEnabled;
-  bool? _notifActions;
-  bool? _kbShortcuts;
-  bool? _wearable;
+  // bool? _widgetEnabled; // TODO: Re-enable
+  // bool? _notifActions; // TODO: Re-enable
+  // bool? _kbShortcuts; // TODO: Re-enable
+  // bool? _wearable; // TODO: Re-enable
   String? _focusTrack;
-  bool? _biometricEnabled;
+  // bool? _biometricEnabled; // TODO: Re-enable
   bool? _focusBlock;
   bool _dndGranted = false;
 
@@ -63,13 +62,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final vol = await _repo.getTickingVolume();
     final vib = await _repo.isVibrationEnabled();
     final hap = await _repo.isHapticEnabled();
-    final alarm = await _repo.getAlarmSound();
+    // final alarm = await _repo.getAlarmSound(); // TODO: Re-enable
     final ad = await _repo.getAlarmDurationSeconds();
-    final widget = await _repo.isHomeWidgetEnabled();
-    final notifActions = await _repo.isNotificationActionsEnabled();
-    final kb = await _repo.isKeyboardShortcutsEnabled();
-    final wear = await _repo.isWearableSupportEnabled();
-    final bio = await _repo.isBiometricEnabled();
+    // final widget = await _repo.isHomeWidgetEnabled(); // TODO: Re-enable
+    // final notifActions = await _repo.isNotificationActionsEnabled(); // TODO: Re-enable
+    // final kb = await _repo.isKeyboardShortcutsEnabled(); // TODO: Re-enable
+    // final wear = await _repo.isWearableSupportEnabled(); // TODO: Re-enable
+    // final bio = await _repo.isBiometricEnabled(); // TODO: Re-enable
     final focusBlock = await _repo.isFocusBlockEnabled();
     final dndGranted = Platform.isAndroid ? await Dnd.isPolicyGranted() : false;
     // focus track
@@ -87,14 +86,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _tickVol = vol;
         _vibration = vib;
         _haptic = hap;
-        _alarm = alarm;
+        // _alarm = alarm; // TODO: Re-enable
         _alarmDur = ad;
-        _widgetEnabled = widget;
-        _notifActions = notifActions;
-        _kbShortcuts = kb;
-        _wearable = wear;
+        // _widgetEnabled = widget; // TODO: Re-enable
+        // _notifActions = notifActions; // TODO: Re-enable
+        // _kbShortcuts = kb; // TODO: Re-enable
+        // _wearable = wear; // TODO: Re-enable
         _focusTrack = _focusTrack;
-        _biometricEnabled = bio;
+        // _biometricEnabled = bio; // TODO: Re-enable
         _focusBlock = focusBlock;
         _dndGranted = dndGranted;
       });
@@ -308,11 +307,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     }
                   },
                 ),
-                ListTile(
-                  title: const Text('Primary Color'),
-                  subtitle: const Text('Pick a primary color (soon)'),
-                  onTap: () {},
-                ),
+                // TODO: Re-enable Primary Color picker
+                // ListTile(
+                //   title: const Text('Primary Color'),
+                //   subtitle: const Text('Pick a primary color (soon)'),
+                //   onTap: () {},
+                // ),
                 const Divider(),
                 SwitchListTile(
                   title: Text('Ticking Sound',
@@ -459,20 +459,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   },
                 ),
                 const Divider(),
-                ListTile(
-                  title: Text('Alarm Sound',
-                      style: TextStyle(
-                          color:
-                              Theme.of(context).textTheme.bodyMedium?.color)),
-                  subtitle: Text(_alarm ?? 'default',
-                      style: TextStyle(
-                          color: Theme.of(context)
-                              .textTheme
-                              .bodyMedium
-                              ?.color
-                              ?.withValues(alpha: 0.65))),
-                  onTap: () {},
-                ),
+                // TODO: Re-enable Alarm Sound selector
+                // ListTile(
+                //   title: Text('Alarm Sound',
+                //       style: TextStyle(
+                //           color:
+                //               Theme.of(context).textTheme.bodyMedium?.color)),
+                //   subtitle: Text(_alarm ?? 'default',
+                //       style: TextStyle(
+                //           color: Theme.of(context)
+                //               .textTheme
+                //               .bodyMedium
+                //               ?.color
+                //               ?.withValues(alpha: 0.65))),
+                //   onTap: () {},
+                // ),
                 ListTile(
                   title: Text('Alarm Duration (s)',
                       style: TextStyle(
@@ -491,49 +492,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     setState(() => _alarmDur = next);
                   },
                 ),
+                // ────────────────────────────────────────────────────────────
+                // TODO: Re-enable the following sections when ready
+                // ────────────────────────────────────────────────────────────
+
+                // ── Seguridad / Biometría ──
+                // const Divider(),
+                // ListTile(title: Text('Seguridad', style: TextStyle(color: scheme.primary))),
+                // SwitchListTile(title: Text('Habilitar Biometría'), ...),
+
+                // ── Widgets / Notificaciones / Atajos / Wearable ──
+                // SwitchListTile(title: Text('Home Widget Enabled'), ...),
+                // SwitchListTile(title: Text('Notification Actions'), ...),
+                // SwitchListTile(title: Text('Keyboard Shortcuts'), ...),
+                // SwitchListTile(title: Text('Wearable Support'), ...),
+
+                // ────────────────────────────────────────────────────────────
+                // Sección: Integraciones (Calendario)
+                // ────────────────────────────────────────────────────────────
                 const Divider(),
-                ListTile(
-                    title: Text('Seguridad',
-                        style: TextStyle(color: scheme.primary))),
-                SwitchListTile(
-                  title: Text('Habilitar Biometría',
-                      style: TextStyle(
-                          color:
-                              Theme.of(context).textTheme.bodyMedium?.color)),
-                  subtitle: Text(
-                      'Usar huella digital o FaceID para iniciar sesión',
-                      style: TextStyle(
-                          color: Theme.of(context)
-                              .textTheme
-                              .bodyMedium
-                              ?.color
-                              ?.withValues(alpha: 0.55))),
-                  value: _biometricEnabled ?? false,
-                  onChanged: (v) async {
-                    if (v) {
-                      // Try to authenticate first to confirm ownership
-                      final success = await BiometricService().authenticate();
-                      if (success) {
-                        await _repo.setBiometricEnabled(true);
-                        setState(() => _biometricEnabled = true);
-                      } else {
-                        if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text(
-                                    'Autenticación fallida no se pudo activar biometría.')),
-                          );
-                        }
-                        setState(() => _biometricEnabled = false);
-                      }
-                    } else {
-                      await _repo.setBiometricEnabled(false);
-                      setState(() => _biometricEnabled = false);
-                    }
-                  },
-                ),
-                const Divider(),
-                // Calendar Integration Settings
                 ListTile(
                     title: Text('Integraciones',
                         style: TextStyle(color: scheme.primary))),
@@ -542,11 +519,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       style: TextStyle(
                           color:
                               Theme.of(context).textTheme.bodyMedium?.color)),
+                  subtitle: Text(
+                      'Registra tus sesiones como eventos en tu calendario',
+                      style: TextStyle(
+                          color: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.color
+                              ?.withValues(alpha: 0.55))),
                   value: CalendarService.instance.isEnabled.value,
+                  activeColor: scheme.primary,
                   onChanged: (v) async {
                     await CalendarService.instance.setEnabled(v);
                     setState(() {});
-                    // If enabled, try to fetch calendars immediately to verify permissions
                     if (v) {
                       await CalendarService.instance.retrieveCalendars();
                     }
@@ -554,22 +539,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 if (CalendarService.instance.isEnabled.value)
                   ListTile(
+                    leading: Icon(Icons.calendar_month_rounded,
+                        color: scheme.onSurface.withValues(alpha: 0.6)),
                     title: Text('Seleccionar Calendario',
                         style: TextStyle(
                             color:
                                 Theme.of(context).textTheme.bodyMedium?.color)),
-                    subtitle: FutureBuilder<List<Calendar>>(
-                      future: CalendarService.instance.retrieveCalendars(),
-                      builder: (context, snap) {
-                        if (!snap.hasData) return const Text('Cargando...');
-                        if (snap.data!.isEmpty) {
-                          return const Text('No se encontraron calendarios');
-                        }
-                        // Find selected name? We store ID but UI might want name.
-                        // For now just "Tap to select"
-                        return const Text('Toca para seleccionar');
-                      },
-                    ),
+                    subtitle: const Text('Toca para seleccionar'),
                     onTap: () async {
                       final calendars =
                           await CalendarService.instance.retrieveCalendars();
@@ -595,53 +571,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       }
                     },
                   ),
+
+                // ────────────────────────────────────────────────────────────
+                // Sección: Concentración (Focus Block / DND)
+                // ────────────────────────────────────────────────────────────
                 const Divider(),
-                SwitchListTile(
-                  title: Text('Home Widget Enabled',
-                      style: TextStyle(
-                          color:
-                              Theme.of(context).textTheme.bodyMedium?.color)),
-                  value: _widgetEnabled ?? true,
-                  onChanged: (v) async {
-                    await _repo.setHomeWidgetEnabled(v);
-                    setState(() => _widgetEnabled = v);
-                  },
-                ),
-                SwitchListTile(
-                  title: Text('Notification Actions',
-                      style: TextStyle(
-                          color:
-                              Theme.of(context).textTheme.bodyMedium?.color)),
-                  value: _notifActions ?? true,
-                  onChanged: (v) async {
-                    await _repo.setNotificationActionsEnabled(v);
-                    setState(() => _notifActions = v);
-                  },
-                ),
-                SwitchListTile(
-                  title: Text('Keyboard Shortcuts',
-                      style: TextStyle(
-                          color:
-                              Theme.of(context).textTheme.bodyMedium?.color)),
-                  value: _kbShortcuts ?? false,
-                  onChanged: (v) async {
-                    await _repo.setKeyboardShortcutsEnabled(v);
-                    setState(() => _kbShortcuts = v);
-                  },
-                ),
-                SwitchListTile(
-                  title: Text('Wearable Support',
-                      style: TextStyle(
-                          color:
-                              Theme.of(context).textTheme.bodyMedium?.color)),
-                  value: _wearable ?? false,
-                  onChanged: (v) async {
-                    await _repo.setWearableSupportEnabled(v);
-                    setState(() => _wearable = v);
-                  },
-                ),
-                const Divider(),
-                // ── Sección Concentración ──────────────────────────────────
                 ListTile(
                   leading: Icon(Icons.do_not_disturb_on_rounded,
                       color: scheme.primary),
@@ -693,7 +627,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       await _repo.setFocusBlockEnabled(v);
                       setState(() => _focusBlock = v);
                       if (v && Platform.isAndroid) {
-                        // Si activó y no tiene permiso DND, ofrecer abrirlo
                         final granted = await Dnd.isPolicyGranted();
                         setState(() => _dndGranted = granted);
                         if (!granted && mounted) {
@@ -737,7 +670,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         : TextButton(
                             onPressed: () async {
                               await Dnd.gotoPolicySettings();
-                              // Re-check after returning
                               await Future.delayed(
                                   const Duration(milliseconds: 500));
                               final granted = await Dnd.isPolicyGranted();
@@ -773,10 +705,64 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       child: const Text('Ver guía'),
                     ),
                   ),
+
+                // ────────────────────────────────────────────────────────────
+                // Sección: Acerca de
+                // ────────────────────────────────────────────────────────────
+                const Divider(),
+                ListTile(
+                    title: Text('Acerca de',
+                        style: TextStyle(color: scheme.primary))),
+                ListTile(
+                  leading: Icon(Icons.privacy_tip_outlined,
+                      color: scheme.onSurface.withValues(alpha: 0.6)),
+                  title: Text('Política de Privacidad',
+                      style: TextStyle(
+                          color:
+                              Theme.of(context).textTheme.bodyMedium?.color)),
+                  subtitle: Text('Leer nuestra política de privacidad',
+                      style: TextStyle(
+                          color: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.color
+                              ?.withValues(alpha: 0.55))),
+                  trailing: Icon(Icons.open_in_new_rounded,
+                      size: 18,
+                      color: scheme.onSurface.withValues(alpha: 0.4)),
+                  onTap: () async {
+                    final uri = Uri.parse(
+                        'https://privacy-policy-jg-2026.web.app');
+                    if (await canLaunchUrl(uri)) {
+                      await launchUrl(uri,
+                          mode: LaunchMode.externalApplication);
+                    }
+                  },
+                ),
+                ListTile(
+                  leading: Icon(Icons.info_outline_rounded,
+                      color: scheme.onSurface.withValues(alpha: 0.6)),
+                  title: Text('Versión',
+                      style: TextStyle(
+                          color:
+                              Theme.of(context).textTheme.bodyMedium?.color)),
+                  subtitle: Text('1.0.3',
+                      style: TextStyle(
+                          color: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.color
+                              ?.withValues(alpha: 0.55))),
+                ),
+                const SizedBox(height: 32),
               ],
             ),
     );
   }
+
+  // ──────────────────────────────────────────────────────────────
+  // Helper methods for Focus Block / DND
+  // ──────────────────────────────────────────────────────────────
 
   void _showAndroidDndPermissionDialog() {
     showDialog<void>(
@@ -908,7 +894,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      'Con esto, cada vez que abras Pomodoro, iOS activará automáticamente tu modo Focus silenciando todas las apps.',
+                      'Con esto, cada vez que abras Pomodoro Focus, iOS activará automáticamente tu modo Focus silenciando todas las apps.',
                       style: TextStyle(fontSize: 13),
                     ),
                   ),

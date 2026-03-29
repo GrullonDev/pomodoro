@@ -32,6 +32,10 @@
 	<string></string>
 	<key>NSUserNotificationUsageDescription</key>
 	<string>Esta aplicación usa notificaciones para recordarte tus sesiones</string>
+	<key>NSCalendarsUsageDescription</key>
+	<string>Pomodoro Focus necesita acceso a tu calendario para registrar tus sesiones de enfoque como eventos</string>
+	<key>NSCalendarsFullAccessUsageDescription</key>
+	<string>Pomodoro Focus necesita acceso completo a tu calendario para registrar tus sesiones de enfoque como eventos</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

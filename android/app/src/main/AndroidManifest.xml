@@ -12,6 +12,9 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <!-- Receive device boot to survive reboots if needed -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <!-- Calendar integration: read/write events when user enables calendar sync -->
+    <uses-permission android:name="android.permission.READ_CALENDAR" />
+    <uses-permission android:name="android.permission.WRITE_CALENDAR" />
     <application
         android:label="Pomodoro Focus"
         android:name="${applicationName}"
