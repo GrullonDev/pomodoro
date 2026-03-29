@@ -80,6 +80,8 @@ android/app/google-services.json
 android/app/*.keystore
 android/app/*.jks
 android/key.properties
+android/app/upload-keystore.jks
+android/app/internal_cert.der
 
 ################
 # SO / Editor

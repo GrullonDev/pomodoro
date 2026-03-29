@@ -1,4 +1,4 @@
-package com.grullondev.pomodoro
+package com.grullondev.pomodorofocus
 
 import android.content.BroadcastReceiver
 import android.content.Context

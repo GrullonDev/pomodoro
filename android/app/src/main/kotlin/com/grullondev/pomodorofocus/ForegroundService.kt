@@ -1,4 +1,4 @@
-package com.grullondev.pomodoro
+package com.grullondev.pomodorofocus
 
 import android.app.NotificationChannel
 import android.app.NotificationManager

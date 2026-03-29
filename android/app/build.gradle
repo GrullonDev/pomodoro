@@ -27,7 +27,7 @@ if (flutterVersionName == null) {
 }
 
 android {
-    namespace = "com.grullondev.pomodoro"
+    namespace = "com.grullondev.pomodorofocus"
     compileSdk = 36
     ndkVersion = "27.0.12077973"
 
@@ -42,7 +42,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.grullondev.pomodoro"
+        applicationId = "com.grullondev.pomodorofocus"
         // Firebase Auth requires minSdk 23+, bump default to 23 while still honoring
         // any explicit value set in local.properties via flutter.minSdkVersion.
         minSdk = 24
